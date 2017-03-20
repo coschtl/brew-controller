@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- units: -->
+<!-- all times are given in minutes -->
+<!-- all weights are given in grams -->
+<!-- all volumes are given in liters -->
+<!-- all temperatures are given in °C -->
+<!-- wort is given in °P -->
+<recipe name="SampleBeer" type="infusion" wort="12.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="InfusionRecipe.xsd">
+	<malts>
+		<malt name="Pilsner Malz" amount="2500" />
+		<malt name="Pale ale Malz" amount="1500" />
+		<malt name="Sauermalz" amount="300" />
+	</malts>
+	<mashing water="15" temperature="61">
+		<rest temperature="67" time="10" />
+		<rest temperature="71" time="60" />
+		<rest temperature="74" time="0" />
+	</mashing>
+	<lautering rest="20" water="14" />
+	<cooking time="90">
+		<hop name="Hopfen 1" alpha="5.3" amount="15" cookingTime="90" />
+		<hop name="Hopfen 2" alpha="14" amount="5" cookingTime="70" />
+		<hop name="Hopfen 3" alpha="6.8" amount="25" cookingTime="30" />
+		<hop name="Hopfen 4" alpha="14" amount="5" cookingTime="0" />
+	</cooking>
+	<whirlpool time="20" />
+	<yeast name="Pilsener Hefe" amount="15" />
+</recipe>
