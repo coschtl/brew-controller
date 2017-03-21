@@ -43,8 +43,8 @@ public class RecipeLoader {
 				case "lautering":
 					addLautering(recipe, child);
 					break;
-				case "cooking":
-					addCooking(recipe, child);
+				case "boiling":
+					addBoiling(recipe, child);
 					break;
 				case "whirlpool":
 					addWhirlpool(recipe, child);
@@ -71,13 +71,13 @@ public class RecipeLoader {
 		recipe.setWhirlpoolTime(getIntAttribute("time", whirlpool));
 	}
 
-	private static void addCooking(Recipe recipe, Element cooking) {
-		recipe.setCookingTime(getIntAttribute("time", cooking));
-		NodeList childs = cooking.getElementsByTagName("hop");
+	private static void addBoiling(Recipe recipe, Element boiling) {
+		recipe.setBoilingTime(getIntAttribute("time", boiling));
+		NodeList childs = boiling.getElementsByTagName("hop");
 		for (int i = 0; i < childs.getLength(); i++) {
 			Element hop = (Element) childs.item(i);
 			recipe.addHop(new Hop(hop.getAttribute("name"), getIntAttribute("amount", hop),
-					getFloatAttribute("alpha", hop), getIntAttribute("cookingTime", hop)));
+					getFloatAttribute("alpha", hop), getIntAttribute("boilingTime", hop)));
 		}
 	}
 

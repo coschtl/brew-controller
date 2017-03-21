@@ -14,7 +14,7 @@ public abstract class Recipe {
 	private Ingredient yeast;
 
 	
-	private int cookingTime;
+	private int boilingTime;
 	private int whirlpoolTime;
 	private int primaryWater, secondaryWater;
 	private int mashingTemperature;
@@ -47,15 +47,15 @@ public abstract class Recipe {
 	protected String stringFromLautering() {
 		StringBuilder b = new StringBuilder();
 		b.append("\nLäuterrast: ").append(getLauteringRest()).append(" min\n");
-		b.append("Kochen: ").append(getCookingTime()).append(" min\n");
+		b.append("Kochen: ").append(getBoilingTime()).append(" min\n");
 		b.append("Hopfung: ");
 		for (Hop hop : getHops()) {
-			if (hop.getCookingTime() == getCookingTime()) {
+			if (hop.getBoilingTime() == getBoilingTime()) {
 				b.append("\n\tVorderwürze: ").append(hop);
-			} else if (hop.getCookingTime() == 0) {
+			} else if (hop.getBoilingTime() == 0) {
 				b.append("\n\tzu Kochende: ").append(hop);
 			} else {
-				b.append("\n\t").append(hop).append(" Kochzeit: ").append(hop.getCookingTime()).append(" min");
+				b.append("\n\t").append(hop).append(" Kochzeit: ").append(hop.getBoilingTime()).append(" min");
 			}
 		}
 		if (getWhirlpoolTime() > 0) {
@@ -128,12 +128,12 @@ public abstract class Recipe {
 		this.yeast = yeast;
 	}
 
-	public int getCookingTime() {
-		return cookingTime;
+	public int getBoilingTime() {
+		return boilingTime;
 	}
 
-	public void setCookingTime(int cookingTime) {
-		this.cookingTime = cookingTime;
+	public void setBoilingTime(int boilingTime) {
+		this.boilingTime = boilingTime;
 	}
 
 	public int getWhirlpoolTime() {
