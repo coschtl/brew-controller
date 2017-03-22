@@ -2,9 +2,9 @@ package at.dcosta.brew.io.w1;
 
 import com.pi4j.temperature.TemperatureScale;
 
-import at.dcosta.brew.io.TemperatureSensor;
+import at.dcosta.brew.io.Sensor;
 
-public class W1TemperatureSensor implements TemperatureSensor {
+public class W1TemperatureSensor implements Sensor {
 
 	private final com.pi4j.component.temperature.TemperatureSensor sensor;
 
@@ -18,8 +18,13 @@ public class W1TemperatureSensor implements TemperatureSensor {
 	}
 
 	@Override
-	public double getTemperature() {
+	public double getValue() {
 		return sensor.getTemperature(TemperatureScale.CELSIUS);
+	}
+	
+	@Override
+	public String getScale() {
+		return "°C";
 	}
 
 }

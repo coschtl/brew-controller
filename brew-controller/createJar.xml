@@ -22,5 +22,6 @@
             <zipfileset dir="${dir.buildfile}/lib" includes="pi4j-service.jar"/>
             <zipfileset dir="${dir.buildfile}/lib" includes="sqlite-jdbc-3.16.1.jar"/>
         </jar>
+        <scp file="${dir.jarfile}/brew-controller.jar" todir="pi@192.168.1.50:" password="raspberry" trust="true"/>
     </target>
 </project>

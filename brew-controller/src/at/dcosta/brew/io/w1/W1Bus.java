@@ -1,25 +1,34 @@
 package at.dcosta.brew.io.w1;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.pi4j.component.temperature.TemperatureSensor;
 import com.pi4j.io.w1.W1Master;
 
+import at.dcosta.brew.io.Sensor;
+
 public class W1Bus {
 
-	private W1Master w1Master;
+	private final Map<String, Sensor> sensors;
 
 	public W1Bus() {
-		w1Master = new W1Master();
+		W1Master w1Master = new W1Master();
+		sensors = new HashMap<>();
+		for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
+			W1TemperatureSensor sensor = new W1TemperatureSensor(device);
+			sensors.put(sensor.getID(), sensor);
+		}
+	}
+	
+	public Sensor getTemperatureSensor(String address) {
+		return sensors.get(address);
 	}
 
-	public List<at.dcosta.brew.io.TemperatureSensor> getAvailableSensors() {
-		List<at.dcosta.brew.io.TemperatureSensor> sensors = new ArrayList<>();
-		for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
-			sensors.add(new W1TemperatureSensor(device));
-		}
-		return sensors;
+	public Collection<at.dcosta.brew.io.Sensor> getAvailableSensors() {
+		return Collections.unmodifiableCollection(sensors.values());
 	}
 
 }

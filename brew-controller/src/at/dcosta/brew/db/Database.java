@@ -18,7 +18,7 @@ abstract class Database {
 	private final String jdbcUrl;
 
 	protected Database(Configuration configuration) {
-		jdbcUrl = JDBC_URL_PREFIX + configuration.getProperty(Configuration.DATABASE_LOCATION);
+		jdbcUrl = JDBC_URL_PREFIX + configuration.getDatabaseLocation();
 		createTableIfNecessary();
 	}
 
