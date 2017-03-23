@@ -1,5 +1,6 @@
 package at.dcosta.brew.db;
 
+import static at.dcosta.brew.Configuration.DATABASE_LOCATION;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,7 +19,7 @@ abstract class Database {
 	private final String jdbcUrl;
 
 	protected Database(Configuration configuration) {
-		jdbcUrl = JDBC_URL_PREFIX + configuration.getDatabaseLocation();
+		jdbcUrl = JDBC_URL_PREFIX + configuration.getString(DATABASE_LOCATION);
 		createTableIfNecessary();
 	}
 

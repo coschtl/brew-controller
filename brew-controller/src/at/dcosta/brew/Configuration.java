@@ -11,17 +11,17 @@ import at.dcosta.brew.util.IOUtils;
 
 public class Configuration {
 
-	private static final String DATABASE_LOCATION = "databaseLocation";
-	private static final String HEATER_PINS = "heater.pi4jPinNumbers";
-	private static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";
-	private static final String STIRRER_RPM_PIN = "stirrer.rpm.pi4jPinNumber";
-	private static final String MALT_STORE_OPENER_PIN = "maltStoreOpener.pi4jPinNumber";
-	private static final String MALT_STORE_OPENER_TIMEOUT = "maltStoreOpener.timeoutSeconds";
-	private static final String THERMOMETER_ADRESSES = "thermometer.addresses";
-	private static final String THERMOMETER_CONNECTION = "thermometer.connection";
-
-	private static final String MAIL_USER = "mail.user";
-	private static final String MAIL_PASSWORD = "mail.password";
+	public static final String DATABASE_LOCATION = "databaseLocation";
+	public static final String HEATER_PINS = "heater.pi4jPinNumbers";
+	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";
+	public static final String STIRRER_RPM_PIN = "stirrer.rpm.pi4jPinNumber";
+	public static final String MALT_STORE_OPENER_PIN = "maltStoreOpener.pi4jPinNumber";
+	public static final String MALT_STORE_OPENER_TIMEOUT_SECONDS = "maltStoreOpener.timeoutSeconds";
+	public static final String THERMOMETER_ADRESSES = "thermometer.addresses";
+	public static final String THERMOMETER_CONNECTION = "thermometer.connection";
+	public static final String MAIL_USER = "mail.user";
+	public static final String MAIL_PASSWORD = "mail.password";
+	public static final String MAIL_RECIPIENTS = "mail.recipients";
 
 	private final Map<String, String> config;
 
@@ -33,7 +33,7 @@ public class Configuration {
 		return value;
 	}
 
-	public int getIntValue(String key) {
+	public int getInt(String key) {
 		String stringValue = getMandatoryValue(key);
 		try {
 			return Integer.parseInt(stringValue);
@@ -47,12 +47,12 @@ public class Configuration {
 		readConfigFile(configFile);
 	}
 
-	public String getProperty(String propertyName) {
+	public String getString(String propertyName) {
 		return config.get(propertyName);
 	}
 
-	public int[] getHeaterPins() {
-		String[] pinStrings = getMandatoryValue(HEATER_PINS).split(",");
+	public int[] getIntArray(String key) {
+		String[] pinStrings = getMandatoryValue(key).split(",");
 		int[] pins = new int[pinStrings.length];
 		for (int i = 0; i < pinStrings.length; i++) {
 			pins[i] = Integer.parseInt(pinStrings[i].trim());
@@ -60,41 +60,8 @@ public class Configuration {
 		return pins;
 	}
 
-	public String getThermometerConnection() {
-		String connection = config.get(THERMOMETER_CONNECTION);
-		if (connection == null || "w1".equalsIgnoreCase(connection)) {
-			return "w1";
-		}
-		throw new ConfigurationException("Thermometer connection-type ' " + connection + "' not supported!");
-	}
-
-	public int getStirrerMotorPin() {
-		return getIntValue(STIRRER_MOTOR_PIN);
-	}
-
-	public int getStirrerRpmPin() {
-		return getIntValue(STIRRER_RPM_PIN);
-	}
-
-	public int getMaltStoreOpenerPin() {
-		return getIntValue(MALT_STORE_OPENER_PIN);
-	}
-	public int getMaltStoreOpenerTimeoutSeconds() {
-		return getIntValue(MALT_STORE_OPENER_TIMEOUT);
-	}
-
-	public String getDatabaseLocation() {
-		return getMandatoryValue(DATABASE_LOCATION);
-	}
-	public String getMailUser() {
-		return getMandatoryValue(MAIL_USER);
-	}
-	public String getMailPassword() {
-		return getMandatoryValue(MAIL_PASSWORD);
-	}
-
-	public String[] getThermometerAddresses() {
-		String[] addrStrings = getMandatoryValue(THERMOMETER_ADRESSES).split(",");
+	public String[] getStringArray(String key) {
+		String[] addrStrings = getMandatoryValue(key).split(",");
 		String[] addresses = new String[addrStrings.length];
 		for (int i = 0; i < addrStrings.length; i++) {
 			addresses[i] = addrStrings[i].trim();
