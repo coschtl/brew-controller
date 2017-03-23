@@ -2,19 +2,27 @@ package at.dcosta.brew;
 
 import java.util.Collection;
 
+import at.dcosta.brew.com.MailNotificationService;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.Relay;
 import at.dcosta.brew.io.gpio.RpmSensor;
 import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.util.ThreadManager;
 
 public class Main {
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws Exception {
 		System.out.println("hello World");
 		// readTemperatures();
 		// toggleRelais();
-
-		readHallSensor();
+		//readHallSensor();
+		
+		System.out.println("sending mail");
+		new MailNotificationService(null).sendNotification("stephan.dcosta@gmail.com", "Grüße von der Brauerei", "Das Bier ist nun bereit zum Abläutern");
+		System.out.println("mail sent.");
+		System.out.println("Waiting  for all Threads to complete.");
+		ThreadManager.getInstance().waitForAllThreadsToComplete();
+		System.out.println("DONE");
 	}
 
 	private static void readHallSensor() throws InterruptedException {

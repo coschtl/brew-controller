@@ -20,6 +20,9 @@ public class Configuration {
 	private static final String THERMOMETER_ADRESSES = "thermometer.addresses";
 	private static final String THERMOMETER_CONNECTION = "thermometer.connection";
 
+	private static final String MAIL_USER = "mail.user";
+	private static final String MAIL_PASSWORD = "mail.password";
+
 	private final Map<String, String> config;
 
 	private String getMandatoryValue(String key) {
@@ -82,6 +85,12 @@ public class Configuration {
 
 	public String getDatabaseLocation() {
 		return getMandatoryValue(DATABASE_LOCATION);
+	}
+	public String getMailUser() {
+		return getMandatoryValue(MAIL_USER);
+	}
+	public String getMailPassword() {
+		return getMandatoryValue(MAIL_PASSWORD);
 	}
 
 	public String[] getThermometerAddresses() {
