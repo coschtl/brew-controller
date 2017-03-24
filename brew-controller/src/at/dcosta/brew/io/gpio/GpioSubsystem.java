@@ -22,18 +22,6 @@ public class GpioSubsystem {
 		relays = new HashMap<>();
 	}
 
-	public void shutdown() {
-		for (Relay relay : relays.values()) {
-			relay.off();
-		}
-		relays.clear();
-		gpio.shutdown();
-	}
-	
-	public RpmSensor getRpmSensor(String name, int pi4jPinNumber) {
-		return new RpmSensor(name, pi4jPinNumber, gpio);
-	}
-
 	public Relay getRelay(String name, int pi4jPinNumber) {
 		Relay relay = relays.get(pi4jPinNumber);
 		if (relay == null) {
@@ -41,6 +29,18 @@ public class GpioSubsystem {
 			relays.put(pi4jPinNumber, relay);
 		}
 		return relay;
+	}
+	
+	public RpmSensor getRpmSensor(String name, int pi4jPinNumber) {
+		return new RpmSensor(name, pi4jPinNumber, gpio);
+	}
+
+	public void shutdown() {
+		for (Relay relay : relays.values()) {
+			relay.off();
+		}
+		relays.clear();
+		gpio.shutdown();
 	}
 
 }

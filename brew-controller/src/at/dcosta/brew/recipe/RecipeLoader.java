@@ -11,16 +11,6 @@ import org.w3c.dom.NodeList;
 
 public class RecipeLoader {
 
-	public static void main(String[] args) {
-		 Recipe recipe = loadSampleRecipe();
-		 System.out.println(recipe);
-	}
-
-	private static Recipe loadSampleRecipe() {
-		ClassLoader c = RecipeLoader.class.getClassLoader();
-		return loadRecipe(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
-	}
-
 	public static Recipe loadRecipe(InputStream in) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
@@ -63,12 +53,9 @@ public class RecipeLoader {
 
 	}
 
-	private static void addYeast(Recipe recipe, Element yeast) {
-		recipe.setYeast(new Ingredient(yeast.getAttribute("name"), getIntAttribute("amount", yeast)));
-	}
-
-	private static void addWhirlpool(Recipe recipe, Element whirlpool) {
-		recipe.setWhirlpoolTime(getIntAttribute("time", whirlpool));
+	public static void main(String[] args) {
+		 Recipe recipe = loadSampleRecipe();
+		 System.out.println(recipe);
 	}
 
 	private static void addBoiling(Recipe recipe, Element boiling) {
@@ -86,6 +73,14 @@ public class RecipeLoader {
 		recipe.setSecondaryWater(getIntAttribute("water", lautering));
 	}
 
+	private static void addMalts(Recipe recipe, Element malts) {
+		NodeList childs = malts.getElementsByTagName("malt");
+		for (int i = 0; i < childs.getLength(); i++) {
+			Element malt = (Element) childs.item(i);
+			recipe.addMalt(new Ingredient(malt.getAttribute("name"), getIntAttribute("amount", malt)));
+		}
+	}
+
 	private static void addMashing(InfusionRecipe recipe, Element mashing) {
 		recipe.setMashingTemperature(getIntAttribute("temperature", mashing));
 		recipe.setPrimaryWater(getIntAttribute("water", mashing));
@@ -96,12 +91,12 @@ public class RecipeLoader {
 		}
 	}
 
-	private static void addMalts(Recipe recipe, Element malts) {
-		NodeList childs = malts.getElementsByTagName("malt");
-		for (int i = 0; i < childs.getLength(); i++) {
-			Element malt = (Element) childs.item(i);
-			recipe.addMalt(new Ingredient(malt.getAttribute("name"), getIntAttribute("amount", malt)));
-		}
+	private static void addWhirlpool(Recipe recipe, Element whirlpool) {
+		recipe.setWhirlpoolTime(getIntAttribute("time", whirlpool));
+	}
+
+	private static void addYeast(Recipe recipe, Element yeast) {
+		recipe.setYeast(new Ingredient(yeast.getAttribute("name"), getIntAttribute("amount", yeast)));
 	}
 
 	private static float getFloatAttribute(String name, Element element) {
@@ -139,5 +134,10 @@ public class RecipeLoader {
 			return new InfusionRecipe(root.getAttribute("name"), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
+	}
+
+	private static Recipe loadSampleRecipe() {
+		ClassLoader c = RecipeLoader.class.getClassLoader();
+		return loadRecipe(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
 	}
 }

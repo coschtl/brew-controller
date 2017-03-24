@@ -24,13 +24,9 @@ public class ThreadManager {
 		runnables = new HashMap<>();
 	}
 
-	public synchronized Thread newThread(Runnable runnable) {
+	public synchronized Thread getThread(String id) {
 		removeDiedThreads();
-		String id = UUID.randomUUID().toString();
-		Thread t = new Thread(runnable, id);
-		threads.put(id, t);
-		runnables.put(id, runnable);
-		return t;
+		return threads.get(id);
 	}
 
 	public synchronized boolean isThreadRunning(String id) {
@@ -42,9 +38,13 @@ public class ThreadManager {
 		return t.isAlive();
 	}
 
-	public synchronized Thread getThread(String id) {
+	public synchronized Thread newThread(Runnable runnable) {
 		removeDiedThreads();
-		return threads.get(id);
+		String id = UUID.randomUUID().toString();
+		Thread t = new Thread(runnable, id);
+		threads.put(id, t);
+		runnables.put(id, runnable);
+		return t;
 	}
 
 	public synchronized void stopAllThreads() {
@@ -55,6 +55,19 @@ public class ThreadManager {
 			}
 		}
 		waitForAllThreadsToComplete();
+	}
+
+	public synchronized void waitForAllThreadsToComplete() {
+		removeDiedThreads();
+		for (Thread t : threads.values()) {
+			try {
+				if (t.isAlive()) {
+					t.join();
+				}
+			} catch (InterruptedException e) {
+				// ignore
+			}
+		}
 	}
 
 	private synchronized void removeDiedThreads() {
@@ -69,19 +82,6 @@ public class ThreadManager {
 		for (String id : toRemove) {
 			threads.remove(id);
 			runnables.remove(id);
-		}
-	}
-
-	public synchronized void waitForAllThreadsToComplete() {
-		removeDiedThreads();
-		for (Thread t : threads.values()) {
-			try {
-				if (t.isAlive()) {
-					t.join();
-				}
-			} catch (InterruptedException e) {
-				// ignore
-			}
 		}
 	}
 

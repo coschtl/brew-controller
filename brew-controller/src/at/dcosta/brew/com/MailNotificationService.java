@@ -1,11 +1,15 @@
 package at.dcosta.brew.com;
 
+import static at.dcosta.brew.Configuration.MAIL_ACCOUNT;
+import static at.dcosta.brew.Configuration.MAIL_PASSWORD;
+import static at.dcosta.brew.Configuration.MAIL_RECIPIENTS;
+import static at.dcosta.brew.Configuration.MAIL_USER;
+
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -13,25 +17,71 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import at.dcosta.brew.Configuration;
+import at.dcosta.brew.ConfigurationException;
 import at.dcosta.brew.util.ThreadManager;
 
-public class MailNotificationService {
+public class MailNotificationService implements NotificationService {
 
 	static final Logger LOGGER = Logger.getLogger(MailNotificationService.class.getName());
 
 	private Configuration config;
 
-	public MailNotificationService(Configuration config) {
-		this.config = config;
+	public MailNotificationService() {
+		this.config = Configuration.getInstance();
 	}
 
-	public Session getGMailSession(String user, String password) {
-		final Properties props = new Properties();
+	public Session getGMailSession() {
+
+		return Session.getInstance(getMailProperties(), new javax.mail.Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(config.getString(MAIL_USER), config.getString(MAIL_PASSWORD));
+			}
+		});
+	}
+
+	@Override
+	public void sendNotification(NotificationType notificationType, String subject, String message) {
+
+		ThreadManager.getInstance().newThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					Message msg = new MimeMessage(getGMailSession());
+
+					String[] recipients = config.getStringArray(MAIL_RECIPIENTS);
+					InternetAddress[] addressesTo = new InternetAddress[recipients.length];
+					for (int i = 0; i < recipients.length; i++) {
+						addressesTo[i] = new InternetAddress(recipients[i]);
+					}
+					msg.setRecipients(Message.RecipientType.TO, addressesTo);
+					msg.setFrom(new InternetAddress(config.getString(MAIL_USER)));
+
+					msg.setSubject(subject);
+					msg.setContent(message, "text/plain");
+					Transport.send(msg);
+				} catch (Exception e) {
+					System.out.println("can not sent Mail-Message: " + e.toString());
+					LOGGER.log(Level.SEVERE, "can not sent Mail-Message: " + e.toString(), e);
+				}
+			}
+
+		}).start();
+	}
+
+	private Properties getMailProperties() {
+		String account = config.getString(MAIL_ACCOUNT);
+		if (!"gmail".equalsIgnoreCase(account)) {
+			throw new ConfigurationException("Unknown email account: " + account);
+		}
+
+		Properties props = new Properties();
 
 		// Zum Empfangen
 		props.setProperty("mail.pop3.host", "pop.gmail.com");
-		props.setProperty("mail.pop3.user", user);
-		props.setProperty("mail.pop3.password", password);
+		props.setProperty("mail.pop3.user", config.getString(MAIL_USER));
+		props.setProperty("mail.pop3.password", config.getString(MAIL_PASSWORD));
 		props.setProperty("mail.pop3.port", "995");
 		props.setProperty("mail.pop3.auth", "true");
 		props.setProperty("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -44,42 +94,7 @@ public class MailNotificationService {
 		props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		props.setProperty("mail.smtp.socketFactory.fallback", "false");
 
-		return Session.getInstance(props, new javax.mail.Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(props.getProperty("mail.pop3.user"),
-						props.getProperty("mail.pop3.password"));
-			}
-		});
-	}
-
-	public void sendNotification(String recipient, String subject, String message) throws MessagingException {
-		String user = "pi.brauerei@gmail.com";
-		String password = "bierBrauen";
-		// String user = config.getMailUser();
-		// String password = config.getMailPassword();
-
-		ThreadManager.getInstance().newThread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Message msg = new MimeMessage(getGMailSession(user, password));
-
-					InternetAddress addressTo = new InternetAddress(recipient);
-					msg.setRecipient(Message.RecipientType.TO, addressTo);
-					msg.setFrom(new InternetAddress(user));
-
-					msg.setSubject(subject);
-					msg.setContent(message, "text/plain");
-					Transport.send(msg);
-				} catch (Exception e) {
-					System.out.println("can not sent Mail-Message: " + e.toString());
-					LOGGER.log(Level.SEVERE, "can not sent Mail-Message: " + e.toString(), e);
-				}
-			}
-
-		}).start();
+		return props;
 	}
 
 }

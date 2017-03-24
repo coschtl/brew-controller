@@ -1,6 +1,7 @@
 package at.dcosta.brew.db;
 
 import static at.dcosta.brew.Configuration.DATABASE_LOCATION;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,9 +19,17 @@ abstract class Database {
 
 	private final String jdbcUrl;
 
-	protected Database(Configuration configuration) {
-		jdbcUrl = JDBC_URL_PREFIX + configuration.getString(DATABASE_LOCATION);
+	protected Database() {
+		jdbcUrl = JDBC_URL_PREFIX + Configuration.getInstance().getString(DATABASE_LOCATION);
 		createTableIfNecessary();
+	}
+
+	public Connection getConnection() {
+		try {
+			return DriverManager.getConnection(jdbcUrl);
+		} catch (SQLException e) {
+			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
+		}
 	}
 
 	private void createTableIfNecessary() {
@@ -32,14 +41,14 @@ abstract class Database {
 			st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
 			st.setString(1, getTableName());
 			rs = st.executeQuery();
-			if (rs.next() && rs.getInt(1)  == 1) {
+			if (rs.next() && rs.getInt(1) == 1) {
 				return;
 			}
 			close(rs);
 			close(st);
 			err = "Can not create non existing table: ";
 			st = con.prepareStatement(getCreateTableStatement());
-			 st.executeUpdate();
+			st.executeUpdate();
 		} catch (SQLException e) {
 			throw new DatabaseException(err + e.getMessage(), e);
 		} finally {
@@ -49,22 +58,20 @@ abstract class Database {
 		}
 	}
 
-	public Connection getConnection()  {
-		try {
-			return DriverManager.getConnection(jdbcUrl);
-		} catch (SQLException e) {
-			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
-		}
-	}
-
-	protected abstract String getTableName();
-
-	protected abstract String getCreateTableStatement();
-
 	protected void close(Connection con) {
 		try {
 			if (con != null) {
 				con.close();
+			}
+		} catch (SQLException e) {
+			// ignore
+		}
+	}
+
+	protected void close(ResultSet rs) {
+		try {
+			if (rs != null) {
+				rs.close();
 			}
 		} catch (SQLException e) {
 			// ignore
@@ -81,14 +88,8 @@ abstract class Database {
 		}
 	}
 
-	protected void close(ResultSet rs) {
-		try {
-			if (rs != null) {
-				rs.close();
-			}
-		} catch (SQLException e) {
-			// ignore
-		}
-	}
+	protected abstract String getCreateTableStatement();
+
+	protected abstract String getTableName();
 
 }

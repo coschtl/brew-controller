@@ -10,12 +10,12 @@ public class Ingredient {
 		this.amount = amount;
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public int getAmount() {
 		return amount;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	@Override

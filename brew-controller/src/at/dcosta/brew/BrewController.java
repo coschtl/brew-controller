@@ -4,38 +4,35 @@ import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.recipe.Recipe;
 
 public class BrewController implements Runnable {
-	
-	private final Configuration config;
 
 	private boolean keepRunning = true;
-	
-	public BrewController(Configuration config) {
-		this.config = config;
-	}
 
 	@Override
 	public void run() {
 		try {
 			Recipe recipe = readRecipe();
-			
+
 			// journaling system!!!!
 			// error alarm system!!
-			
+
 			// mashing
-			MashingSystem mashingSystem = new MashingSystem(config);
+			MashingSystem mashingSystem = new MashingSystem();
 			// (1) heat to the mashing temperature
 			mashingSystem.heat(recipe.getMashingTemperature());
-			
+
 			// (2) add malts
-			// (3) heat and  
+			// (3) heat and
 			while (keepRunning) {
-				
-				
+
 				sleep(100);
 			}
 		} finally {
 			GpioSubsystem.getInstance().shutdown();
 		}
+	}
+
+	public void stop() {
+		keepRunning = false;
 	}
 
 	private Recipe readRecipe() {
@@ -49,10 +46,6 @@ public class BrewController implements Runnable {
 		} catch (InterruptedException e) {
 			// ignore
 		}
-	}
-
-	public void stop() {
-		keepRunning = false;
 	}
 
 }

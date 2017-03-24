@@ -23,9 +23,8 @@ public class Relay implements Actor {
 		return id;
 	}
 
-	public void on() {
-		pin.low();
-		on = true;
+	public boolean isOn() {
+		return on;
 	}
 
 	public void off() {
@@ -33,7 +32,8 @@ public class Relay implements Actor {
 		on = false;
 	}
 
-	public boolean isOn() {
-		return on;
+	public void on() {
+		pin.low();
+		on = true;
 	}
 }

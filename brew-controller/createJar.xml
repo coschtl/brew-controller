@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="create_run_jar" name="Create Runnable Jar for Project brew-controller with Jar-in-Jar Loader">
-    <!--this file was created by Eclipse Runnable JAR file Export Wizard-->
-    <!--ANT 1.7 is required-->
-    <!--define folder properties-->
-    <property name="dir.buildfile" value="."/>
-    <property name="dir.workspace" value="C:/development/eclipse/workspaces/brew-controller"/>
-    <property name="dir.jarfile" value="C:/development/exports"/>
-    <target name="create_run_jar">
-        <jar destfile="${dir.jarfile}/brew-controller.jar">
-            <manifest>
-                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-                <attribute name="Rsrc-Main-Class" value="at.dcosta.brew.Main"/>
-                <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ pi4j-core.jar pi4j-device.jar pi4j-gpio-extension.jar pi4j-service.jar sqlite-jdbc-3.16.1.jar javax.mail.jar"/>
-            </manifest>
-            <zipfileset src="jar-in-jar-loader.zip"/>
-            <fileset dir="${dir.buildfile}/bin"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="pi4j-core.jar"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="pi4j-device.jar"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="pi4j-gpio-extension.jar"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="pi4j-service.jar"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="sqlite-jdbc-3.16.1.jar"/>
-            <zipfileset dir="${dir.buildfile}/lib" includes="javax.mail.jar"/>
-        </jar>
-        <scp file="${dir.jarfile}/brew-controller.jar" todir="pi@192.168.1.50:" password="raspberry" trust="true"/>
-    </target>
+	<!--this file was created by Eclipse Runnable JAR file Export Wizard-->
+	<!--ANT 1.7 is required-->
+	<!--define folder properties-->
+	<property name="dir.buildfile" value="." />
+	<property name="dir.jarfile" value="C:/development/exports" />
+	<target name="create_run_jar">
+		<jar destfile="${dir.jarfile}/brew-controller.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+				<attribute name="Rsrc-Main-Class" value="at.dcosta.brew.Main" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path" value="./ pi4j-core.jar pi4j-device.jar pi4j-gpio-extension.jar pi4j-service.jar sqlite-jdbc-3.16.1.jar javax.mail.jar commons-cli-1.4.jar" />
+			</manifest>
+			<zipfileset src="jar-in-jar-loader.zip" />
+			<fileset dir="${dir.buildfile}/bin" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-core.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-device.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-gpio-extension.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-service.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="sqlite-jdbc-3.16.1.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="javax.mail.jar" />
+			<zipfileset dir="${dir.buildfile}/lib" includes="commons-cli-1.4.jar" />
+		</jar>
+		<scp file="brew-controller.jar" todir="pi@192.168.1.50:" keyfile="C:/cygwin64/home/Stephan_2/.ssh/id_rsa" trust="true">
+			<fileset dir="${dir.jarfile}/" includes="brew-controller.jar" />
+			<fileset dir="." includes="configuration.properties" />
+		</scp>
+	</target>
 </project>

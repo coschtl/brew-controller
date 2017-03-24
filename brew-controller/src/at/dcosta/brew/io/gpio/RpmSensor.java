@@ -30,12 +30,6 @@ public class RpmSensor implements Sensor {
 		});
 	}
 
-	void calculateRpms() {
-		long now = System.currentTimeMillis();
-		rpms = 1000d / (now - lastEvent);
-		lastEvent = now;
-	}
-
 	@Override
 	public String getID() {
 		return id;
@@ -49,6 +43,12 @@ public class RpmSensor implements Sensor {
 	@Override
 	public double getValue() {
 		return rpms;
+	}
+
+	void calculateRpms() {
+		long now = System.currentTimeMillis();
+		rpms = 1000d / (now - lastEvent);
+		lastEvent = now;
 	}
 
 }
