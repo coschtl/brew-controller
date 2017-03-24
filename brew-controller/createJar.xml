@@ -6,7 +6,7 @@
 	<property name="dir.buildfile" value="." />
 	<property name="dir.jarfile" value="C:/development/exports" />
 	<target name="create_run_jar">
-		<jar destfile="${dir.jarfile}/brew-controller.jar">
+		<jar destfile="${dir.jarfile}/brew-controller.jar"> 
 			<manifest>
 				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
 				<attribute name="Rsrc-Main-Class" value="at.dcosta.brew.Main" />
