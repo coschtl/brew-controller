@@ -1,24 +1,76 @@
-
 package at.dcosta.brew.db;
 
-public class Brew extends Database {
+import java.sql.Timestamp;
+import java.util.Iterator;
+import java.util.Set;
 
-	private static final String TABLE_NAME = "BREW";
-	private static final String CREATE_TABLE_STATEMENT = "CREATE TABLE " + TABLE_NAME
-			+ " BREW_ID int, RECIPE_ID int, BREW_START timestamp, BREW_STATUS int, STEP_ID int, STEP_START timestamp, STEP_STATUS int, BREW_END timestamp";
+import at.dcosta.brew.BrewStatus;
 
-	public Brew() {
-		super();
+public class Brew {
+
+	private int id;
+	private final int cookbookEntryId;
+	private Timestamp startTime, endTime;
+	private BrewStatus brewStatus;
+
+	private Set<BrewStep> steps;
+
+	public Brew(int cookbookEntryId) {
+		this.cookbookEntryId = cookbookEntryId;
 	}
 
-	@Override
-	protected String getCreateTableStatement() {
-		return CREATE_TABLE_STATEMENT;
+	public void addStep(BrewStep step) {
+		step.setBrew(this);
+		steps.add(step);
 	}
 
-	@Override
-	protected String getTableName() {
-		return TABLE_NAME;
+	public BrewStatus getBrewStatus() {
+		return brewStatus;
+	}
+
+	public int getCookbookEntryId() {
+		return cookbookEntryId;
+	}
+
+	public BrewStep getCurrentStep() {
+		BrewStep step = null;
+		Iterator<BrewStep> it = steps.iterator();
+		while (it.hasNext()) {
+			step = it.next();
+		}
+		return step;
+	}
+
+	public Timestamp getEndTime() {
+		return endTime;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public Timestamp getStartTime() {
+		return startTime;
+	}
+
+	public Set<BrewStep> getSteps() {
+		return steps;
+	}
+
+	public void setBrewStatus(BrewStatus brewStatus) {
+		this.brewStatus = brewStatus;
+	}
+
+	public void setEndTime(Timestamp endTime) {
+		this.endTime = endTime;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setStartTime(Timestamp startTime) {
+		this.startTime = startTime;
 	}
 
 }

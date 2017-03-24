@@ -1,4 +1,4 @@
-package at.dcosta.brew.io.gpio;
+package at.dcosta.brew.io.gpio.impl;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
@@ -9,13 +9,14 @@ import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 import at.dcosta.brew.io.Sensor;
 
-public class RpmSensor implements Sensor {
+public class GpioRpmSensor implements Sensor {
 
-	private String id;
+	private final String id;
 	private long lastEvent;
 	private double rpms;
 
-	RpmSensor(String name, int pi4jPinNumber, GpioController gpio) {
+	public GpioRpmSensor(String name, int pi4jPinNumber, GpioController gpio) {
+		id = "GPIO_" + pi4jPinNumber;
 		final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.getPinByAddress(pi4jPinNumber), name,
 				PinPullResistance.OFF);
 		pin.addListener(new GpioPinListenerDigital() {

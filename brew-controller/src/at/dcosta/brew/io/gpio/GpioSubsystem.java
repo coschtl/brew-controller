@@ -6,6 +6,12 @@ import java.util.Map;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 
+import at.dcosta.brew.Configuration;
+import at.dcosta.brew.io.Sensor;
+import at.dcosta.brew.io.gpio.impl.GpioRelay;
+import at.dcosta.brew.io.gpio.impl.GpioRpmSensor;
+import at.dcosta.brew.io.gpio.impl.MockRelay;
+
 public class GpioSubsystem {
 
 	private static final GpioSubsystem INSTANCE = new GpioSubsystem();
@@ -16,23 +22,36 @@ public class GpioSubsystem {
 
 	private final GpioController gpio;
 	private final Map<Integer, Relay> relays;
+	private final boolean isMockPi;
 
 	private GpioSubsystem() {
-		gpio = GpioFactory.getInstance();
+		isMockPi = Configuration.getInstance().isMockPi();
+		if (isMockPi) {
+			gpio = null;
+		} else {
+			gpio = GpioFactory.getInstance();
+		}
 		relays = new HashMap<>();
 	}
 
 	public Relay getRelay(String name, int pi4jPinNumber) {
 		Relay relay = relays.get(pi4jPinNumber);
 		if (relay == null) {
-			relay = new Relay(name, pi4jPinNumber, gpio);
+			if (isMockPi) {
+				relay = new MockRelay(pi4jPinNumber);
+			} else {
+				relay = new GpioRelay(name, pi4jPinNumber, gpio);
+			}
 			relays.put(pi4jPinNumber, relay);
 		}
 		return relay;
 	}
-	
-	public RpmSensor getRpmSensor(String name, int pi4jPinNumber) {
-		return new RpmSensor(name, pi4jPinNumber, gpio);
+
+	public Sensor getRpmSensor(String name, int pi4jPinNumber) {
+		if (isMockPi) {
+			return new MockSensor("GPIO_" + pi4jPinNumber, "rpm");
+		}
+		return new GpioRpmSensor(name, pi4jPinNumber, gpio);
 	}
 
 	public void shutdown() {
@@ -40,7 +59,9 @@ public class GpioSubsystem {
 			relay.off();
 		}
 		relays.clear();
-		gpio.shutdown();
+		if (!isMockPi) {
+			gpio.shutdown();
+		}
 	}
 
 }

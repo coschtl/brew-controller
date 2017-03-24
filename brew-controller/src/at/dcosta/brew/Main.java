@@ -11,10 +11,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import at.dcosta.brew.com.MailNotificationService;
+import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.Relay;
-import at.dcosta.brew.io.gpio.RpmSensor;
 import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.util.ThreadManager;
 
@@ -56,15 +57,16 @@ public class Main {
 			return;
 		}
 		Configuration.initialize(configFile);
-		System.out.println(Configuration.getInstance());
+
+		if (cmdLine.hasOption("sendTestMail")) {
+			new MailNotificationService().sendNotification(NotificationType.INFO, "Grüße von der Brauerei",
+					"Das Mailing scheint zu funktionieren.");
+		}
 
 		// readTemperatures();
 		// toggleRelais();
 		// readHallSensor();
 
-		// new
-		// MailNotificationService(null).sendNotification("stephan.dcosta@gmail.com",
-		// "Grüße von der Brauerei", "Das Bier ist nun bereit zum Abläutern");
 		ThreadManager.getInstance().waitForAllThreadsToComplete();
 		System.out.println("DONE");
 	}
@@ -73,6 +75,7 @@ public class Main {
 		Options options = new Options();
 		options.addOption(new Option("help", "print this message"));
 		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
+		options.addOption(new Option("sendTestMail", "sends a test email"));
 		options.addOption(new Option("config", true, "use given config file"));
 		return options;
 	}
@@ -80,7 +83,7 @@ public class Main {
 	private static void readHallSensor() throws InterruptedException {
 		System.out.println("Start");
 		try {
-			RpmSensor rpmSensor = GpioSubsystem.getInstance().getRpmSensor("Motor 1", 0);
+			Sensor rpmSensor = GpioSubsystem.getInstance().getRpmSensor("Motor 1", 0);
 			for (int i = 0; i < 100; i++) {
 				System.out.println(rpmSensor.getValue());
 

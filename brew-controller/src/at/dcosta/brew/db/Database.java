@@ -14,14 +14,14 @@ import at.dcosta.brew.Configuration;
 abstract class Database {
 
 	private static final String SQL_CHECK_TABLE_EXISTS = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?";
-
+	private static final String SQL_LAST_ROW_ID = "SELECT last_insert_rowid()";
 	private static final String JDBC_URL_PREFIX = "jdbc:sqlite:";
 
 	private final String jdbcUrl;
 
 	protected Database() {
 		jdbcUrl = JDBC_URL_PREFIX + Configuration.getInstance().getString(DATABASE_LOCATION);
-		createTableIfNecessary();
+		createTablesIfNecessary();
 	}
 
 	public Connection getConnection() {
@@ -32,23 +32,26 @@ abstract class Database {
 		}
 	}
 
-	private void createTableIfNecessary() {
+	private void createTablesIfNecessary() {
 		String err = "Can not check if table exists: ";
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
-			st.setString(1, getTableName());
-			rs = st.executeQuery();
-			if (rs.next() && rs.getInt(1) == 1) {
-				return;
+			for (int i = 0; i < getTableNames().length; i++) {
+				st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
+				st.setString(1, getTableNames()[i]);
+				rs = st.executeQuery();
+				if (rs.next() && rs.getInt(1) == 1) {
+					continue;
+				}
+				close(rs);
+				close(st);
+				err = "Can not create non existing table: ";
+				st = con.prepareStatement(getCreateTableStatements()[i]);
+				st.executeUpdate();
+				close(st);
 			}
-			close(rs);
-			close(st);
-			err = "Can not create non existing table: ";
-			st = con.prepareStatement(getCreateTableStatement());
-			st.executeUpdate();
 		} catch (SQLException e) {
 			throw new DatabaseException(err + e.getMessage(), e);
 		} finally {
@@ -88,8 +91,26 @@ abstract class Database {
 		}
 	}
 
-	protected abstract String getCreateTableStatement();
+	protected abstract String[] getCreateTableStatements();
 
-	protected abstract String getTableName();
+	protected int getLastInsertedRowId(Connection con) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = con.prepareStatement(SQL_LAST_ROW_ID);
+			rs = st.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+			throw new DatabaseException("can not get last inserted rowId!");
+		} catch (SQLException e) {
+			throw new DatabaseException("can not get last inserted rowId: " + e.getMessage(), e);
+		} finally {
+			close(rs);
+			close(st);
+		}
+	}
+
+	protected abstract String[] getTableNames();
 
 }

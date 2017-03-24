@@ -12,7 +12,6 @@ import java.util.List;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.Relay;
-import at.dcosta.brew.io.gpio.RpmSensor;
 import at.dcosta.brew.io.w1.W1Bus;
 
 public class MashingSystem {
@@ -21,7 +20,7 @@ public class MashingSystem {
 	private final List<Relay> heaters;
 	private final Relay stirrerMotor;
 	private final Relay maltStoreOpener;
-	private final RpmSensor rpmSensor;
+	private final Sensor rpmSensor;
 
 	public MashingSystem() {
 		Configuration config = Configuration.getInstance();

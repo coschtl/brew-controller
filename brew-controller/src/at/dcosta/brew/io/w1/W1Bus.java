@@ -10,7 +10,9 @@ import com.pi4j.component.temperature.TemperatureSensor;
 import com.pi4j.io.w1.W1Device;
 import com.pi4j.io.w1.W1Master;
 
+import at.dcosta.brew.Configuration;
 import at.dcosta.brew.io.Sensor;
+import at.dcosta.brew.io.gpio.MockSensor;
 
 public class W1Bus {
 
@@ -30,6 +32,9 @@ public class W1Bus {
 	}
 
 	public Sensor getTemperatureSensor(String address) {
+		if (Configuration.getInstance().isMockPi()) {
+			return new MockSensor(address, "°C");
+		}
 		return sensors.get(address);
 	}
 

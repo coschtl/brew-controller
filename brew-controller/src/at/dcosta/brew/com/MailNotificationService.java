@@ -58,7 +58,7 @@ public class MailNotificationService implements NotificationService {
 					msg.setRecipients(Message.RecipientType.TO, addressesTo);
 					msg.setFrom(new InternetAddress(config.getString(MAIL_USER)));
 
-					msg.setSubject(subject);
+					msg.setSubject(notificationType.toString() + ": " + subject);
 					msg.setContent(message, "text/plain");
 					Transport.send(msg);
 				} catch (Exception e) {

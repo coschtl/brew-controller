@@ -56,6 +56,7 @@ public class Configuration {
 	}
 
 	private final Map<String, String> configuration;
+	private boolean mockPi;
 
 	private Configuration() throws IOException {
 		configuration = new HashMap<>();
@@ -96,6 +97,10 @@ public class Configuration {
 		return addresses;
 	}
 
+	public boolean isMockPi() {
+		return mockPi;
+	}
+
 	@Override
 	public String toString() {
 		return configuration.toString();
@@ -116,6 +121,7 @@ public class Configuration {
 										+ envFile.getAbsolutePath() + " not found!");
 					}
 					env = readFile(envFile);
+					mockPi = Boolean.parseBoolean(env.get("system.mockPi"));
 				}
 				Matcher m = PATTERN_VARIABLE.matcher(value);
 				if (m.find()) {
