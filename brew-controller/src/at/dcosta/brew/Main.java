@@ -76,7 +76,7 @@ public class Main {
 		}
 
 		Recipe recipe = RecipeLoader.loadSampleRecipe();
-		System.out.println(new RecipeWriter(recipe, false).getRecipeAsXmlString());
+		System.out.println(new RecipeWriter(recipe, true).getRecipeAsXmlString());
 
 		// readTemperatures();
 		// toggleRelais();
@@ -109,7 +109,6 @@ public class Main {
 			System.out.println("Shutting down");
 			GpioSubsystem.getInstance().shutdown();
 		}
-		System.out.println("DONE");
 	}
 
 	private static void readTemperatures() throws InterruptedException {
@@ -151,6 +150,5 @@ public class Main {
 		}
 		System.out.println("isOn: " + relay.isOn());
 
-		System.out.println("DONE");
 	}
 }

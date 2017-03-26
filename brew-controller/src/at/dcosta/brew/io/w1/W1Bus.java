@@ -19,11 +19,16 @@ public class W1Bus {
 	private final Map<String, Sensor> sensors;
 
 	public W1Bus() {
-		W1Master w1Master = new W1Master();
 		sensors = new HashMap<>();
-		for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
-			W1TemperatureSensor sensor = new W1TemperatureSensor(device);
+		if (Configuration.getInstance().isMockPi()) {
+			MockSensor sensor = new MockSensor("mockSensor 1", "°C");
 			sensors.put(sensor.getID(), sensor);
+		} else {
+			W1Master w1Master = new W1Master();
+			for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
+				W1TemperatureSensor sensor = new W1TemperatureSensor(device);
+				sensors.put(sensor.getID(), sensor);
+			}
 		}
 	}
 
