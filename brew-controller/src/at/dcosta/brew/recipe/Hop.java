@@ -15,7 +15,7 @@ public class Hop extends Ingredient {
 		return alpha;
 	}
 
-	public float getBoilingTime() {
+	public int getBoilingTime() {
 		return boilingTime;
 	}
 

@@ -13,22 +13,23 @@ public abstract class Recipe {
 	private final List<Hop> hops;
 	private Ingredient yeast;
 
-	
 	private int boilingTime;
 	private int whirlpoolTime;
 	private int primaryWater, secondaryWater;
 	private int mashingTemperature;
 	private int lauteringRest;
-	
+
 	public Recipe(String name, float wort) {
 		this.name = name;
 		this.wort = wort;
 		this.malts = new ArrayList<>();
 		this.hops = new ArrayList<>();
 	}
+
 	public void addHop(Hop hop) {
 		hops.add(hop);
 	}
+
 	public void addMalt(Ingredient malt) {
 		malts.add(malt);
 	}
@@ -36,6 +37,8 @@ public abstract class Recipe {
 	public int getBoilingTime() {
 		return boilingTime;
 	}
+
+	public abstract String getBrewType();
 
 	public List<Hop> getHops() {
 		return hops;
@@ -145,7 +148,8 @@ public abstract class Recipe {
 	protected String stringUntilMashing() {
 		StringBuilder b = new StringBuilder();
 		b.append(getName()).append(": ").append(getWort()).append("°P").append("\n");
-		b.append("Hauptguss: ").append(getPrimaryWater()).append("l / Nachguss: ").append(getSecondaryWater()).append("l\n");
+		b.append("Hauptguss: ").append(getPrimaryWater()).append("l / Nachguss: ").append(getSecondaryWater())
+				.append("l\n");
 		b.append("Malze: ");
 		boolean first = true;
 		for (Ingredient malt : getMalts()) {

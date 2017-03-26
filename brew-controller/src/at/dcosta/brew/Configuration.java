@@ -18,6 +18,8 @@ import at.dcosta.brew.util.IOUtils;
 
 public class Configuration {
 
+	private static final String SYSTEM_MOCK_PI = "system.mockPi";
+
 	public static final String DATABASE_LOCATION = "databaseLocation";
 	public static final String HEATER_PINS = "heater.pi4jPinNumbers";
 	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";
@@ -121,7 +123,7 @@ public class Configuration {
 										+ envFile.getAbsolutePath() + " not found!");
 					}
 					env = readFile(envFile);
-					mockPi = Boolean.parseBoolean(env.get("system.mockPi"));
+					mockPi = Boolean.parseBoolean(env.get(SYSTEM_MOCK_PI));
 				}
 				Matcher m = PATTERN_VARIABLE.matcher(value);
 				if (m.find()) {

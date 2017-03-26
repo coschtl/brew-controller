@@ -1,6 +1,11 @@
 package at.dcosta.brew.recipe;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -9,7 +14,21 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import at.dcosta.brew.util.IOUtils;
+
 public class RecipeLoader {
+
+	public static Recipe loadRecipe(File recipeFile) {
+		InputStream in = null;
+		try {
+			in = new FileInputStream(recipeFile);
+			return loadRecipe(in);
+		} catch (FileNotFoundException e) {
+			throw new RecipeException("Can not read recipe: " + e.toString());
+		} finally {
+			IOUtils.close(in);
+		}
+	}
 
 	public static Recipe loadRecipe(InputStream in) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -48,14 +67,26 @@ public class RecipeLoader {
 		} catch (RecipeException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new RecipeException("CAn not read recipe: " + e.toString());
+			throw new RecipeException("Can not read recipe: " + e.toString());
 		}
 
 	}
 
-	public static void main(String[] args) {
-		 Recipe recipe = loadSampleRecipe();
-		 System.out.println(recipe);
+	public static Recipe loadRecipe(String recipeAsSting) {
+		InputStream in = null;
+		try {
+			in = new ByteArrayInputStream(recipeAsSting.getBytes("utf-8"));
+			return loadRecipe(in);
+		} catch (UnsupportedEncodingException e) {
+			throw new RecipeException("Can not read recipe: " + e.toString());
+		} finally {
+			IOUtils.close(in);
+		}
+	}
+
+	public static Recipe loadSampleRecipe() {
+		ClassLoader c = RecipeLoader.class.getClassLoader();
+		return loadRecipe(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
 	}
 
 	private static void addBoiling(Recipe recipe, Element boiling) {
@@ -134,10 +165,5 @@ public class RecipeLoader {
 			return new InfusionRecipe(root.getAttribute("name"), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
-	}
-
-	private static Recipe loadSampleRecipe() {
-		ClassLoader c = RecipeLoader.class.getClassLoader();
-		return loadRecipe(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
 	}
 }

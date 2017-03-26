@@ -16,6 +16,11 @@ public class InfusionRecipe extends Recipe {
 		rests.add(rest);
 	}
 
+	@Override
+	public String getBrewType() {
+		return "infusion";
+	}
+
 	public List<Rest> getRests() {
 		return rests;
 	}

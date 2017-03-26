@@ -17,6 +17,9 @@ import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.Relay;
 import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.recipe.Recipe;
+import at.dcosta.brew.recipe.RecipeLoader;
+import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.util.ThreadManager;
 
 public class Main {
@@ -63,6 +66,18 @@ public class Main {
 					"Das Mailing scheint zu funktionieren.");
 		}
 
+		if (cmdLine.hasOption("importRecipe")) {
+			File recipeFile = configFile = new File(cmdLine.getOptionValue("importRecipe"));
+			if (!recipeFile.exists()) {
+				System.err.println("Given recipe file '" + recipeFile.getAbsolutePath() + "' does not exist!");
+				return;
+			}
+			Recipe loadRecipe = RecipeLoader.loadRecipe(recipeFile);
+		}
+
+		Recipe recipe = RecipeLoader.loadSampleRecipe();
+		System.out.println(new RecipeWriter(recipe, false).getRecipeAsXmlString());
+
 		// readTemperatures();
 		// toggleRelais();
 		// readHallSensor();
@@ -77,6 +92,7 @@ public class Main {
 		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
 		options.addOption(new Option("sendTestMail", "sends a test email"));
 		options.addOption(new Option("config", true, "use given config file"));
+		options.addOption(new Option("importRecipe", true, "import the given recipe"));
 		return options;
 	}
 
