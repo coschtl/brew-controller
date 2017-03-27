@@ -20,7 +20,7 @@ import at.dcosta.brew.Configuration;
 import at.dcosta.brew.ConfigurationException;
 import at.dcosta.brew.util.ThreadManager;
 
-public class MailNotificationService implements NotificationService {
+public class MailNotificationService implements Notifier {
 
 	static final Logger LOGGER = Logger.getLogger(MailNotificationService.class.getName());
 

@@ -14,13 +14,13 @@ public class BrewDB extends Database {
 	private static final String[] TABLE_NAMES = new String[] { "BREW", "BREW_STEPS" };
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] {
 			"CREATE TABLE " + TABLE_NAMES[0]
-					+ " COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), BREW_END timestamp",
+					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), BREW_END timestamp)",
 			"CREATE TABLE " + TABLE_NAMES[1]
-					+ " BREW_ID int, STEP_NAME varchar(255), STEP_START timestamp, STEP_END timestamp" };
+					+ " (BREW_ID int, STEP_NAME varchar(255), STEP_START timestamp, STEP_END timestamp)" };
 	private static final String SQL_INSERT_BREW = "INSERT INTO " + TABLE_NAMES[0]
 			+ " (COOKBOOK_ENTRY_ID, BREW_START, BREW_STATUS) VALUES (?, ?, ?)";
-	private static final String SQL_BREW_BY_ID = "SELECT * FROM " + TABLE_NAMES[0] + " WHERE ROWID=?";
-	private static final String SQL_STEPS_FOR_BREW = "SELECT * FROM " + TABLE_NAMES[1] + " WHERE BREW_ID=?";
+	private static final String SQL_BREW_BY_ID = "SELECT ROWID, * FROM " + TABLE_NAMES[0] + " WHERE ROWID=?";
+	private static final String SQL_STEPS_FOR_BREW = "SELECT ROWID, * FROM " + TABLE_NAMES[1] + " WHERE BREW_ID=?";
 
 	public BrewDB() {
 		super();

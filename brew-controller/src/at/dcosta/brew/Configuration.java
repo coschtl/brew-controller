@@ -22,12 +22,13 @@ public class Configuration {
 
 	public static final String DATABASE_LOCATION = "databaseLocation";
 	public static final String HEATER_PINS = "heater.pi4jPinNumbers";
+	public static final String HEATER_MINIMUM_INCREASE_PER_MINUTE = "heater.minimumIncreasePerMinute";
 	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";
 	public static final String STIRRER_RPM_PIN = "stirrer.rpm.pi4jPinNumber";
 	public static final String MALT_STORE_OPENER_PIN = "maltStoreOpener.pi4jPinNumber";
 	public static final String MALT_STORE_OPENER_TIMEOUT_SECONDS = "maltStoreOpener.timeoutSeconds";
-	public static final String THERMOMETER_ADRESSES = "thermometer.addresses";
-	public static final String THERMOMETER_CONNECTION = "thermometer.connection";
+	public static final String MASHING_THERMOMETER_ADRESSES = "mashing.thermometer.addresses";
+	public static final String MASHING_THERMOMETER_MAXDIFF = "mashing.thermometer.maxDiff";
 	public static final String MAIL_USER = "mail.user";
 	public static final String MAIL_ACCOUNT = "mail.account";
 	public static final String MAIL_PASSWORD = "mail.password";
@@ -62,6 +63,15 @@ public class Configuration {
 
 	private Configuration() throws IOException {
 		configuration = new HashMap<>();
+	}
+
+	public double getDouble(String key) {
+		String stringValue = getString(key);
+		try {
+			return Double.parseDouble(stringValue);
+		} catch (NumberFormatException e) {
+			throw ConfigurationException.createIllegalValueException(key, stringValue);
+		}
 	}
 
 	public int getInt(String key) {

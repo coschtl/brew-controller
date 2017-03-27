@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import at.dcosta.brew.Configuration;
 
@@ -22,14 +23,6 @@ abstract class Database {
 	protected Database() {
 		jdbcUrl = JDBC_URL_PREFIX + Configuration.getInstance().getString(DATABASE_LOCATION);
 		createTablesIfNecessary();
-	}
-
-	public Connection getConnection() {
-		try {
-			return DriverManager.getConnection(jdbcUrl);
-		} catch (SQLException e) {
-			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
-		}
 	}
 
 	private void createTablesIfNecessary() {
@@ -48,7 +41,8 @@ abstract class Database {
 				close(rs);
 				close(st);
 				err = "Can not create non existing table: ";
-				st = con.prepareStatement(getCreateTableStatements()[i]);
+				String sqlCreateTable = getCreateTableStatements()[i];
+				st = con.prepareStatement(sqlCreateTable);
 				st.executeUpdate();
 				close(st);
 			}
@@ -91,6 +85,14 @@ abstract class Database {
 		}
 	}
 
+	protected Connection getConnection() {
+		try {
+			return DriverManager.getConnection(jdbcUrl);
+		} catch (SQLException e) {
+			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
+		}
+	}
+
 	protected abstract String[] getCreateTableStatements();
 
 	protected int getLastInsertedRowId(Connection con) {
@@ -112,5 +114,9 @@ abstract class Database {
 	}
 
 	protected abstract String[] getTableNames();
+
+	protected Timestamp now() {
+		return new Timestamp(System.currentTimeMillis());
+	}
 
 }

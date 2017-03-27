@@ -37,28 +37,34 @@ public class CookbookEntry {
 		return recipeSource;
 	}
 
-	public void setAddedOn(Timestamp addedOn) {
+	public CookbookEntry setAddedOn(Timestamp addedOn) {
 		this.addedOn = addedOn;
+		return this;
 	}
 
-	public void setBrewCount(int brewCount) {
+	public CookbookEntry setBrewCount(int brewCount) {
 		this.brewCount = brewCount;
+		return this;
 	}
 
-	public void setId(int id) {
+	public CookbookEntry setId(int id) {
 		this.id = id;
+		return this;
 	}
 
-	public void setName(String name) {
+	public CookbookEntry setName(String name) {
 		this.name = name;
+		return this;
 	}
 
-	public void setRecipe(Recipe recipe) {
+	public CookbookEntry setRecipe(Recipe recipe) {
 		this.recipe = recipe;
+		return this;
 	}
 
-	public void setRecipeSource(String recipeSource) {
+	public CookbookEntry setRecipeSource(String recipeSource) {
 		this.recipeSource = recipeSource;
+		return this;
 	}
 
 }

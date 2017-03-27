@@ -29,24 +29,29 @@ public class BrewStep {
 		return stepName;
 	}
 
-	public void setBrew(Brew brew) {
+	public BrewStep setBrew(Brew brew) {
 		this.brew = brew;
+		return this;
 	}
 
-	public void setEndTime(Timestamp endTime) {
+	public BrewStep setEndTime(Timestamp endTime) {
 		this.endTime = endTime;
+		return this;
 	}
 
-	public void setId(int id) {
+	public BrewStep setId(int id) {
 		this.id = id;
+		return this;
 	}
 
-	public void setStartTime(Timestamp startTime) {
+	public BrewStep setStartTime(Timestamp startTime) {
 		this.startTime = startTime;
+		return this;
 	}
 
-	public void setStepName(String stepName) {
+	public BrewStep setStepName(String stepName) {
 		this.stepName = stepName;
+		return this;
 	}
 
 }

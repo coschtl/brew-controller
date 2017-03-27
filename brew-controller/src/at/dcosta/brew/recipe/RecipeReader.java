@@ -16,13 +16,18 @@ import org.w3c.dom.NodeList;
 
 import at.dcosta.brew.util.IOUtils;
 
-public class RecipeLoader {
+public class RecipeReader {
 
-	public static Recipe loadRecipe(File recipeFile) {
+	public static Recipe loadSampleRecipe() {
+		ClassLoader c = RecipeReader.class.getClassLoader();
+		return read(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
+	}
+
+	public static Recipe read(File recipeFile) {
 		InputStream in = null;
 		try {
 			in = new FileInputStream(recipeFile);
-			return loadRecipe(in);
+			return read(in);
 		} catch (FileNotFoundException e) {
 			throw new RecipeException("Can not read recipe: " + e.toString());
 		} finally {
@@ -30,7 +35,7 @@ public class RecipeLoader {
 		}
 	}
 
-	public static Recipe loadRecipe(InputStream in) {
+	public static Recipe read(InputStream in) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
 		try {
@@ -72,21 +77,16 @@ public class RecipeLoader {
 
 	}
 
-	public static Recipe loadRecipe(String recipeAsSting) {
+	public static Recipe read(String recipeAsSting) {
 		InputStream in = null;
 		try {
 			in = new ByteArrayInputStream(recipeAsSting.getBytes("utf-8"));
-			return loadRecipe(in);
+			return read(in);
 		} catch (UnsupportedEncodingException e) {
 			throw new RecipeException("Can not read recipe: " + e.toString());
 		} finally {
 			IOUtils.close(in);
 		}
-	}
-
-	public static Recipe loadSampleRecipe() {
-		ClassLoader c = RecipeLoader.class.getClassLoader();
-		return loadRecipe(c.getResourceAsStream("at/dcosta/brew/recipe/SampleRecipe.xml"));
 	}
 
 	private static void addBoiling(Recipe recipe, Element boiling) {

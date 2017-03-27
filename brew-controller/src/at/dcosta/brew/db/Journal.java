@@ -8,9 +8,9 @@ import java.sql.Timestamp;
 
 public class Journal extends Database {
 
-	private static final String[] TABLE_NAME = new String[] { "JOURNAL" };
+	private static final String TABLE_NAME = "JOURNAL";
 	private static final String[] SQL_CREATE_TABLE = new String[] { "CREATE TABLE " + TABLE_NAME
-			+ " RECIPE_ID int, STEP varchar(255), JOURNAL_DATE timestamp, JOURNAL_TEXT varchar(65000)" };
+			+ " (RECIPE_ID int, STEP varchar(255), JOURNAL_DATE timestamp, JOURNAL_TEXT varchar(65000))" };
 
 	private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
 			+ " (RECIPE_ID, STEP, JOURNAL_DATE, JOURNAL_TEXT) values (?, ?, ?, ?)";
@@ -19,12 +19,12 @@ public class Journal extends Database {
 		super();
 	}
 
-	public void addEntry(int recipeId, String step, String text) {
+	public void addEntry(int cookbookEntryId, String step, String text) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		try {
 			st = con.prepareStatement(SQL_INSERT);
-			st.setInt(1, recipeId);
+			st.setInt(1, cookbookEntryId);
 			st.setString(2, step);
 			st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 			st.setString(4, text);
@@ -47,7 +47,7 @@ public class Journal extends Database {
 
 	@Override
 	protected String[] getTableNames() {
-		return TABLE_NAME;
+		return new String[] { TABLE_NAME };
 	}
 
 }

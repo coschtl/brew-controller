@@ -1,20 +1,57 @@
 package at.dcosta.brew.recipe;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+
+import at.dcosta.brew.util.IOUtils;
+
 public class RecipeWriter {
 
 	private final StringBuilder xml;
 
 	private boolean tagIsOpen;
-	private boolean includeNewlines;
+	private boolean prettyPrint;
+	private int depth;
 
-	public RecipeWriter(Recipe recipe, boolean includeNewlines) {
+	public RecipeWriter(Recipe recipe, boolean prettyPrint) {
 		this.xml = new StringBuilder();
-		this.includeNewlines = includeNewlines;
+		this.prettyPrint = prettyPrint;
 		toXml(recipe);
 	}
 
 	public String getRecipeAsXmlString() {
 		return xml.toString();
+	}
+
+	public void writeTo(File file) throws IOException {
+		OutputStream out = null;
+		try {
+			out = new FileOutputStream(file);
+			writeTo(out);
+			out.flush();
+		} finally {
+			out.close();
+		}
+	}
+
+	public void writeTo(OutputStream out) throws IOException {
+		try {
+			OutputStreamWriter writer = null;
+			try {
+				writer = new OutputStreamWriter(out, "utf-8");
+				writer.write(getRecipeAsXmlString());
+				writer.flush();
+			} finally {
+				IOUtils.close(writer);
+			}
+		} catch (UnsupportedEncodingException e) {
+			// utf-8 must be present!
+			e.printStackTrace();
+		}
 	}
 
 	private RecipeWriter attribute(String name, float value) {
@@ -41,7 +78,9 @@ public class RecipeWriter {
 	}
 
 	private RecipeWriter endElement(String elementName) {
+		depth--;
 		closeTagIfNecessary();
+		indent();
 		xml.append("</").append(elementName).append(">");
 		newline();
 		return this;
@@ -50,25 +89,37 @@ public class RecipeWriter {
 	private RecipeWriter endEmptyElement() {
 		xml.append("/>");
 		newline();
+		depth--;
 		tagIsOpen = false;
 		return this;
 	}
 
+	private void indent() {
+		if (prettyPrint) {
+			for (int i = 0; i < depth; i++) {
+				xml.append("  ");
+			}
+		}
+	}
+
 	private void newline() {
-		if (includeNewlines) {
+		if (prettyPrint) {
 			xml.append('\n');
 		}
 	}
 
 	private RecipeWriter startElement(String elementName) {
 		closeTagIfNecessary();
+		indent();
 		xml.append('<').append(elementName);
 		tagIsOpen = true;
+		depth++;
 		return this;
 	}
 
 	private void toXml(Recipe recipe) {
 		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		newline();
 		startElement("recipe");
 		attribute("version", "1.0");
 		attribute("name", recipe.getName());

@@ -1,7 +1,9 @@
 package at.dcosta.brew;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,12 +15,14 @@ import org.apache.commons.cli.ParseException;
 
 import at.dcosta.brew.com.MailNotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.Cookbook;
+import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.Relay;
 import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.recipe.Recipe;
-import at.dcosta.brew.recipe.RecipeLoader;
+import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.util.ThreadManager;
 
@@ -72,10 +76,40 @@ public class Main {
 				System.err.println("Given recipe file '" + recipeFile.getAbsolutePath() + "' does not exist!");
 				return;
 			}
-			Recipe loadRecipe = RecipeLoader.loadRecipe(recipeFile);
+			Recipe recipe = RecipeReader.read(recipeFile);
+			String recipeSource = cmdLine.hasOption("recipeSource") ? cmdLine.getOptionValue("recipeSource") : null;
+			new Cookbook().addRecipe(recipe, recipeSource);
+			System.out.println("Recipe added.");
+			return;
 		}
 
-		Recipe recipe = RecipeLoader.loadSampleRecipe();
+		if (cmdLine.hasOption("listRecipes")) {
+			System.out.println("ID\tRecipe\t\taddedOn\t\tbrew count\trecipe source");
+			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
+			for (CookbookEntry entry : new Cookbook().listRecipes()) {
+				System.out.println(entry.getId() + "\t" + entry.getName() + "\t" + df.format(entry.getAddedOn())
+						+ "\t\t" + entry.getBrewCount() + "\t" + entry.getRecipeSource());
+			}
+			return;
+		}
+		if (cmdLine.hasOption("showRecipe")) {
+			int id = Integer.valueOf(cmdLine.getOptionValue("showRecipe"));
+			CookbookEntry entry = new Cookbook().getEntryById(id);
+			if (entry == null) {
+				System.out
+						.println("No recipe found for id=" + id + "! Use -listRecipes to list all available recipes.");
+				return;
+			}
+			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
+			System.out.println("Recipe: " + entry.getName());
+			System.out.println("addedOn: " + df.format(entry.getAddedOn()));
+			System.out.println("brew count: " + entry.getBrewCount());
+			System.out.println("recipe source: " + entry.getRecipeSource());
+			System.out.println();
+			System.out.println(new RecipeWriter(entry.getRecipe(), true).getRecipeAsXmlString());
+			return;
+		}
+		Recipe recipe = RecipeReader.loadSampleRecipe();
 		System.out.println(new RecipeWriter(recipe, true).getRecipeAsXmlString());
 
 		// readTemperatures();
@@ -93,6 +127,9 @@ public class Main {
 		options.addOption(new Option("sendTestMail", "sends a test email"));
 		options.addOption(new Option("config", true, "use given config file"));
 		options.addOption(new Option("importRecipe", true, "import the given recipe"));
+		options.addOption(new Option("recipeSource", true, "the source of the recipe just getting imported"));
+		options.addOption(new Option("listRecipes", "list all recipes"));
+		options.addOption(new Option("showRecipe", true, "output the xml of the recipe"));
 		return options;
 	}
 
