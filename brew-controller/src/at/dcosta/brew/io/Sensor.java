@@ -5,7 +5,7 @@ public interface Sensor {
 	String getID();
 
 	String getScale();
-	
+
 	double getValue();
 
 }

@@ -43,8 +43,8 @@ public class Main {
 			new HelpFormatter().printHelp("brew-controller", options);
 			return;
 		}
-		if (cmdLine.hasOption("scanW1")) {
-			new W1Bus().scanW1Bus();
+		if (cmdLine.hasOption("shutDown")) {
+			new ProcessBuilder().command("sudo", "halt").start();
 			return;
 		}
 
@@ -65,6 +65,10 @@ public class Main {
 		}
 		Configuration.initialize(configFile);
 
+		if (cmdLine.hasOption("scanW1")) {
+			new W1Bus().scanW1Bus();
+			return;
+		}
 		if (cmdLine.hasOption("sendTestMail")) {
 			new MailNotificationService().sendNotification(NotificationType.INFO, "Grüße von der Brauerei",
 					"Das Mailing scheint zu funktionieren.");
@@ -109,12 +113,19 @@ public class Main {
 			System.out.println(new RecipeWriter(entry.getRecipe(), true).getRecipeAsXmlString());
 			return;
 		}
-		Recipe recipe = RecipeReader.loadSampleRecipe();
-		System.out.println(new RecipeWriter(recipe, true).getRecipeAsXmlString());
+		// Recipe recipe = RecipeReader.loadSampleRecipe();
+		// System.out.println(new RecipeWriter(recipe,
+		// true).getRecipeAsXmlString());
 
-		// readTemperatures();
-		// toggleRelais();
-		// readHallSensor();
+		if (cmdLine.hasOption("testTemperature")) {
+			readTemperatures();
+		}
+		if (cmdLine.hasOption("testRelais")) {
+			toggleRelais();
+		}
+		if (cmdLine.hasOption("testRpm")) {
+			readHallSensor();
+		}
 
 		ThreadManager.getInstance().waitForAllThreadsToComplete();
 		System.out.println("DONE");
@@ -130,6 +141,10 @@ public class Main {
 		options.addOption(new Option("recipeSource", true, "the source of the recipe just getting imported"));
 		options.addOption(new Option("listRecipes", "list all recipes"));
 		options.addOption(new Option("showRecipe", true, "output the xml of the recipe"));
+		options.addOption(new Option("testRelais", "testRelais"));
+		options.addOption(new Option("shutDown", "shutDown"));
+		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
 		return options;
 	}
 
@@ -161,31 +176,52 @@ public class Main {
 	}
 
 	private static void toggleRelais() throws InterruptedException {
-		Relay relay = GpioSubsystem.getInstance().getRelay("Heater 1", 1);
+		Relay relay1 = GpioSubsystem.getInstance().getRelay("Heater 1", 1);
+		Relay relay2 = GpioSubsystem.getInstance().getRelay("Heater 2", 4);
 		try {
-			System.out.println("isOn: " + relay.isOn());
+			System.out.println("Relay 1 isOn: " + relay1.isOn());
 			Thread.sleep(5000);
 
-			System.out.print("Switching on: ");
-			relay.on();
-			System.out.println("isOn: " + relay.isOn());
+			System.out.print("Switching Relay 1 on: ");
+			relay1.on();
+			System.out.println("Relay 1 isOn: " + relay1.isOn());
 			Thread.sleep(5000);
 
-			System.out.print("Switching off: ");
-			relay.off();
-			System.out.println("isOn: " + relay.isOn());
+			System.out.print("Switching Relay 1 off: ");
+			relay1.off();
+			System.out.println("Relay 1 isOn: " + relay1.isOn());
 			Thread.sleep(5000);
 
-			System.out.print("Switching on: ");
-			relay.on();
-			System.out.println("isOn: " + relay.isOn());
+			System.out.print("Switching Relay 1 on: ");
+			relay1.on();
+			System.out.println("Relay 1 isOn: " + relay1.isOn());
+			Thread.sleep(5000);
+
+			// System.out.print("Switching Relay 1 off: ");
+			// relay1.off();
+			// System.out.println("Relay 1 isOn: " + relay1.isOn());
+			// Thread.sleep(5000);
+
+			System.out.print("Switching Relay 2 on: ");
+			relay2.on();
+			System.out.println("Relay 2 isOn: " + relay1.isOn());
+			Thread.sleep(5000);
+
+			System.out.print("Switching Relay 2 off: ");
+			relay2.off();
+			System.out.println("Relay 2 isOn: " + relay1.isOn());
+			Thread.sleep(5000);
+
+			System.out.print("Switching Relay 2 on: ");
+			relay2.on();
+			System.out.println("Relay 2 isOn: " + relay1.isOn());
 			Thread.sleep(5000);
 
 		} finally {
 			System.out.println("Shutting down");
 			GpioSubsystem.getInstance().shutdown();
 		}
-		System.out.println("isOn: " + relay.isOn());
+		System.out.println("isOn: " + relay1.isOn());
 
 	}
 }

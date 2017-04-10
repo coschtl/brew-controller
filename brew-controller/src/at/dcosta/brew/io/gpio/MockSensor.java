@@ -28,8 +28,8 @@ public class MockSensor implements Sensor {
 		return value;
 	}
 
-	public void setValue(double value) {
+	public MockSensor setValue(double value) {
 		this.value = value;
+		return this;
 	}
-
 }

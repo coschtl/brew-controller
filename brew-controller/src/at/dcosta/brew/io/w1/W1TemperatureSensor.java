@@ -21,7 +21,7 @@ public class W1TemperatureSensor implements Sensor {
 	public String getScale() {
 		return "°C";
 	}
-	
+
 	@Override
 	public double getValue() {
 		return sensor.getTemperature(TemperatureScale.CELSIUS);

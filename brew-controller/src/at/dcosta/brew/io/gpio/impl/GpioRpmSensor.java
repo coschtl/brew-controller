@@ -48,7 +48,7 @@ public class GpioRpmSensor implements Sensor {
 
 	void calculateRpms() {
 		long now = System.currentTimeMillis();
-		rpms = 1000d / (now - lastEvent);
+		rpms = 1000d / (now - lastEvent) / 60d;
 		lastEvent = now;
 	}
 

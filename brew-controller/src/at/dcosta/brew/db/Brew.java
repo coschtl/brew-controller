@@ -57,20 +57,24 @@ public class Brew {
 		return steps;
 	}
 
-	public void setBrewStatus(BrewStatus brewStatus) {
+	public Brew setBrewStatus(BrewStatus brewStatus) {
 		this.brewStatus = brewStatus;
+		return this;
 	}
 
-	public void setEndTime(Timestamp endTime) {
+	public Brew setEndTime(Timestamp endTime) {
 		this.endTime = endTime;
+		return this;
 	}
 
-	public void setId(int id) {
+	public Brew setId(int id) {
 		this.id = id;
+		return this;
 	}
 
-	public void setStartTime(Timestamp startTime) {
+	public Brew setStartTime(Timestamp startTime) {
 		this.startTime = startTime;
+		return this;
 	}
 
 }
