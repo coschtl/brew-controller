@@ -12,9 +12,15 @@ public class JournalNotificationService implements Notifier {
 	}
 
 	@Override
-	public void sendNotification(NotificationType notificationType, String subject, String message) {
-		if (notificationType == NotificationType.WARNING || notificationType == NotificationType.ERROR) {
-			journal.addEntry(cookbookEntryId, notificationType.toString(), message);
+	public long getIgnoreSameSubjectTimeoutMillis() {
+		return 1000l;
+	}
+
+	@Override
+	public void sendNotification(Notification notification) {
+		if (notification.getNotificationType() == NotificationType.WARNING
+				|| notification.getNotificationType() == NotificationType.ERROR) {
+			journal.addEntry(cookbookEntryId, notification.getNotificationType().toString(), notification.getMessage());
 		}
 	}
 

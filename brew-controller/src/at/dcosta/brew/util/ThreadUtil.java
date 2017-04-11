@@ -1,0 +1,24 @@
+package at.dcosta.brew.util;
+
+public final class ThreadUtil {
+
+	public static final long ONE_SECOND = 1000l;
+	public static final long ONE_MINUTE = ONE_SECOND * 60l;
+
+	public static void sleepMillis(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			// ignore
+		}
+	}
+
+	public static void sleepMinutes(long minutes) {
+		sleepMillis(ONE_MINUTE * minutes);
+	}
+
+	public static void sleepSeconds(long seconds) {
+		sleepMillis(ONE_SECOND * seconds);
+	}
+
+}

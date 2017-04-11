@@ -14,6 +14,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import at.dcosta.brew.com.MailNotificationService;
+import at.dcosta.brew.com.Notification;
+import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
@@ -70,8 +72,8 @@ public class Main {
 			return;
 		}
 		if (cmdLine.hasOption("sendTestMail")) {
-			new MailNotificationService().sendNotification(NotificationType.INFO, "Grüße von der Brauerei",
-					"Das Mailing scheint zu funktionieren.");
+			new MailNotificationService().sendNotification(new Notification(NotificationType.INFO,
+					"Grüße von der Brauerei", "Das Mailing scheint zu funktionieren."));
 		}
 
 		if (cmdLine.hasOption("importRecipe")) {
@@ -126,6 +128,11 @@ public class Main {
 		if (cmdLine.hasOption("testRpm")) {
 			readHallSensor();
 		}
+		if (cmdLine.hasOption("boil")) {
+			int boilingTime = Integer.valueOf(cmdLine.getOptionValue("boil"));
+			BoilingSystem boilingSystem = new BoilingSystem(new NotificationService(0));
+			boilingSystem.cook(boilingTime);
+		}
 
 		ThreadManager.getInstance().waitForAllThreadsToComplete();
 		System.out.println("DONE");
@@ -144,6 +151,7 @@ public class Main {
 		options.addOption(new Option("testRelais", "testRelais"));
 		options.addOption(new Option("shutDown", "shutDown"));
 		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(new Option("boil", true, "heat and boil for a given time"));
 		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
 		return options;
 	}

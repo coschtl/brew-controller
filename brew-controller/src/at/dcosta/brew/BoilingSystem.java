@@ -1,112 +1,79 @@
 package at.dcosta.brew;
 
+import static at.dcosta.brew.Configuration.COOKING_COOKING_TEMPERATURE;
+import static at.dcosta.brew.Configuration.COOKING_COOKING_TEMPERATURE_MIN;
 import static at.dcosta.brew.Configuration.COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
 import static at.dcosta.brew.Configuration.COOKING_HEATER_PINS;
 import static at.dcosta.brew.Configuration.COOKING_THERMOMETER_ADRESSES;
-import static at.dcosta.brew.Configuration.COOKING_THERMOMETER_MAXDIFF;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 import at.dcosta.brew.com.NotificationService;
-import at.dcosta.brew.io.Sensor;
-import at.dcosta.brew.io.gpio.GpioSubsystem;
-import at.dcosta.brew.io.gpio.Relay;
-import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.util.ThreadUtil;
 
-public class BoilingSystem {
+public class BoilingSystem extends HeatingSystem {
 
-	private static final long ONE_MINUTE = 100l * 60l;
+	private final double cookingTemperature;
+	private final double cookingTemperatureMin;
 
-	private final List<Sensor> temperatureSensors;
-	private final List<Relay> heaters;
-	private final NotificationService notificationService;
-	private final double thermometerMaxDiff;
+	private double lastTemperature = 60d;
 
 	public BoilingSystem(NotificationService notificationService) {
-		this.notificationService = notificationService;
+		super(notificationService);
 		Configuration config = Configuration.getInstance();
-		W1Bus w1Bus = new W1Bus();
-		temperatureSensors = new ArrayList<>();
-		for (String address : config.getStringArray(COOKING_THERMOMETER_ADRESSES)) {
-			Sensor sensor = w1Bus.getTemperatureSensor(address);
-			if (sensor == null) {
-				throw new IllegalArgumentException(
-						"Sensor with address '" + address + "' not found! Check configuration/installation!");
-			}
-			temperatureSensors.add(sensor);
-		}
-
-		int i = 0;
-		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
-		heaters = new ArrayList<>();
-		for (int pi4jPinNumber : config.getIntArray(COOKING_HEATER_PINS)) {
-			heaters.add(gpioSubsystem.getRelay("Heater " + i++, pi4jPinNumber));
-		}
-		thermometerMaxDiff = config.getInt(COOKING_THERMOMETER_MAXDIFF);
+		cookingTemperature = config.getDouble(COOKING_COOKING_TEMPERATURE);
+		cookingTemperatureMin = config.getDouble(COOKING_COOKING_TEMPERATURE_MIN);
 	}
 
-	public void cook(double targetTemperature) throws BrewException {
+	public void cook(int cookingTimeMinutes) throws BrewException {
+		System.out.println("Start cooking");
 		try {
-			double lastTemperature = getTemperature();
-			long lastMeasureTime = System.currentTimeMillis();
-			double minIncrease = Configuration.getInstance().getDouble(COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
-			for (Relay heater : heaters) {
-				heater.on();
-			}
-			while (true) {
-				if (getTemperature() >= targetTemperature) {
-					return;
+			heatingMonitor.start();
+			heatUntilBoiling();
+			long cookingEnd = System.currentTimeMillis() + cookingTimeMinutes * ThreadUtil.ONE_MINUTE;
+			while (System.currentTimeMillis() < cookingEnd) {
+				double aktTemperature = getTemperature();
+				if (aktTemperature < cookingTemperatureMin) {
+					System.out.println("re-heating");
+					heatUntilBoiling();
 				}
-				sleep(100);
-				if (lastMeasureTime + ONE_MINUTE < System.currentTimeMillis()) {
-					if (lastTemperature + minIncrease > getTemperature()) {
-						throw new BrewException(
-								"The temperature did not increase by " + minIncrease + "°C during the last minute!");
-					}
-				}
+				ThreadUtil.sleepSeconds(10);
 			}
+			System.out.println("End cooking");
 		} finally {
-			for (Relay heater : heaters) {
-				heater.off();
-			}
+			heatingMonitor.stop();
+			switchHeatersOff();
 		}
 	}
 
-	private double getTemperature() {
-		double sum = 0;
-		double min = 0;
-		double max = 0;
-		List<String> err = new ArrayList<>();
-		for (Sensor tempSensor : temperatureSensors) {
-			double sensorTemp = tempSensor.getValue();
-			;
-			if (sum == 0) {
-				sum = sensorTemp;
-				min = sum;
-				max = sum;
-			} else {
-				if (min + thermometerMaxDiff < sensorTemp || max - thermometerMaxDiff > sensorTemp) {
-					err.add("Temperature sensor " + tempSensor.getID() + " measures + " + sensorTemp
-							+ "°C which differs too much from the other sensor(s)!");
-				}
-				/// xx wie soll ich das berechnen??
-
-				// über abweichung vom mitelwert?
-				// was ist, wenn der erste sensor defekt ist?
-			}
-
-		}
-		return 0;
+	private void heatUntilBoiling() throws BrewException {
+		heatToTemperature(cookingTemperature);
+		System.out.println("boiling temperature reached");
 	}
 
-	private void sleep(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	@Override
+	protected int[] getHeaterPins() {
+		return Configuration.getInstance().getIntArray(COOKING_HEATER_PINS);
+	}
+
+	@Override
+	protected double getLastTemperature() {
+		return lastTemperature;
+	}
+
+	@Override
+	protected double getMinTemperatureIncreasePerMinute() {
+		return Configuration.getInstance().getDouble(COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
+	}
+
+	@Override
+	protected String[] getTemperatureSensorAddresses() {
+		return Configuration.getInstance().getStringArray(COOKING_THERMOMETER_ADRESSES);
+	}
+
+	@Override
+	protected void heatToTemperatureWaiting() {
+		System.out.println(new Date() + ": aktTemperature=" + getTemperature() + "°C");
 	}
 
 }

@@ -31,12 +31,17 @@ public class GpioRelay implements Relay {
 
 	@Override
 	public void off() {
-		pin.high();
-		on = false;
+		if (isOn()) {
+			pin.high();
+			on = false;
+		}
 	}
 
 	@Override
 	public void on() {
+		if (isOn()) {
+			return;
+		}
 		pin.low();
 		on = true;
 	}

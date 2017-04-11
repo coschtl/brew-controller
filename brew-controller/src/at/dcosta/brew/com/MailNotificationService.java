@@ -41,7 +41,12 @@ public class MailNotificationService implements Notifier {
 	}
 
 	@Override
-	public void sendNotification(NotificationType notificationType, String subject, String message) {
+	public long getIgnoreSameSubjectTimeoutMillis() {
+		return 1000l * 5;
+	}
+
+	@Override
+	public void sendNotification(Notification notification) {
 
 		ThreadManager.getInstance().newThread(new Runnable() {
 
@@ -58,8 +63,11 @@ public class MailNotificationService implements Notifier {
 					msg.setRecipients(Message.RecipientType.TO, addressesTo);
 					msg.setFrom(new InternetAddress(config.getString(MAIL_USER)));
 
-					msg.setSubject(notificationType.toString() + ": " + subject);
-					msg.setContent(message, "text/plain");
+					msg.setSubject(notification.getNotificationType().toString() + ": " + notification.getSubject());
+					msg.setContent(
+							notification.getMessage() + "\n\nNotificationTime: "
+									+ Notification.DATE_FORMAT.format(notification.getNotificationTime()),
+							"text/plain");
 					Transport.send(msg);
 				} catch (Exception e) {
 					System.out.println("can not sent Mail-Message: " + e.toString());

@@ -1,6 +1,6 @@
 package at.dcosta.brew;
 
-public class BrewException extends Exception {
+public class BrewException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

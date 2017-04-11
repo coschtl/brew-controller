@@ -1,7 +1,9 @@
 package at.dcosta.brew.com;
 
 public interface Notifier {
-	
-	public void sendNotification(NotificationType notificationType, String subject, String message);
+
+	public long getIgnoreSameSubjectTimeoutMillis();
+
+	public void sendNotification(Notification notification);
 
 }

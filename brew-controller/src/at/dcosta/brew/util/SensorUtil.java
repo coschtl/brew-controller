@@ -61,6 +61,7 @@ public class SensorUtil {
 	};
 
 	public static Value getValue(double lastValue, List<Sensor> sensors, double maxDiff) {
+		long start = System.currentTimeMillis();
 		if (sensors.size() == 0) {
 			return new Value(lastValue, "no sensors given!");
 		}
@@ -80,7 +81,9 @@ public class SensorUtil {
 						.append(sensor.getScale()).append(" which differs too much from the other sensor(s)!\n");
 			}
 		}
-		return new Value(getAverage(sensors), err.toString());
+		double average = getAverage(sensors);
+		System.out.println("getValue took " + (System.currentTimeMillis() - start));
+		return new Value(average, err.toString());
 	}
 
 	private static double getAverage(List<Sensor> sensors) {
