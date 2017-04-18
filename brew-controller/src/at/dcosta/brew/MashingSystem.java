@@ -61,7 +61,7 @@ public class MashingSystem extends HeatingSystem {
 	public void heat(double targetTemperature, boolean useStirrer) throws BrewException {
 		this.useStirrer = useStirrer;
 		if (useStirrer) {
-			stirrer.start();
+			startStirrer();
 		}
 		heatingMonitor.start();
 		try {
@@ -73,11 +73,19 @@ public class MashingSystem extends HeatingSystem {
 			heatToTemperature(targetTemperature);
 		} finally {
 			if (useStirrer) {
-				stirrer.stop();
+				stoptStirrer();
 			}
 			heatingMonitor.stop();
 			switchHeatersOff();
 		}
+	}
+
+	public void startStirrer() {
+		stirrer.start();
+	}
+
+	public void stoptStirrer() {
+		stirrer.stop();
 	}
 
 	private boolean isStirrerRunning(int maxWaitSeconds) {

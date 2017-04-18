@@ -32,4 +32,14 @@ public class MockSensor implements Sensor {
 		this.value = value;
 		return this;
 	}
+
+	@Override
+	public void start() {
+		System.out.println("starting sensor " + getID());
+	}
+
+	@Override
+	public void stop() {
+		System.out.println("stopping sensor " + getID());
+	}
 }

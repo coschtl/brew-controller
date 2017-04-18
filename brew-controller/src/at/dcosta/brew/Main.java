@@ -27,6 +27,7 @@ import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.util.ThreadManager;
+import at.dcosta.brew.util.ThreadUtil;
 
 public class Main {
 
@@ -174,12 +175,12 @@ public class Main {
 	private static void readTemperatures() throws InterruptedException {
 		W1Bus w1Bus = new W1Bus();
 		Collection<Sensor> tempSensors = w1Bus.getAvailableTemperatureSensors();
-		for (int i = 0; i < 10; i++) {
+		while (true) {
 			int j = 1;
 			for (Sensor ts : tempSensors) {
 				System.out.println("Sensor " + j++ + ": " + ts.getID() + ": " + ts.getValue());
 			}
-			Thread.sleep(1000);
+			ThreadUtil.sleepSeconds(3);
 		}
 	}
 

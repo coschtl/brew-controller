@@ -34,6 +34,7 @@ public class Configuration {
 	public static final String MASHING_HEATER_PINS = "mashing.heater.pi4jPinNumbers";
 	public static final String MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE = "mashing.heater.minimumIncreasePerMinute";
 	public static final String MASHING_THERMOMETER_ADRESSES = "mashing.thermometer.addresses";
+	public static final String MASHING_TEMPERATURE_MAX_DROP = "mashing.temperature.maxDrop";
 	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";
 	public static final String STIRRER_OVERTIME_SECONDS = "stirrer.overtime.seconds";
 	public static final String STIRRER_RPM_PIN = "stirrer.rpm.pi4jPinNumber";

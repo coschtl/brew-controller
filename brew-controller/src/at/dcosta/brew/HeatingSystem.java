@@ -122,8 +122,16 @@ public abstract class HeatingSystem {
 	}
 
 	protected void heatToTemperature(double targetTemperature) throws BrewException {
+		heatToTemperature(targetTemperature, ThreadUtil.TEN_HOURS);
+	}
+
+	protected void heatToTemperature(double targetTemperature, long maxHeatingTimeMinutes) throws BrewException {
 		System.out.println("heatToTemperature");
+		long heatingEnd = System.currentTimeMillis() + maxHeatingTimeMinutes * ThreadUtil.ONE_MINUTE;
 		while (true) {
+			if (System.currentTimeMillis() > heatingEnd) {
+				break;
+			}
 			double aktTemperature = getTemperature();
 			if (aktTemperature >= targetTemperature) {
 				return;

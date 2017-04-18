@@ -1,25 +1,23 @@
 package at.dcosta.brew.io.w1;
 
-import com.pi4j.temperature.TemperatureScale;
-
 import at.dcosta.brew.io.Sensor;
 
 public class W1TemperatureSensor implements Sensor {
 
-	private static final long VALUE_READ_AGE = 1000l * 5l;
-	private static final long VALUE_MAX_AGE = VALUE_READ_AGE * 2l;
-
-	private final com.pi4j.component.temperature.TemperatureSensor sensor;
-	private double temperature;
-	private long valueReadTime;
+	private final String name;
+	private final W1TemperatureUpdater temperatureUpdater;
+	private final Value value;
+	private boolean started;
 
 	public W1TemperatureSensor(com.pi4j.component.temperature.TemperatureSensor sensor) {
-		this.sensor = sensor;
+		this.name = sensor.getName().trim();
+		value = new Value();
+		this.temperatureUpdater = new W1TemperatureUpdater(value, sensor);
 	}
 
 	@Override
 	public String getID() {
-		return sensor.getName().trim();
+		return name;
 	}
 
 	@Override
@@ -29,34 +27,22 @@ public class W1TemperatureSensor implements Sensor {
 
 	@Override
 	public double getValue() {
-		if (valueReadTime + VALUE_READ_AGE < System.currentTimeMillis()) {
-			readValue();
+		if (!started) {
+			temperatureUpdater.readValue();
+			start();
 		}
-		return temperature;
+		return value.getValue();
 	}
 
-	public void readValue() {
-		if (valueReadTime + VALUE_MAX_AGE < System.currentTimeMillis()) {
-			// read synchronously
-			setAktTemperature(sensor.getTemperature(TemperatureScale.CELSIUS));
-			setValueReadTime();
-		} else {
-			new Thread() {
-				@Override
-				public void run() {
-					setAktTemperature(sensor.getTemperature(TemperatureScale.CELSIUS));
-					setValueReadTime();
-				}
-			}.start();
-		}
+	@Override
+	public void start() {
+		started = true;
+		temperatureUpdater.start();
 	}
 
-	void setAktTemperature(double aktTemperature) {
-		temperature = aktTemperature;
-	}
-
-	void setValueReadTime() {
-		valueReadTime = System.currentTimeMillis();
+	@Override
+	public void stop() {
+		temperatureUpdater.abort();
 	}
 
 }

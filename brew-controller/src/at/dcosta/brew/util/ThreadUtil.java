@@ -4,6 +4,8 @@ public final class ThreadUtil {
 
 	public static final long ONE_SECOND = 1000l;
 	public static final long ONE_MINUTE = ONE_SECOND * 60l;
+	public static final long ONE_HOUR = ONE_MINUTE * 60l;
+	public static final long TEN_HOURS = ONE_HOUR * 10l;
 
 	public static void sleepMillis(long millis) {
 		try {

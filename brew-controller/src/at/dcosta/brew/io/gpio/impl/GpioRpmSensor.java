@@ -46,6 +46,17 @@ public class GpioRpmSensor implements Sensor {
 		return rpms;
 	}
 
+	@Override
+	public void start() {
+		System.out.println("starting sensor " + getID());
+	}
+
+	@Override
+	public void stop() {
+		System.out.println("stopping sensor " + getID());
+
+	}
+
 	void calculateRpms() {
 		long now = System.currentTimeMillis();
 		rpms = 1000d / (now - lastEvent) / 60d;
