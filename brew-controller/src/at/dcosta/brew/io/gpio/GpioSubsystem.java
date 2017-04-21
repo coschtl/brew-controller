@@ -7,6 +7,8 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 
 import at.dcosta.brew.Configuration;
+import at.dcosta.brew.io.ComponentType;
+import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.impl.GpioRelay;
 import at.dcosta.brew.io.gpio.impl.GpioRpmSensor;
@@ -38,7 +40,7 @@ public class GpioSubsystem {
 		Relay relay = relays.get(pi4jPinNumber);
 		if (relay == null) {
 			if (isMockPi) {
-				relay = new MockRelay(pi4jPinNumber);
+				relay = new MockRelay(name, pi4jPinNumber);
 			} else {
 				relay = new GpioRelay(name, pi4jPinNumber, gpio);
 			}
@@ -49,7 +51,7 @@ public class GpioSubsystem {
 
 	public Sensor getRpmSensor(String name, int pi4jPinNumber) {
 		if (isMockPi) {
-			return new MockSensor("GPIO_" + pi4jPinNumber, "rpm");
+			return new MockSensor(ComponentType.ROTATION_SPEED_SENSOR, "GPIO_" + pi4jPinNumber, "rpm");
 		}
 		return new GpioRpmSensor(name, pi4jPinNumber, gpio);
 	}

@@ -15,8 +15,8 @@ import at.dcosta.brew.recipe.RecipeWriter;
 public class Cookbook extends Database {
 
 	private static final String TABLE_NAME = "RECIPIES";
-	private static final String[] CREATE_TABLE_STATEMENT = new String[] { "CREATE TABLE " + TABLE_NAME
-			+ " (RECIPE_NAME varchar(255), RECIPE varchar(65000), ADDED_ON timestamp, BREW_COUNT int, RECIPE_SOURCE varchar(255))" };
+	private static final String[] CREATE_TABLE_STATEMENTS = new String[] { "CREATE TABLE " + TABLE_NAME
+			+ " (RECIPE_NAME varchar(255), RECIPE varchar(65000), ADDED_ON timestamp, BREW_COUNT int, RECIPE_SOURCE varchar(255))", };
 	private static final String SQL_ADD_ENTRY = "INSERT INTO " + TABLE_NAME
 			+ " (RECIPE_NAME, RECIPE, ADDED_ON, BREW_COUNT, RECIPE_SOURCE) VALUES (?, ?, ?, ?, ?)";
 	private static final String SQL_GET_ALL = "SELECT ROWID, * FROM " + TABLE_NAME;
@@ -105,8 +105,13 @@ public class Cookbook extends Database {
 	}
 
 	@Override
+	protected String[] getCreateIndexStatements() {
+		return new String[0];
+	}
+
+	@Override
 	protected String[] getCreateTableStatements() {
-		return CREATE_TABLE_STATEMENT;
+		return CREATE_TABLE_STATEMENTS;
 	}
 
 	@Override

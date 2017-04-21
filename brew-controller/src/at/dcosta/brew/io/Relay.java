@@ -1,6 +1,4 @@
-package at.dcosta.brew.io.gpio;
-
-import at.dcosta.brew.io.Actor;
+package at.dcosta.brew.io;
 
 public interface Relay extends Actor {
 

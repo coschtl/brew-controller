@@ -5,23 +5,17 @@ import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
-import at.dcosta.brew.io.gpio.Relay;
+import at.dcosta.brew.io.AbstractRelay;
 
-public class GpioRelay implements Relay {
+public class GpioRelay extends AbstractRelay {
 
 	private final GpioPinDigitalOutput pin;
-	private final String id;
 	private boolean on;
 
 	public GpioRelay(String name, int pi4jPinNumber, GpioController gpio) {
+		super(name, pi4jPinNumber);
 		pin = gpio.provisionDigitalOutputPin(RaspiPin.getPinByAddress(pi4jPinNumber), name, PinState.HIGH);
 		pin.setShutdownOptions(true, PinState.HIGH);
-		id = "GPIO_" + pi4jPinNumber;
-	}
-
-	@Override
-	public String getID() {
-		return id;
 	}
 
 	@Override
@@ -32,6 +26,7 @@ public class GpioRelay implements Relay {
 	@Override
 	public void off() {
 		if (isOn()) {
+			super.off();
 			pin.high();
 			on = false;
 		}
@@ -42,6 +37,7 @@ public class GpioRelay implements Relay {
 		if (isOn()) {
 			return;
 		}
+		super.on();
 		pin.low();
 		on = true;
 	}

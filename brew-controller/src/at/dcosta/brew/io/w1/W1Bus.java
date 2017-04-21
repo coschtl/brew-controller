@@ -11,6 +11,7 @@ import com.pi4j.io.w1.W1Device;
 import com.pi4j.io.w1.W1Master;
 
 import at.dcosta.brew.Configuration;
+import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.MockSensor;
 
@@ -21,7 +22,7 @@ public class W1Bus {
 	public W1Bus() {
 		sensors = new HashMap<>();
 		if (Configuration.getInstance().isMockPi()) {
-			MockSensor sensor = new MockSensor("mockSensor 1", "°C");
+			MockSensor sensor = new MockSensor(ComponentType.TEMPERATURE_SENSOR, "mockSensor 1", "°C");
 			sensors.put(sensor.getID(), sensor);
 		} else {
 			W1Master w1Master = new W1Master();
@@ -38,7 +39,7 @@ public class W1Bus {
 
 	public Sensor getTemperatureSensor(String address) {
 		if (Configuration.getInstance().isMockPi()) {
-			return new MockSensor(address, "°C");
+			return new MockSensor(ComponentType.TEMPERATURE_SENSOR, address, "°C");
 		}
 		return sensors.get(address);
 	}

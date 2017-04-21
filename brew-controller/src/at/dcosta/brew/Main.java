@@ -1,6 +1,7 @@
 package at.dcosta.brew;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Locale;
@@ -19,13 +20,14 @@ import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
+import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
-import at.dcosta.brew.io.gpio.Relay;
 import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
+import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 
@@ -42,6 +44,12 @@ public class Main {
 			return;
 		}
 
+		execute(cmdLine, options);
+		ThreadManager.getInstance().waitForAllThreadsToComplete();
+		System.out.println("DONE");
+	}
+
+	private static void execute(CommandLine cmdLine, Options options) throws IOException, InterruptedException {
 		if (cmdLine.hasOption("help")) {
 			new HelpFormatter().printHelp("brew-controller", options);
 			return;
@@ -75,6 +83,7 @@ public class Main {
 		if (cmdLine.hasOption("sendTestMail")) {
 			new MailNotificationService().sendNotification(new Notification(NotificationType.INFO,
 					"Grüße von der Brauerei", "Das Mailing scheint zu funktionieren."));
+			return;
 		}
 
 		if (cmdLine.hasOption("importRecipe")) {
@@ -122,38 +131,78 @@ public class Main {
 
 		if (cmdLine.hasOption("testTemperature")) {
 			readTemperatures();
+			return;
 		}
 		if (cmdLine.hasOption("testRelais")) {
 			toggleRelais();
+			return;
 		}
 		if (cmdLine.hasOption("testRpm")) {
 			readHallSensor();
+			return;
 		}
+		NotificationService notificationService = new NotificationService(0);
 		if (cmdLine.hasOption("boil")) {
 			int boilingTime = Integer.valueOf(cmdLine.getOptionValue("boil"));
-			BoilingSystem boilingSystem = new BoilingSystem(new NotificationService(0));
+			BoilingSystem boilingSystem = new BoilingSystem(notificationService);
 			boilingSystem.cook(boilingTime);
+			return;
 		}
 
-		ThreadManager.getInstance().waitForAllThreadsToComplete();
-		System.out.println("DONE");
+		int temperature = -1;
+		if (cmdLine.hasOption("temperature")) {
+			temperature = Integer.valueOf(cmdLine.getOptionValue("temperature"));
+		}
+		if (cmdLine.hasOption("heat")) {
+			if (temperature < 0) {
+				System.out.println("No temperature given! Use the -temperature argument!");
+				return;
+			}
+
+			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			mashingSystem.heat(temperature);
+			mashingSystem.switchOff();
+			String msg = "Finished heating to " + temperature + "°C";
+			notificationService.sendNotification(NotificationType.INFO, "Heating finished", msg);
+			System.out.println(msg);
+			return;
+		}
+		if (cmdLine.hasOption("rest")) {
+			if (temperature < 0) {
+				System.out.println("No temperature given! Use the -temperature argument!");
+				return;
+			}
+			int restTime = Integer.valueOf(cmdLine.getOptionValue("restTime"));
+			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			mashingSystem.doRest(new Rest(temperature, restTime));
+			mashingSystem.switchOff();
+			String msg = "Finished a " + restTime + " minutes rest at " + temperature + "°C";
+			notificationService.sendNotification(NotificationType.INFO, "Rest finished", msg);
+			System.out.println(msg);
+			return;
+		}
 	}
 
 	private static Options getOptions() {
 		Options options = new Options();
 		options.addOption(new Option("help", "print this message"));
-		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
-		options.addOption(new Option("sendTestMail", "sends a test email"));
-		options.addOption(new Option("config", true, "use given config file"));
+		options.addOption(new Option("config", true,
+				"use given config file (if not given use the configuration.properties inside the current dir)"));
 		options.addOption(new Option("importRecipe", true, "import the given recipe"));
 		options.addOption(new Option("recipeSource", true, "the source of the recipe just getting imported"));
 		options.addOption(new Option("listRecipes", "list all recipes"));
 		options.addOption(new Option("showRecipe", true, "output the xml of the recipe"));
-		options.addOption(new Option("testRelais", "testRelais"));
-		options.addOption(new Option("shutDown", "shutDown"));
-		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(new Option("temperature", true, "use this argument with -heat or -rest"));
+		options.addOption(new Option("heat", "heat to the temperature given with the -temperature argument"));
+		options.addOption(new Option("rest", true,
+				"rest for the given minutes at the temperature given with the -temperature argument"));
 		options.addOption(new Option("boil", true, "heat and boil for a given time"));
+		options.addOption(new Option("sendTestMail", "sends a test email"));
+		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
 		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
+		options.addOption(new Option("testRelais", "testRelais"));
+		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(new Option("shutDown", "shutDown"));
 		return options;
 	}
 

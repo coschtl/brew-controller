@@ -10,7 +10,6 @@ import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.recipe.InfusionRecipe;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.StoppableRunnable;
-import at.dcosta.brew.util.ThreadUtil;
 
 public class BrewController implements StoppableRunnable {
 
@@ -32,27 +31,6 @@ public class BrewController implements StoppableRunnable {
 		keepRunning = false;
 	}
 
-	public void doRest(Rest rest, MashingSystem mashingSystem) {
-		long restEnd = System.currentTimeMillis() + rest.getMinutes() * ThreadUtil.ONE_MINUTE;
-		long aktRestTimeMinutes = 0;
-		double minTemp = mashingSystem.getTemperature()
-				- Configuration.getInstance().getDouble(Configuration.MASHING_TEMPERATURE_MAX_DROP);
-		while (System.currentTimeMillis() < restEnd) {
-			ThreadUtil.sleepMinutes(1);
-			aktRestTimeMinutes++;
-			if (aktRestTimeMinutes == 5) {
-				mashingSystem.startStirrer();
-			} else if (aktRestTimeMinutes == 6) {
-				aktRestTimeMinutes = 0;
-				mashingSystem.stoptStirrer();
-				if (mashingSystem.getTemperature() < minTemp) {
-					mashingSystem.heatToTemperature(rest.getTemperature(),
-							(restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE);
-				}
-			}
-		}
-	}
-
 	@Override
 	public boolean mustComplete() {
 		return true;
@@ -65,15 +43,15 @@ public class BrewController implements StoppableRunnable {
 			// mashing
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
 			// heat to the mashing temperature
-			mashingSystem.heat(recipe.getMashingTemperature(), false);
+			mashingSystem.heat(recipe.getMashingTemperature());
 
 			// add malts
 			mashingSystem.addMalts();
 
 			// do the rests
 			for (Rest rest : recipe.getRests()) {
-				mashingSystem.heat(rest.getTemperature(), true);
-				doRest(rest, mashingSystem);
+				mashingSystem.heat(rest.getTemperature());
+				mashingSystem.doRest(rest);
 			}
 			notificationService.sendNotification(NotificationType.INFO, "Malting finised",
 					"The malting has finished. Please start lauthering and do not forget to heat the secundary water!");
@@ -85,14 +63,6 @@ public class BrewController implements StoppableRunnable {
 			notificationService.sendNotification(NotificationType.ERROR, "FATAL Brewing system error", e.getMessage());
 		} finally {
 			GpioSubsystem.getInstance().shutdown();
-		}
-	}
-
-	private void sleep(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			// ignore
 		}
 	}
 

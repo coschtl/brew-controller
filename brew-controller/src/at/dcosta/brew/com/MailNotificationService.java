@@ -30,16 +30,6 @@ public class MailNotificationService implements Notifier {
 		this.config = Configuration.getInstance();
 	}
 
-	public Session getGMailSession() {
-
-		return Session.getInstance(getMailProperties(), new javax.mail.Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(config.getString(MAIL_USER), config.getString(MAIL_PASSWORD));
-			}
-		});
-	}
-
 	@Override
 	public long getIgnoreSameSubjectTimeoutMillis() {
 		return 1000l * 5;
@@ -75,7 +65,17 @@ public class MailNotificationService implements Notifier {
 				}
 			}
 
-		}).start();
+		}, "sendMail").start();
+	}
+
+	private Session getGMailSession() {
+
+		return Session.getInstance(getMailProperties(), new javax.mail.Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(config.getString(MAIL_USER), config.getString(MAIL_PASSWORD));
+			}
+		});
 	}
 
 	private Properties getMailProperties() {

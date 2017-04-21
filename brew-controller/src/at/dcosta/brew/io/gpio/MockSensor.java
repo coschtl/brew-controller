@@ -1,16 +1,37 @@
 package at.dcosta.brew.io.gpio;
 
-import at.dcosta.brew.io.Sensor;
+import at.dcosta.brew.io.AbstractSensor;
+import at.dcosta.brew.io.ComponentType;
 
-public class MockSensor implements Sensor {
+public class MockSensor extends AbstractSensor {
 
+	private ComponentType componentType;
 	private final String id;
 	private final String scale;
 	private double value = 20.1d;
+	private long startTime;
 
-	public MockSensor(String id, String scale) {
+	public MockSensor(ComponentType componentType, String id, String scale) {
+		this.componentType = componentType;
 		this.id = id;
 		this.scale = scale;
+	}
+
+	@Override
+	public double doGetValue() {
+		if (startTime == 0) {
+			startTime = System.currentTimeMillis();
+		}
+		// add 0.5 per Second
+		double aktValue = value + (System.currentTimeMillis() - startTime) / 2000;
+		// System.out.println(Thread.currentThread().getName() + ": " +
+		// aktValue);
+		return aktValue;
+	}
+
+	@Override
+	public ComponentType getComponentType() {
+		return componentType;
 	}
 
 	@Override
@@ -23,23 +44,16 @@ public class MockSensor implements Sensor {
 		return scale;
 	}
 
-	@Override
-	public double getValue() {
-		return value;
-	}
-
 	public MockSensor setValue(double value) {
 		this.value = value;
 		return this;
 	}
 
 	@Override
-	public void start() {
-		System.out.println("starting sensor " + getID());
+	protected void startCollectingSensorData() {
+		if (ComponentType.DUMMY != getComponentType()) {
+			super.startCollectingSensorData();
+		}
 	}
 
-	@Override
-	public void stop() {
-		System.out.println("stopping sensor " + getID());
-	}
 }

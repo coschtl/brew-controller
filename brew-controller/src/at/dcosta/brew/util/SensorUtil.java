@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.MockSensor;
 
@@ -61,17 +62,18 @@ public class SensorUtil {
 	};
 
 	public static Value getValue(double lastValue, List<Sensor> sensors, double maxDiff) {
-		long start = System.currentTimeMillis();
 		if (sensors.size() == 0) {
 			return new Value(lastValue, "no sensors given!");
 		}
 		if (sensors.size() == 1) {
-			return new Value(sensors.get(0).getValue(), null).setSensorStatusUnknown();
+			Sensor sensor = sensors.get(0);
+			System.out.println(sensor.getID() + ": " + sensor.getValue() + sensor.getScale());
+			return new Value(sensor.getValue(), null).setSensorStatusUnknown();
 		}
 		List<Sensor> l = new ArrayList<>(sensors.size() + 1);
 		l.addAll(sensors);
 		if (l.size() == 2) {
-			l.add(new MockSensor("MOCK_ID", sensors.get(0).getScale()).setValue(lastValue));
+			l.add(new MockSensor(ComponentType.DUMMY, "MOCK_ID", sensors.get(0).getScale()).setValue(lastValue));
 		}
 		double median = getMedian(l);
 		StringBuilder err = new StringBuilder();
@@ -82,7 +84,8 @@ public class SensorUtil {
 			}
 		}
 		double average = getAverage(sensors);
-		System.out.println("getValue took " + (System.currentTimeMillis() - start));
+		Sensor sensor = sensors.get(0);
+		System.out.println(sensor.getComponentType() + ": " + average + sensor.getScale());
 		return new Value(average, err.toString());
 	}
 

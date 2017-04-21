@@ -1,23 +1,30 @@
 package at.dcosta.brew.io.w1;
 
+import com.pi4j.component.temperature.TemperatureSensor;
+
+import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Sensor;
+import at.dcosta.brew.util.ManagedThread;
 
 public class W1TemperatureSensor implements Sensor {
 
-	private final String name;
-	private final W1TemperatureUpdater temperatureUpdater;
-	private final Value value;
-	private boolean started;
+	private final TemperatureSensor sensor;
+	private ManagedThread<W1TemperatureUpdater> temperatureUpdater;
+	private double sensorValue;
 
-	public W1TemperatureSensor(com.pi4j.component.temperature.TemperatureSensor sensor) {
-		this.name = sensor.getName().trim();
-		value = new Value();
-		this.temperatureUpdater = new W1TemperatureUpdater(value, sensor);
+	public W1TemperatureSensor(TemperatureSensor sensor) {
+		this.sensor = sensor;
+		startTemperatureUpdater();
+	}
+
+	@Override
+	public ComponentType getComponentType() {
+		return ComponentType.TEMPERATURE_SENSOR;
 	}
 
 	@Override
 	public String getID() {
-		return name;
+		return sensor.getName();
 	}
 
 	@Override
@@ -27,22 +34,41 @@ public class W1TemperatureSensor implements Sensor {
 
 	@Override
 	public double getValue() {
-		if (!started) {
-			temperatureUpdater.readValue();
-			start();
+		if (!temperatureUpdaterIsRunning()) {
+			startTemperatureUpdater();
 		}
-		return value.getValue();
+		return sensorValue;
 	}
 
 	@Override
-	public void start() {
-		started = true;
-		temperatureUpdater.start();
+	public void logValue() {
+		if (temperatureUpdater != null) {
+			temperatureUpdater.getRunnable().logValue();
+		}
 	}
 
 	@Override
-	public void stop() {
+	public void switchOff() {
 		temperatureUpdater.abort();
+	}
+
+	private void startTemperatureUpdater() {
+		synchronized (this) {
+			if (!temperatureUpdaterIsRunning()) {
+				temperatureUpdater = new ManagedThread<W1TemperatureUpdater>(new W1TemperatureUpdater(this, sensor),
+						sensor.getName());
+				temperatureUpdater.getRunnable().readAndStoreValue();
+				temperatureUpdater.start();
+			}
+		}
+	}
+
+	private boolean temperatureUpdaterIsRunning() {
+		return temperatureUpdater != null && temperatureUpdater.isAlive();
+	}
+
+	void setValue(double value) {
+		sensorValue = value;
 	}
 
 }

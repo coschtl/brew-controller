@@ -9,15 +9,9 @@ public class NotificationService {
 	private final Map<String, Long> subject2SendTime;
 
 	public NotificationService(int cookbookEntryId) {
-		// TODO: read the requested NotificationServices from the configuration
-		// notifiers = new Notifier[] { new MailNotificationService(), new
-		// JournalNotificationService(cookbookEntryId) };
-		notifiers = new Notifier[] { new ConsoleNotificationService() };
+		notifiers = new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(cookbookEntryId),
+				new MailNotificationService() };
 		subject2SendTime = new HashMap<>();
-	}
-
-	public Notifier[] getNotificationServices() {
-		return notifiers;
 	}
 
 	public void sendNotification(Notification notification) {

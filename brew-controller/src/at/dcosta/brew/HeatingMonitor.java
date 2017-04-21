@@ -3,6 +3,7 @@ package at.dcosta.brew;
 import java.lang.Thread.State;
 
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.util.ManagedThread;
 import at.dcosta.brew.util.StoppableRunnable;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
@@ -56,12 +57,12 @@ public class HeatingMonitor {
 
 	}
 
-	private final HeatingMonitorMonitor monitor;
-	private Thread monitorThread;
+	private final HeatingSystem heatingSystem;
+	private ManagedThread<HeatingMonitorMonitor> monitorThread;
 
 	public HeatingMonitor(HeatingSystem heatingSystem) {
-		monitor = new HeatingMonitorMonitor(heatingSystem);
-		monitorThread = ThreadManager.getInstance().newThread(monitor);
+		this.heatingSystem = heatingSystem;
+		createMonitorThread();
 	}
 
 	public void start() {
@@ -69,13 +70,18 @@ public class HeatingMonitor {
 			return;
 		}
 		if (monitorThread.getState() == State.TERMINATED) {
-			monitorThread = ThreadManager.getInstance().newThread(monitor);
+			createMonitorThread();
 		}
 		monitorThread.start();
 	}
 
 	public void stop() {
-		monitor.abort();
+		monitorThread.getRunnable().abort();
+	}
+
+	private void createMonitorThread() {
+		monitorThread = ThreadManager.getInstance().newThread(new HeatingMonitorMonitor(heatingSystem),
+				"Heating Monitor");
 	}
 
 }

@@ -7,9 +7,10 @@ import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
-import at.dcosta.brew.io.Sensor;
+import at.dcosta.brew.io.AbstractSensor;
+import at.dcosta.brew.io.ComponentType;
 
-public class GpioRpmSensor implements Sensor {
+public class GpioRpmSensor extends AbstractSensor {
 
 	private final String id;
 	private long lastEvent;
@@ -32,6 +33,16 @@ public class GpioRpmSensor implements Sensor {
 	}
 
 	@Override
+	public double doGetValue() {
+		return rpms;
+	}
+
+	@Override
+	public ComponentType getComponentType() {
+		return ComponentType.ROTATION_SPEED_SENSOR;
+	}
+
+	@Override
 	public String getID() {
 		return id;
 	}
@@ -39,22 +50,6 @@ public class GpioRpmSensor implements Sensor {
 	@Override
 	public String getScale() {
 		return "rpm";
-	}
-
-	@Override
-	public double getValue() {
-		return rpms;
-	}
-
-	@Override
-	public void start() {
-		System.out.println("starting sensor " + getID());
-	}
-
-	@Override
-	public void stop() {
-		System.out.println("stopping sensor " + getID());
-
 	}
 
 	void calculateRpms() {

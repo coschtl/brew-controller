@@ -31,6 +31,8 @@ abstract class Database {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
+			boolean createIndex = false;
+			String[] createStatements = getCreateTableStatements();
 			for (int i = 0; i < getTableNames().length; i++) {
 				st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
 				st.setString(1, getTableNames()[i]);
@@ -41,10 +43,19 @@ abstract class Database {
 				close(rs);
 				close(st);
 				err = "Can not create non existing table: ";
-				String sqlCreateTable = getCreateTableStatements()[i];
-				st = con.prepareStatement(sqlCreateTable);
+				st = con.prepareStatement(createStatements[i]);
 				st.executeUpdate();
+				createIndex = true;
 				close(st);
+			}
+			if (createIndex) {
+				createStatements = getCreateIndexStatements();
+				for (int i = 0; i < getTableNames().length; i++) {
+					err = "Can not create index: ";
+					st = con.prepareStatement(createStatements[i]);
+					st.executeUpdate();
+					close(st);
+				}
 			}
 		} catch (SQLException e) {
 			throw new DatabaseException(err + e.getMessage(), e);
@@ -92,6 +103,8 @@ abstract class Database {
 			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
 		}
 	}
+
+	protected abstract String[] getCreateIndexStatements();
 
 	protected abstract String[] getCreateTableStatements();
 

@@ -9,10 +9,12 @@ import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.io.ComponentType;
+import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.MockSensor;
-import at.dcosta.brew.io.gpio.Relay;
+import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.ThreadUtil;
 
 public class MashingSystem extends HeatingSystem {
@@ -23,7 +25,6 @@ public class MashingSystem extends HeatingSystem {
 	private final Stirrer stirrer;
 
 	private double lastTemperature = 4d;
-	private boolean useStirrer;
 
 	public MashingSystem(NotificationService notificationService) {
 		super(notificationService);
@@ -42,7 +43,7 @@ public class MashingSystem extends HeatingSystem {
 		if (rpmPin > 0) {
 			rpmSensor = gpioSubsystem.getRpmSensor("Stirrer RPM Sensor", rpmPin);
 		} else {
-			rpmSensor = new MockSensor("RPM-Sensor", "u/min").setValue(30);
+			rpmSensor = new MockSensor(ComponentType.ROTATION_SPEED_SENSOR, "RPM-Sensor", "u/min").setValue(30);
 		}
 		stirrer = new Stirrer();
 	}
@@ -58,34 +59,51 @@ public class MashingSystem extends HeatingSystem {
 		ThreadUtil.sleepMinutes(1);
 	}
 
-	public void heat(double targetTemperature, boolean useStirrer) throws BrewException {
-		this.useStirrer = useStirrer;
-		if (useStirrer) {
-			startStirrer();
+	public void doRest(Rest rest) {
+		long restEnd = System.currentTimeMillis() + rest.getMinutes() * ThreadUtil.ONE_MINUTE;
+		long aktRestTimeMinutes = 0;
+		double minTemp = getTemperature()
+				- Configuration.getInstance().getDouble(Configuration.MASHING_TEMPERATURE_MAX_DROP);
+		while (System.currentTimeMillis() < restEnd) {
+			ThreadUtil.sleepMinutes(1);
+			aktRestTimeMinutes++;
+			if (aktRestTimeMinutes == 5) {
+				startStirrer();
+			} else if (aktRestTimeMinutes == 6) {
+				aktRestTimeMinutes = 0;
+				stoptStirrer();
+				if (getTemperature() < minTemp) {
+					logTemperature();
+					heatToTemperature(rest.getTemperature(),
+							(restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE);
+				}
+			}
 		}
+		logTemperature();
+	}
+
+	public void heat(double targetTemperature) throws BrewException {
+		startStirrer();
 		heatingMonitor.start();
 		try {
 
 			// wait maximum 10s to get the stirrer running
-			if (useStirrer & !isStirrerRunning(10)) {
+			if (!isStirrerRunning(10)) {
 				throw new BrewException("Stirrer does not start!");
 			}
 			heatToTemperature(targetTemperature);
 		} finally {
-			if (useStirrer) {
-				stoptStirrer();
-			}
+			stoptStirrerDelayed();
 			heatingMonitor.stop();
 			switchHeatersOff();
 		}
 	}
 
-	public void startStirrer() {
-		stirrer.start();
-	}
-
-	public void stoptStirrer() {
-		stirrer.stop();
+	@Override
+	public void switchOff() {
+		super.switchOff();
+		rpmSensor.switchOff();
+		stoptStirrer();
 	}
 
 	private boolean isStirrerRunning(int maxWaitSeconds) {
@@ -97,6 +115,18 @@ public class MashingSystem extends HeatingSystem {
 			ThreadUtil.sleepMillis(100);
 		}
 		return false;
+	}
+
+	private void startStirrer() {
+		stirrer.start();
+	}
+
+	private void stoptStirrer() {
+		stirrer.stop();
+	}
+
+	private void stoptStirrerDelayed() {
+		stirrer.stopDelayed();
 	}
 
 	@Override
@@ -121,7 +151,7 @@ public class MashingSystem extends HeatingSystem {
 
 	@Override
 	protected void heatToTemperatureWaiting() {
-		if (useStirrer && !isStirrerRunning(0)) {
+		if (!isStirrerRunning(1)) {
 			throw new BrewException("Stirrer does run anymore! --> heating stopped at " + getTemperature()
 					+ getTemperatureSensors().get(0).getScale());
 		}

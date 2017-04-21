@@ -1,19 +1,13 @@
 package at.dcosta.brew.io.gpio.impl;
 
-import at.dcosta.brew.io.gpio.Relay;
+import at.dcosta.brew.io.AbstractRelay;
 
-public class MockRelay implements Relay {
+public class MockRelay extends AbstractRelay {
 
-	private final String id;
 	private boolean on;
 
-	public MockRelay(int pi4jPinNumber) {
-		id = "GPIO_" + pi4jPinNumber;
-	}
-
-	@Override
-	public String getID() {
-		return id;
+	public MockRelay(String name, int pi4jPinNumber) {
+		super(name, pi4jPinNumber);
 	}
 
 	@Override
@@ -23,12 +17,19 @@ public class MockRelay implements Relay {
 
 	@Override
 	public void off() {
-		System.out.println("Setting relay " + getID() + " to state OFF");
-		on = false;
+		if (isOn()) {
+			super.off();
+			System.out.println("Setting relay " + getID() + " to state OFF");
+			on = false;
+		}
 	}
 
 	@Override
 	public void on() {
+		if (isOn()) {
+			return;
+		}
+		super.on();
 		System.out.println("Setting relay " + getID() + " to state ON");
 		on = true;
 	}

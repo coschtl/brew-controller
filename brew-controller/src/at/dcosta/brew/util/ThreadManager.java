@@ -6,37 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 public class ThreadManager {
-
-	private static class ManagedThread extends Thread implements StoppableRunnable {
-		private final Runnable runnable;
-
-		public ManagedThread(Runnable runnable) {
-			super(runnable, UUID.randomUUID().toString());
-			this.runnable = runnable;
-		}
-
-		@Override
-		public void abort() {
-			if (runnable instanceof StoppableRunnable) {
-				((StoppableRunnable) runnable).abort();
-			}
-		}
-
-		@Override
-		public boolean mustComplete() {
-			if (!isAlive()) {
-				return false;
-			}
-			if (runnable instanceof StoppableRunnable) {
-				return ((StoppableRunnable) runnable).mustComplete();
-			}
-			return true;
-		}
-
-	}
 
 	private static final ThreadManager INSTANCE = new ThreadManager();
 
@@ -44,8 +15,7 @@ public class ThreadManager {
 		return INSTANCE;
 	}
 
-	private Map<String, ManagedThread> threads;
-	// private Map<String, Runnable> runnables;
+	private Map<String, ManagedThread<?>> threads;
 
 	private ThreadManager() {
 		threads = new HashMap<>();
@@ -65,39 +35,43 @@ public class ThreadManager {
 		return t.isAlive();
 	}
 
-	public synchronized Thread newThread(Runnable runnable) {
+	public synchronized <T extends Runnable> ManagedThread<T> newThread(T runnable, String name) {
 		removeDiedThreads();
-		ManagedThread thread = new ManagedThread(runnable);
+		ManagedThread<T> thread = new ManagedThread<T>(runnable, name);
 		threads.put(thread.getName(), thread);
 		return thread;
 	}
 
 	public synchronized void stopAllThreads() {
 		removeDiedThreads();
-		for (ManagedThread thread : threads.values()) {
+		for (ManagedThread<?> thread : threads.values()) {
 			thread.abort();
 		}
 		waitForAllThreadsToComplete();
 	}
 
 	public synchronized void waitForAllThreadsToComplete() {
+		System.out.println("waitForAllThreadsToComplete");
 		removeDiedThreads();
-		for (ManagedThread thread : threads.values()) {
+		for (ManagedThread<?> thread : threads.values()) {
 			if (thread.mustComplete()) {
+				System.out.println("must wait for thread " + thread.getName() + " to complete");
 				try {
 					thread.join();
 				} catch (InterruptedException e) {
 					// ignore
 				}
+			} else {
+				thread.abort();
 			}
 		}
 	}
 
 	private synchronized void removeDiedThreads() {
 		List<String> toRemove = new ArrayList<>();
-		Iterator<Entry<String, ManagedThread>> it = threads.entrySet().iterator();
+		Iterator<Entry<String, ManagedThread<?>>> it = threads.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<String, ManagedThread> entry = it.next();
+			Entry<String, ManagedThread<?>> entry = it.next();
 			if (!entry.getValue().isAlive()) {
 				toRemove.add(entry.getKey());
 			}

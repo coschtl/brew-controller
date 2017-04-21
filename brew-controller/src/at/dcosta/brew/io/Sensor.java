@@ -2,14 +2,16 @@ package at.dcosta.brew.io;
 
 public interface Sensor {
 
-	public void start();
-
-	public void stop();
+	ComponentType getComponentType();
 
 	String getID();
 
 	String getScale();
 
 	double getValue();
+
+	void logValue();
+
+	void switchOff();
 
 }

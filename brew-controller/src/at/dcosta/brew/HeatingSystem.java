@@ -8,9 +8,9 @@ import java.util.List;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
-import at.dcosta.brew.io.gpio.Relay;
 import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.util.SensorUtil;
 import at.dcosta.brew.util.SensorUtil.SensorStatus;
@@ -36,11 +36,10 @@ public abstract class HeatingSystem {
 		this.notificationService = notificationService;
 		Configuration config = Configuration.getInstance();
 		this.thermometerMaxDiff = Configuration.getInstance().getInt(THERMOMETER_MAXDIFF);
-		this.multipleHeaterTempDiff = config.getInt(MULTIPLE_HEATER_TEMPDIFF);
+		this.multipleHeaterTempDiff = config.getDouble(MULTIPLE_HEATER_TEMPDIFF);
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-
 		W1Bus w1Bus = new W1Bus();
 		for (String address : getTemperatureSensorAddresses()) {
 			Sensor sensor = w1Bus.getTemperatureSensor(address);
@@ -83,6 +82,10 @@ public abstract class HeatingSystem {
 		this.errorStatus = errorStatus;
 	}
 
+	public void switchOff() {
+		switchOffTemperatureSensors();
+	}
+
 	private void handleSensorStatus(Value value) {
 		if (value.getSensorStatus() == sensorStatus) {
 			return;
@@ -90,6 +93,12 @@ public abstract class HeatingSystem {
 		notificationService.sendNotification(NotificationType.WARNING, "Sensor status " + value.getSensorStatus(),
 				value.getError());
 		sensorStatus = value.getSensorStatus();
+	}
+
+	private void switchOffTemperatureSensors() {
+		for (Sensor temperatureSensor : temperatureSensors) {
+			temperatureSensor.switchOff();
+		}
 	}
 
 	protected void adjustHeaters(double targetTemperature) {
@@ -100,10 +109,8 @@ public abstract class HeatingSystem {
 		for (int i = 0; i < heaters.size(); i++) {
 			Relay heater = heaters.get(i);
 			if (aktTemperature + multipleHeaterTempDiff * i < targetTemperature) {
-				System.out.println("Switching heater " + i + " on");
 				heater.on();
 			} else {
-				System.out.println("Switching heater " + i + " off");
 				heater.off();
 			}
 		}
@@ -134,6 +141,7 @@ public abstract class HeatingSystem {
 			}
 			double aktTemperature = getTemperature();
 			if (aktTemperature >= targetTemperature) {
+				logTemperature();
 				return;
 			}
 			adjustHeaters(targetTemperature);
@@ -144,6 +152,12 @@ public abstract class HeatingSystem {
 
 	protected void heatToTemperatureWaiting() {
 
+	}
+
+	protected void logTemperature() {
+		for (Sensor temperatureSensor : temperatureSensors) {
+			temperatureSensor.logValue();
+		}
 	}
 
 	protected void switchHeatersOff() {
