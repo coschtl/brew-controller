@@ -31,5 +31,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/brew-db"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/brew-base"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

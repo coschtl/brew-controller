@@ -6,15 +6,31 @@
 	<property name="dir.buildfile" value="." />
 	<property name="dir.jarfile" value="C:/development/exports" />
 	<target name="create_run_jar">
-		<jar destfile="${dir.jarfile}/brew-controller.jar"> 
+		<jar destfile="${dir.jarfile}/brew-base.jar">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="${dir.buildfile}/../brew-base/bin" />
+		</jar>
+		<jar destfile="${dir.jarfile}/brew-db.jar">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path" value="./ brew-base.jar" />
+			</manifest>
+			<zipfileset src="jar-in-jar-loader.zip" />
+			<fileset dir="${dir.buildfile}/../brew-db/bin" />
+			<zipfileset dir="${dir.jarfile}" includes="brew-base.jar" />
+		</jar>
+		<jar destfile="${dir.jarfile}/brew-controller.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
 				<attribute name="Rsrc-Main-Class" value="at.dcosta.brew.Main" />
 				<attribute name="Class-Path" value="." />
-				<attribute name="Rsrc-Class-Path" value="./ pi4j-core.jar pi4j-device.jar pi4j-gpio-extension.jar pi4j-service.jar sqlite-jdbc-3.16.1.jar javax.mail.jar commons-cli-1.4.jar" />
+				<attribute name="Rsrc-Class-Path" value="./ brew-db.jar pi4j-core.jar pi4j-device.jar pi4j-gpio-extension.jar pi4j-service.jar sqlite-jdbc-3.16.1.jar javax.mail.jar commons-cli-1.4.jar" />
 			</manifest>
 			<zipfileset src="jar-in-jar-loader.zip" />
 			<fileset dir="${dir.buildfile}/bin" />
+			<zipfileset dir="${dir.jarfile}" includes="brew-db.jar" />
 			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-core.jar" />
 			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-device.jar" />
 			<zipfileset dir="${dir.buildfile}/lib" includes="pi4j-gpio-extension.jar" />
