@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_copy_war" name="Create WAR-file and copy it to rapsberry">
+	<property name="dir.buildfile" value="." />
+	<property name="dir.base" value="C:/development" />
+	<property name="dir.export" value="${dir.base}/exports" />
+	<target name="create_copy_war">
+		<jar destfile="${dir.export}/brew-base.jar">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="${dir.buildfile}/../brew-base/bin" />
+		</jar>
+		<jar destfile="${dir.export}/brew-db.jar">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="${dir.buildfile}/../brew-db/bin" />
+		</jar>
+		<war destfile="${dir.export}/brew-server.war" webxml="WebContent/WEB-INF/web.xml">
+		  <zipfileset dir="WebContent/theme" prefix="theme"/>
+		  <zipfileset dir="WebContent/app" prefix="app"/>
+		  <zipfileset dir="WebContent/scripts" prefix="scripts"/>
+		  <lib dir="WebContent/WEB-INF/lib">		  		
+		  </lib>
+		  <lib dir="${dir.export}/">
+		  	<include name="brew-base.jar"/>
+		  	<include name="brew-db.jar"/>
+		  </lib>
+		  <classes dir="build/classes"/>
+		</war>
+		<scp file="${dir.export}/brew-server.war" todir="pi@192.168.1.50:" keyfile="C:/cygwin64/home/Stephan_2/.ssh/id_rsa" trust="true">
+			<fileset dir="${dir.export}/" includes="brew-server.war" />
+		</scp>
+	</target>
+</project>
