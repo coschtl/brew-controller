@@ -62,10 +62,12 @@ public class MashingSystem extends HeatingSystem {
 	public void doRest(Rest rest) {
 		long restEnd = System.currentTimeMillis() + rest.getMinutes() * ThreadUtil.ONE_MINUTE;
 		long aktRestTimeMinutes = 0;
-		double minTemp = getTemperature()
+		getTemperature();
+		double minTemp = rest.getTemperature()
 				- Configuration.getInstance().getDouble(Configuration.MASHING_TEMPERATURE_MAX_DROP);
 		while (System.currentTimeMillis() < restEnd) {
-			ThreadUtil.sleepMinutes(1);
+			// ThreadUtil.sleepMinutes(1);
+			ThreadUtil.sleepSeconds(10);
 			aktRestTimeMinutes++;
 			if (aktRestTimeMinutes == 5) {
 				startStirrer();

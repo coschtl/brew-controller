@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
@@ -20,6 +23,8 @@ import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
+import at.dcosta.brew.db.IOData;
+import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
@@ -148,6 +153,60 @@ public class Main {
 			boilingSystem.cook(boilingTime);
 			return;
 		}
+		if (cmdLine.hasOption("getData")) {
+			System.out.println();
+			DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+			IOLog ioLog = new IOLog();
+			List<String> components = ioLog.getComponents();
+			Comparator<IOData> comparator = new Comparator<IOData>() {
+
+				@Override
+				public int compare(IOData o1, IOData o2) {
+					int cmp = o1.getComponentType().toString().compareTo(o2.getComponentType().toString());
+					if (cmp == 0) {
+						return o1.getComponentId().compareTo(o2.getComponentId());
+					}
+					return cmp;
+				}
+			};
+			while (true) {
+				List<IOData> entries = ioLog.getLatestEntries(components);
+				if (!entries.isEmpty()) {
+					entries.sort(comparator);
+					StringBuilder b = new StringBuilder(df.format(new Date())).append(":");
+					int tempSensorCount = 0;
+					for (IOData entry : entries) {
+						b.append('\t');
+						switch (entry.getComponentType()) {
+						case RELAY: {
+							if (entry.getComponentId().startsWith("Heater")) {
+								b.append("Heater: ").append(entry.getValue() > 0 ? "ON" : "OFF");
+							}
+							if (entry.getComponentId().startsWith("Stirrer")) {
+								b.append("Stirrer: ").append(entry.getValue() > 0 ? "ON" : "OFF");
+							}
+						}
+							break;
+						case ROTATION_SPEED_SENSOR:
+							b.append(entry.getValue()).append(" rpm");
+							break;
+						case TEMPERATURE_SENSOR: {
+							if (entry.getComponentId().startsWith("Average")) {
+								b.append("avg: ");
+							} else {
+								b.append("T").append(tempSensorCount++).append(": ");
+							}
+							b.append(entry.getValue()).append("°C");
+						}
+							break;
+						}
+					}
+					b.append('\r');
+					System.out.print(b.toString());
+				}
+				ThreadUtil.sleepSeconds(3);
+			}
+		}
 
 		int temperature = -1;
 		if (cmdLine.hasOption("temperature")) {
@@ -172,7 +231,7 @@ public class Main {
 				System.out.println("No temperature given! Use the -temperature argument!");
 				return;
 			}
-			int restTime = Integer.valueOf(cmdLine.getOptionValue("restTime"));
+			int restTime = Integer.valueOf(cmdLine.getOptionValue("rest"));
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
 			mashingSystem.doRest(new Rest(temperature, restTime));
 			mashingSystem.switchOff();
@@ -199,6 +258,7 @@ public class Main {
 		options.addOption(new Option("boil", true, "heat and boil for a given time"));
 		options.addOption(new Option("sendTestMail", "sends a test email"));
 		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
+		options.addOption(new Option("getData", "get the actual data for all components"));
 		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
 		options.addOption(new Option("testRelais", "testRelais"));
 		options.addOption(new Option("testRpm", "testRpm"));

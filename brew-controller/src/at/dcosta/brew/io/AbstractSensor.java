@@ -1,7 +1,7 @@
 package at.dcosta.brew.io;
 
-import at.dcosta.brew.db.IoData;
-import at.dcosta.brew.db.IoLog;
+import at.dcosta.brew.db.IOData;
+import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.util.ManagedThread;
 import at.dcosta.brew.util.StoppableRunnable;
 import at.dcosta.brew.util.ThreadUtil;
@@ -10,11 +10,11 @@ public abstract class AbstractSensor implements Sensor {
 
 	private class SensorDataCollector implements StoppableRunnable {
 
-		private final IoLog ioLog;
+		private final IOLog ioLog;
 		private boolean aborted;
 
 		public SensorDataCollector() {
-			ioLog = new IoLog();
+			ioLog = new IOLog();
 		}
 
 		@Override
@@ -24,7 +24,7 @@ public abstract class AbstractSensor implements Sensor {
 
 		public void logValue() {
 			ioLog.addEntry(
-					new IoData().setComponentId(getID()).setComponentType(getComponentType()).setValue(getValue()));
+					new IOData().setComponentId(getID()).setComponentType(getComponentType()).setValue(getValue()));
 		}
 
 		@Override
@@ -35,7 +35,7 @@ public abstract class AbstractSensor implements Sensor {
 		@Override
 		public void run() {
 			int count = Integer.MAX_VALUE;
-			int maxCount = IoLog.LOG_INTERVAL_MILLIS / ThreadUtil.SLEEP_MILLIS_DEFAULT;
+			int maxCount = IOLog.LOG_INTERVAL_MILLIS / ThreadUtil.SLEEP_MILLIS_DEFAULT;
 			while (!aborted) {
 				if (count++ >= maxCount) {
 					count = 0;
@@ -87,7 +87,7 @@ public abstract class AbstractSensor implements Sensor {
 		// do wait at least two intervalls before starting the thread again
 		// this prevents the automatic re-creation of the SensorDataCollector
 		// immediately after switchOf()
-		if (switchOffTime > 0 && switchOffTime + IoLog.LOG_INTERVAL_MILLIS * 2 < System.currentTimeMillis()) {
+		if (switchOffTime > 0 && switchOffTime + IOLog.LOG_INTERVAL_MILLIS * 2 < System.currentTimeMillis()) {
 			return;
 		}
 		synchronized (this) {

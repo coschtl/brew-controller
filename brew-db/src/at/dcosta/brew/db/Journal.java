@@ -18,7 +18,7 @@ public class Journal extends Database {
 
 	private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
 			+ " (BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE) values (?, ?, ?, ?, ?)";
-	private static final String SQL_FIND_BY_BREW_ID = "SELECT (BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE) from "
+	private static final String SQL_FIND_BY_BREW_ID = "SELECT BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE from "
 			+ TABLE_NAME + " where BREW_ID=?";
 	private static final String SQL_FIND_BY_BREW_ID_AND_STEP = SQL_FIND_BY_BREW_ID + " and STEP=?";
 

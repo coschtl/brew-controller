@@ -32,6 +32,10 @@ public class SystemState implements Serializable {
 		heaters = new ArrayList<>();
 		temperatures = new ArrayList<>();
 	}
+	
+	public List<Relay> getHeaters() {
+		return heaters;
+	}
 
 	public void addHeater(Relay heater) {
 		heaters.add(heater);
@@ -56,6 +60,10 @@ public class SystemState implements Serializable {
 	public void setAvgTemp(double avgTemp) {
 		this.avgTemp = avgTemp;
 	}
+	
+	public List<Sensor> getTemperatures() {
+		return temperatures;
+	}
 
 	public void setRotation(double rotation) {
 		this.rotation = rotation;
@@ -63,6 +71,10 @@ public class SystemState implements Serializable {
 
 	public void setStirrerRunning(Relay stirrer) {
 		this.stirrer = stirrer;
+	}
+	
+	public Relay getStirrer() {
+		return stirrer;
 	}
 
 	public void setTimeString(String timeString) {

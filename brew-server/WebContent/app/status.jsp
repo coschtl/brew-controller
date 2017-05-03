@@ -39,25 +39,25 @@ img.statusIcon {
 		<tr>
 			<td></td>
 			<td colspan="2" align="center"><img class="statusIcon"
-				src="theme/<%=JspUtil.getOnOffPngImageName(state.isStirrerRunning(), "motor_")%>" /></td>
+				src="theme/<%=JspUtil.getOnOffPngImageName(state.getStirrer().isOn(), "motor_")%>" /></td>
 			<td></td>
 		</tr>
 		<tr>
 			<td></td>
 			<td colspan="2" rowspan="2"><img height="150px" width="100px"
 				src="theme/pot.png" /></td>
-			<td><img class="statusIcon" src="theme/thermometer.png" /><br />&nbsp;<%=JspUtil.getValue(state.getTemperature(0), "°C")%></td>
+			<td><img class="statusIcon" src="theme/thermometer.png" /><br />&nbsp;<%=JspUtil.getValue(state.getTemperatures().get(0).getValue(), "°C")%></td>
 		</tr>
 		<tr>
-			<td><img class="statusIcon" src="theme/thermometer.png" /><br /><%=JspUtil.getValue(state.getTemperature(0), "°C")%>&nbsp;</td>
+			<td><img class="statusIcon" src="theme/thermometer.png" /><br /><%=JspUtil.getValue(state.getTemperatures().get(1).getValue(), "°C")%>&nbsp;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<td></td>
 			<td><img class="statusIcon"
-				src="theme/<%=JspUtil.getOnOffPngImageName(state.isHeaterOn(0), "heater_")%>" /></td>
+				src="theme/<%=JspUtil.getOnOffPngImageName(state.getHeaters().get(0).isOn(), "heater_")%>" /></td>
 			<td><img class="statusIcon"
-				src="theme/<%=JspUtil.getOnOffPngImageName(state.isHeaterOn(1), "heater_")%>" /></td>
+				src="theme/<%=JspUtil.getOnOffPngImageName(state.getHeaters().get(1).isOn(), "heater_")%>" /></td>
 			<td></td>
 		</tr> 
 		<% if (state.getAvgTemp() != null) { %>

@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 import at.dcosta.brew.io.ComponentType;
 
-public class IoData {
+public class IOData {
 
 	private ComponentType componentType;
 	private String componentId;
@@ -27,22 +27,22 @@ public class IoData {
 		return value;
 	}
 
-	public IoData setComponentId(String componentId) {
+	public IOData setComponentId(String componentId) {
 		this.componentId = componentId;
 		return this;
 	}
 
-	public IoData setComponentType(ComponentType componentType) {
+	public IOData setComponentType(ComponentType componentType) {
 		this.componentType = componentType;
 		return this;
 	}
 
-	public IoData setMeasureTime(Timestamp measureTime) {
+	public IOData setMeasureTime(Timestamp measureTime) {
 		this.measureTime = measureTime;
 		return this;
 	}
 
-	public IoData setValue(double value) {
+	public IOData setValue(double value) {
 		this.value = value;
 		return this;
 	}

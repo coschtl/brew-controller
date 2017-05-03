@@ -40,6 +40,8 @@
 		<scp file="brew-controller.jar" todir="pi@192.168.1.50:" keyfile="C:/cygwin64/home/Stephan_2/.ssh/id_rsa" trust="true">
 			<fileset dir="${dir.jarfile}/" includes="brew-controller.jar" />
 			<fileset dir="." includes="configuration.properties" />
+			<fileset dir="C:/development/localLibs" includes="*.zip" />
+			<fileset dir="C:/development/localLibs" includes="BrewController" />
 		</scp>
 	</target>
 </project>

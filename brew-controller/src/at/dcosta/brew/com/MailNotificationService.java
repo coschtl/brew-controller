@@ -36,7 +36,7 @@ public class MailNotificationService implements Notifier {
 	}
 
 	@Override
-	public void sendNotification(Notification notification) {
+	public void sendNotification(final Notification notification) {
 
 		ThreadManager.getInstance().newThread(new Runnable() {
 

@@ -1,16 +1,16 @@
 package at.dcosta.brew.io;
 
-import at.dcosta.brew.db.IoData;
-import at.dcosta.brew.db.IoLog;
+import at.dcosta.brew.db.IOData;
+import at.dcosta.brew.db.IOLog;
 
 public abstract class AbstractRelay implements Relay {
 
-	private final IoLog ioLog;
+	private final IOLog ioLog;
 	private final String id;
 
 	public AbstractRelay(String name, int pi4jPinNumber) {
 		this.id = name + "_GPIO_" + pi4jPinNumber;
-		ioLog = new IoLog();
+		ioLog = new IOLog();
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public abstract class AbstractRelay implements Relay {
 	}
 
 	private void log(int state) {
-		ioLog.addEntry(new IoData().setComponentId(getID()).setComponentType(ComponentType.RELAY).setValue(state));
+		ioLog.addEntry(new IOData().setComponentId(getID()).setComponentType(ComponentType.RELAY).setValue(state));
 	}
 
 }

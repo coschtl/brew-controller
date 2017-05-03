@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import at.dcosta.brew.db.IOData;
+import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.MockSensor;
@@ -61,6 +63,8 @@ public class SensorUtil {
 		}
 	};
 
+	private static final IOLog IO_LOG = new IOLog();
+
 	public static Value getValue(double lastValue, List<Sensor> sensors, double maxDiff) {
 		if (sensors.size() == 0) {
 			return new Value(lastValue, "no sensors given!");
@@ -86,6 +90,8 @@ public class SensorUtil {
 		double average = getAverage(sensors);
 		Sensor sensor = sensors.get(0);
 		System.out.println(sensor.getComponentType() + ": " + average + sensor.getScale());
+		IO_LOG.addEntry(
+				new IOData().setComponentId("Average").setComponentType(sensor.getComponentType()).setValue(average));
 		return new Value(average, err.toString());
 	}
 
