@@ -100,7 +100,10 @@ function setValue(id, text, scale) {
 	
 </script>
 <script>
- function drawChart(componentId, labelString) {
+
+var myChart;
+
+function drawChart(componentId, labelString) {
 	 var r = new XMLHttpRequest();
 		r.open("GET", contextPath + "/v1/api/states/chartData?componentId=" + componentId, true);
 		r.onreadystatechange = function() {
@@ -124,8 +127,10 @@ function setValue(id, text, scale) {
 			                responsive: false,
 			            }
 			        }; 
-			 
-			 var myChart = new Chart(ctx,config);
+			if (myChart != null) {
+				myChart.destroy();
+			} 
+			myChart = new Chart(ctx,config);
 		};
 		r.send();
  }

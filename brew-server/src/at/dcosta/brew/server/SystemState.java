@@ -11,10 +11,10 @@ public class SystemState implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@XmlElement
-	private final List<Relay> heaters;
+	private List<Relay> heaters;
 
 	@XmlElement
-	private final List<Sensor> temperatures;
+	private List<Sensor> temperatures;
 
 	@XmlElement
 	private Relay stirrer;
@@ -32,7 +32,7 @@ public class SystemState implements Serializable {
 		heaters = new ArrayList<>();
 		temperatures = new ArrayList<>();
 	}
-	
+
 	public List<Relay> getHeaters() {
 		return heaters;
 	}
@@ -60,7 +60,7 @@ public class SystemState implements Serializable {
 	public void setAvgTemp(double avgTemp) {
 		this.avgTemp = avgTemp;
 	}
-	
+
 	public List<Sensor> getTemperatures() {
 		return temperatures;
 	}
@@ -72,7 +72,7 @@ public class SystemState implements Serializable {
 	public void setStirrerRunning(Relay stirrer) {
 		this.stirrer = stirrer;
 	}
-	
+
 	public Relay getStirrer() {
 		return stirrer;
 	}

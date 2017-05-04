@@ -26,6 +26,9 @@
 		  	<include name="brew-base.jar"/>
 		  	<include name="brew-db.jar"/>
 		  </lib>
+		  <lib dir="${dir.base}/localLibs/sqlite">
+		  	<include name="sqlite-jdbc-3.16.1.jar"/>
+		  </lib>
 		  <classes dir="build/classes"/>
 		</war>
 		<scp file="${dir.export}/brew-server.war" todir="pi@192.168.1.50:" keyfile="C:/cygwin64/home/Stephan_2/.ssh/id_rsa" trust="true">

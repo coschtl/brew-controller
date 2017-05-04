@@ -5,10 +5,14 @@ import javax.xml.bind.annotation.XmlElement;
 public class Sensor {
 
 	@XmlElement
-	private final double value;
-
+	private double value;
+	
 	@XmlElement
-	private final String id;
+	private String id;
+
+	public Sensor() {
+		// needed for jaxb
+	}
 
 	public Sensor(String id, double value) {
 		this.id = id;
@@ -21,6 +25,14 @@ public class Sensor {
 
 	public double getValue() {
 		return value;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

@@ -5,10 +5,14 @@ import javax.xml.bind.annotation.XmlElement;
 public class Relay {
 
 	@XmlElement
-	private final boolean on;
-
+	private boolean on;
+	
 	@XmlElement
-	private final String id;
+	private String id;
+	
+	public Relay() {
+		// needed for jaxb
+	}
 
 	public Relay(String id, boolean on) {
 		this.id = id;
@@ -21,6 +25,14 @@ public class Relay {
 
 	public boolean isOn() {
 		return on;
+	}
+
+	public void setOn(boolean on) {
+		this.on = on;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }
