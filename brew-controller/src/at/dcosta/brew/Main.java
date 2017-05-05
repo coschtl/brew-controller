@@ -1,7 +1,7 @@
 package at.dcosta.brew;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Comparator;
@@ -21,10 +21,13 @@ import at.dcosta.brew.com.MailNotificationService;
 import at.dcosta.brew.com.Notification;
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
+import at.dcosta.brew.db.Database;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
+import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
@@ -33,8 +36,12 @@ import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.recipe.Rest;
+import at.dcosta.brew.util.FileUtil;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
+import at.dcosta.brew.xml.dom.Document;
+import at.dcosta.brew.xml.dom.DomReader;
+import at.dcosta.brew.xml.dom.DomWriter;
 
 public class Main {
 
@@ -54,7 +61,7 @@ public class Main {
 		System.out.println("DONE");
 	}
 
-	private static void execute(CommandLine cmdLine, Options options) throws IOException, InterruptedException {
+	private static void execute(CommandLine cmdLine, Options options) throws Exception {
 		if (cmdLine.hasOption("help")) {
 			new HelpFormatter().printHelp("brew-controller", options);
 			return;
@@ -207,6 +214,37 @@ public class Main {
 				ThreadUtil.sleepSeconds(3);
 			}
 		}
+		if (cmdLine.hasOption("dump")) {
+			String db = cmdLine.getOptionValue("dump");
+			Database database = null;
+			if ("BrewDB".equals(db)) {
+				database = new BrewDB();
+			} else if ("Cookbook".equals(db)) {
+				database = new Cookbook();
+			} else if ("IOLog".equals(db)) {
+				database = new IOLog();
+			} else if ("Journal".equals(db)) {
+				database = new Journal();
+			}
+			if (database == null) {
+				System.out.println("Can not dump: unknown argument: " + db);
+			}
+			File out = new File(new File("."), FileUtil.getFilename(db + "_", ".xml", false));
+			System.out.println("dumping " + db + " to " + out.getAbsolutePath());
+			database.dumpToXml(out);
+		}
+		if (cmdLine.hasOption("importXml")) {
+			String file = cmdLine.getOptionValue("importXml");
+			File in = new File(new File("."), file);
+			DomReader reader = new DomReader();
+			Document document = reader.read(new FileInputStream(file));
+			DomWriter writer = new DomWriter();
+			File out = new File(new File("."), FileUtil.getFilename( "copy_", ".xml", false));
+			writer.write(document, out);
+			
+			Database.importFromXml(in);
+			//System.out.println("dumping " + db + " to " + out.getAbsolutePath());
+		}
 
 		int temperature = -1;
 		if (cmdLine.hasOption("temperature")) {
@@ -262,6 +300,10 @@ public class Main {
 		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
 		options.addOption(new Option("testRelais", "testRelais"));
 		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(
+				new Option("dump", true, "dump database tables [BrewDB | Cookbook | IOLog | Journal] to xml."));
+		options.addOption(
+				new Option("importXml", true, "import database tables [BrewDB | Cookbook | IOLog | Journal] from xml."));
 		options.addOption(new Option("shutDown", "shutDown"));
 		return options;
 	}
