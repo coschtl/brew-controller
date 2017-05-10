@@ -26,14 +26,19 @@ public class W1Bus {
 			sensors.put(sensor.getID(), sensor);
 		} else {
 			W1Master w1Master = new W1Master();
+			System.out.println("got W1Master");
 			for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
+				System.out.println("got W1Device");
 				W1TemperatureSensor sensor = new W1TemperatureSensor(device);
+				System.out.println("got W1TemperatureSensor");
 				sensors.put(sensor.getID(), sensor);
+				System.out.println("device aded");
 			}
 		}
 	}
 
 	public Collection<at.dcosta.brew.io.Sensor> getAvailableTemperatureSensors() {
+		System.out.println("getAvailableTemperatureSensors");
 		return Collections.unmodifiableCollection(sensors.values());
 	}
 

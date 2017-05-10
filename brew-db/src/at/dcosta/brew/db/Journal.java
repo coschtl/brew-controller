@@ -17,7 +17,7 @@ public class Journal extends Database {
 			"CREATE INDEX I_BREWID_STEP ON " + TABLE_NAME + " (BREW_ID ASC, STEP ASC)" };
 
 	private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
-			+ " (BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE) values (?, ?, ?, ?, ?)";
+			+ " (BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE) values (?, ?, ?, ?)";
 	private static final String SQL_FIND_BY_BREW_ID = "SELECT BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE from "
 			+ TABLE_NAME + " where BREW_ID=?";
 	private static final String SQL_FIND_BY_BREW_ID_AND_STEP = SQL_FIND_BY_BREW_ID + " and STEP=?";

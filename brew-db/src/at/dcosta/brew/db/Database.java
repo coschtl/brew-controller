@@ -167,7 +167,6 @@ public abstract class Database {
 			sqlParamMarker.append("?");
 		}
 		sqlInsert.append(") values (").append(sqlParamMarker).append(")");
-		System.out.println(sqlInsert);
 
 		Connection con = getConnection(getJdbcUrl());
 		PreparedStatement st = null;
@@ -185,7 +184,6 @@ public abstract class Database {
 					st.setObject(i, columnDefinition.convert(i, col.getText().getTextTrim()));
 					i++;
 				}
-				System.out.println("add row");
 				st.executeUpdate();
 			}
 		} catch (SQLException e) {

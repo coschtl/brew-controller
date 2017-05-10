@@ -142,6 +142,7 @@ public class Main {
 		// true).getRecipeAsXmlString());
 
 		if (cmdLine.hasOption("testTemperature")) {
+			System.out.println("reading temp");
 			readTemperatures();
 			return;
 		}
@@ -297,7 +298,7 @@ public class Main {
 		options.addOption(new Option("sendTestMail", "sends a test email"));
 		options.addOption(new Option("scanW1", "List all devices connected to the W1 bus"));
 		options.addOption(new Option("getData", "get the actual data for all components"));
-		options.addOption(new Option("testTemperature", "output the xml of the recipe"));
+		options.addOption(new Option("testTemperature", "testTemperature"));
 		options.addOption(new Option("testRelais", "testRelais"));
 		options.addOption(new Option("testRpm", "testRpm"));
 		options.addOption(
@@ -326,6 +327,7 @@ public class Main {
 	private static void readTemperatures() throws InterruptedException {
 		W1Bus w1Bus = new W1Bus();
 		Collection<Sensor> tempSensors = w1Bus.getAvailableTemperatureSensors();
+		System.out.println("got sensors");
 		while (true) {
 			int j = 1;
 			for (Sensor ts : tempSensors) {

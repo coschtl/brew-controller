@@ -19,6 +19,7 @@ public class W1TemperatureUpdater implements StoppableRunnable {
 		this.w1Sensor = w1Sensor;
 		this.pi4jSensor = pi4jSensor;
 		this.ioLog = new IOLog();
+		readAndStroreValue();
 	}
 
 	@Override
@@ -36,10 +37,14 @@ public class W1TemperatureUpdater implements StoppableRunnable {
 		return false;
 	}
 
-	public void readAndStoreValue() {
+	private void readStoreAndLogValue() {
+		readAndStroreValue();
+		logValue();
+	}
+
+	public void readAndStroreValue() {
 		double temperature = pi4jSensor.getTemperature(TemperatureScale.CELSIUS);
 		w1Sensor.setValue(temperature);
-		logValue();
 	}
 
 	@Override
@@ -50,10 +55,9 @@ public class W1TemperatureUpdater implements StoppableRunnable {
 		while (active) {
 			if (count++ >= maxCount) {
 				count = 0;
-				readAndStoreValue();
+				readStoreAndLogValue();
 			}
 			ThreadUtil.sleepDefaultMillis();
 		}
-		System.out.println("TemperatureUpdater stopped");
 	}
 }
