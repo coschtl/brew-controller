@@ -3,30 +3,11 @@
 <meta charset="utf-8"/>
 <head>
 <title>Brew Controller Status</title>
-<style type="text/css">
-img.statusIcon {
-	height: 50px;
-	width: 50px;
-}
-.potImage { 
-   position: relative; 
-   width: 100%; /* for IE 6 */
-}
-
-.potTemp { 
-   position: absolute; 
-   top: 85px; 
-   left: 25px; 
-   width: 100%; 
-}
-
-.imageContainer {
-       width:100px; 
-       height:150px; 
-       background-image: url(../theme/pot.png);
- }
-</style>
-<script type="text/javascript" src="../scripts/Chart.bundle.js"></script>
+<link rel="stylesheet" type="text/css" href="../theme/status.css" />
+<link rel="stylesheet" type="text/css" href="../theme/menu.css" />
+<script type="text/javascript" src="../scripts/Chart.bundle.js" ></script>
+<script type="text/javascript" src="../scripts/chartLoader.js" ></script>
+<script type="text/javascript" src="../scripts/refreshStatus.js" ></script>
 <script type="text/javascript">
 
 var contextPath = document.location.href;
@@ -37,112 +18,89 @@ if (contextPath.substring(0,4) == "/app") {
 	contextPath = "";
 }
 
-function loadStatus() {
+var aktSubmenu;
+
+function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
-	r.open("GET", contextPath + "/v1/api/states/system", true);
+	r.open("GET", contextPath + "/v1/api/recipes/0/" + step, true);
 	r.onreadystatechange = function() {
 		if (r.readyState != 4 || r.status != 200) {
 			return;
 		}
-		var statusData = JSON.parse(r.responseText);
-		
-		setLinkedPngImage("icon_stirrer", statusData.stirrer, "motor_", "ON / OFF");
-		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");
-		setLinkedPngImage("icon_heater_2", statusData.heaters[1], "heater_", "ON / OFF");
-		setValue("temperature1", statusData.temperatures[0].value, "°C");
-		setLink("temperature1_icon", statusData.temperatures[0].id, "Temperature [°C]");
-		setValue("temperature2", statusData.temperatures[1].value, "°C");
-		setLink("temperature2_icon", statusData.temperatures[1].id, "Temperature [°C]");
-		setValue("avgTemp", statusData.avgTemp, "°C");
-		setLink("temperatureAvg_icon", "Average", "Temperature [°C]");
-		setValue("time", statusData.timeString);
-		if (statusData.stirrerRunning) {
-			setValue("rotationSpeed", statusData.rotation, "U/min");
-		} else {
-			setValue("rotationSpeed", "");
+		var submenu = JSON.parse(r.responseText);
+		var last = submenu.entries.length-1;
+		for (var i=0;i<=last; i++) {
+			addSubmenuEntry(submenu.entries[i].name, i==0, i<last);
 		}
 	};
 	r.send();
 }
 
-function setLinkedPngImage(id, relay, imageprefix, labelString) {
-	setPngImage(id, relay.on, imageprefix);
-	setLink(id, relay.id, labelString);
-}
-
-function setPngImage(id, booleanValue, imageprefix) {
-	var imageFile = imageprefix;
-	if (booleanValue) {
-		imageFile += "ON";
-	} else {
-		imageFile += "OFF";
+function addSubmenuEntry(text, clearBeforeAdd, addArrow) {
+	var submenu = document.getElementById("submenu");
+	var html = clearBeforeAdd ? "" : submenu.innerHTML;
+	html +="<span class=\"menu sub_menu\">" + text + "</span>";
+	if (addArrow) {
+		html +="<img src=\"../theme/up.png\" class=\"down rotateimg180\"/>";
 	}
-	imageFile += ".png";
-	setImage(id, imageFile);
+	submenu.innerHTML = html;
 }
 
-function setImage(id, imageFile) {
-	document.getElementById(id).src = "../theme/" + imageFile;
+///// tabs /////
+function showTab(evt, tabName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
 }
 
-function setLink(id, componentId, labelString) {
-	document.getElementById(id).onclick = function(){ drawChart(componentId , labelString); };
+function init() {
+	loadSubmenu("mashing");
+	loadStatus();
+	setInterval(loadStatus, 2500);
 }
-	
-function setValue(id, text, scale) {
-	if (text != null) {
-		if (scale != null) {
-			text += "&nbsp;" + scale;
-		}
-		document.getElementById(id).innerHTML = text;
-	}
-}
-	
-</script>
-<script>
 
-var myChart;
-
-function drawChart(componentId, labelString) {
-	 var r = new XMLHttpRequest();
-		r.open("GET", contextPath + "/v1/api/states/chartData?componentId=" + componentId, true);
-		r.onreadystatechange = function() {
-			if (r.readyState != 4 || r.status != 200) {
-				return;
-			}
-			var chartData = JSON.parse(r.responseText);
-			
-			 var ctx = document.getElementById("myChart");
-			 var config = {
-			            type: 'line',
-			            data: {
-			                labels: chartData.labels,
-			                datasets: [{
-			                    label: labelString,
-			                    data: chartData.data,
-			                    fill: false,
-			                }]
-			            },
-			            options: {
-			                responsive: false,
-			            }
-			        }; 
-			if (myChart != null) {
-				myChart.destroy();
-			} 
-			myChart = new Chart(ctx,config);
-		};
-		r.send();
- }
 </script>
 </head>
-<body onload="loadStatus();setInterval(loadStatus, 2500);">
-	<p>Status from <span id="time"></span>:</p>
-	<br/>
-	<table>
+<body onload="init();">
+	<table border ="0">
 		<tr>
-		<td>
-			<table>
+		<td valign="middle" align="center" colspan="3">
+			<div class="menu main_menu">Rezept</div>
+			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
+			<div class="menu_selected menu main_menu">Einmaischen</div>
+			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
+			<div class="menu main_menu">Läutern</div>
+			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
+			<div class="menu main_menu">Kochen</div>
+			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
+			<div class="menu main_menu">Kühlen &amp; Anstellen</div>
+		</td>
+		</tr>
+		<tr>
+		<td valign="middle" align="center" colspan="3">
+			<hr style="color:#d6d6d6"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="center" id="submenu" rowspan="2">
+		</td>
+		<td align="center">
+			<table class="status" border="0">
 				<tr>
 					<td></td>
 					<td colspan="2" align="center"><span id="rotationSpeed"></span><br /></td>
@@ -154,20 +112,25 @@ function drawChart(componentId, labelString) {
 						<img id="icon_stirrer" class="statusIcon" src=""/>
 					</td>
 					<td></td>
-					<td></td>
 				</tr>
 				<tr>
 					<td></td>
 					<td colspan="2" rowspan="2">
 						<div class="potImage">
-							<img src="../theme/pot.png"  id="temperatureAvg_icon" onclick="" alt="" width="100px" height="150"/>
+							<img src="../theme/pot.png"  id="temperatureAvg_icon" onclick="" width="150" height="225"/>
 							<span class="potTemp"><span id="avgTemp"></span></span>
 						</div>
 					</td>
-					<td><img id="temperature1_icon" class="statusIcon" onclick="" src="../theme/thermometer.png" /><br />&nbsp;<span id="temperature1"></span></td>
+					<td align="center">
+						<img id="temperature1_icon" class="statusIcon" onclick="" src="../theme/thermometer.png" /><br />
+						<div id="temperature1"></div>
+					</td>
 				</tr>
 				<tr>
-					<td><img id="temperature2_icon" class="statusIcon" onclick="" src="../theme/thermometer.png" /><br /><span id="temperature2"></span></td>
+					<td align="center">
+						<img id="temperature2_icon" class="statusIcon" onclick="" src="../theme/thermometer.png" /><br />
+						<div id="temperature2"></div>
+					</td>
 					<td></td>
 				</tr>
 				<tr>
@@ -176,10 +139,36 @@ function drawChart(componentId, labelString) {
 					<td><img id="icon_heater_2" class="statusIcon" src="" /></td>
 					<td></td>
 				</tr>
+				<tr>
+					<td></td>
+					<td colspan="2" align="center"><span id="time"></span></td>
+					<td></td>
+				</tr>
 			</table>
 		</td>
-		<td><canvas id="myChart" width="500" height="500"></canvas></td>
+		<td width="510px" height="100%">
+			<div id="chartTab" class="tabcontent">
+				<canvas id="chartCanvas" width="500px" height="500px"></canvas>
+			</div>
+			
+			<div id="logTab" class="tabcontent" style="width:500px;height:500px">
+			  <h3>Brew-Log:</h3>
+			  <p>Was bisher geschah</p> 
+			</div>
+			
+			<div class="tab">
+			  <button class="tablinks" onclick="showTab(event, 'chartTab')" id="clickChartTab">Chart</button>
+			  <button class="tablinks" onclick="showTab(event, 'logTab')" id="clickLogTab">Log</button>
+			</div>
+		
+		</td>
+		</tr>
+		<tr>
+			<td colspan="2">hier kommt die Steuerung her</td>
 		</tr>
 	</table>
+	<script type="text/javascript">
+		document.getElementById("clickLogTab").click();
+	</script>
 </body>
 </html>

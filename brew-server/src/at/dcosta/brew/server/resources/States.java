@@ -44,6 +44,9 @@ public class States {
 		String id = null;
 		List<IOData> entries = ioLog.getEntries(componentId);
 		int modulo = entries.size() / 10;
+		if (modulo == 0) {
+			modulo = 1;
+		}
 		int i = 0;
 		int max = entries.size() - 1;
 		for (IOData ioData : entries) {

@@ -16,7 +16,6 @@ public class BoilingSystem extends HeatingSystem {
 	private final double cookingTemperature;
 	private final double cookingTemperatureMin;
 
-	private double lastTemperature = 60d;
 
 	public BoilingSystem(NotificationService notificationService) {
 		super(notificationService);
@@ -56,10 +55,6 @@ public class BoilingSystem extends HeatingSystem {
 		return Configuration.getInstance().getIntArray(COOKING_HEATER_PINS);
 	}
 
-	@Override
-	protected double getLastTemperature() {
-		return lastTemperature;
-	}
 
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {

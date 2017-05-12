@@ -24,8 +24,6 @@ public class MashingSystem extends HeatingSystem {
 	private final Sensor rpmSensor;
 	private final Stirrer stirrer;
 
-	private double lastTemperature = 4d;
-
 	public MashingSystem(NotificationService notificationService) {
 		super(notificationService);
 		Configuration config = Configuration.getInstance();
@@ -136,10 +134,6 @@ public class MashingSystem extends HeatingSystem {
 		return Configuration.getInstance().getIntArray(MASHING_HEATER_PINS);
 	}
 
-	@Override
-	protected double getLastTemperature() {
-		return lastTemperature;
-	}
 
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {

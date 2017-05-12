@@ -8,23 +8,22 @@ import java.util.List;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.io.AvgCalculatingSensor;
+import at.dcosta.brew.io.AvgCalculatingSensor.SensorStatus;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.w1.W1Bus;
-import at.dcosta.brew.util.SensorUtil;
-import at.dcosta.brew.util.SensorUtil.SensorStatus;
-import at.dcosta.brew.util.SensorUtil.Value;
 import at.dcosta.brew.util.ThreadUtil;
 
 public abstract class HeatingSystem {
 
 	private static final long SWITCHING_INTERVAL = 1000l * 10l;
 
-	private final double thermometerMaxDiff;
 	private final double multipleHeaterTempDiff;
 	private final NotificationService notificationService;
 	private final List<Sensor> temperatureSensors;
+	private final AvgCalculatingSensor averageTemperature;
 	private final List<Relay> heaters;
 	protected final HeatingMonitor heatingMonitor;
 
@@ -35,11 +34,11 @@ public abstract class HeatingSystem {
 	public HeatingSystem(NotificationService notificationService) {
 		this.notificationService = notificationService;
 		Configuration config = Configuration.getInstance();
-		this.thermometerMaxDiff = Configuration.getInstance().getInt(THERMOMETER_MAXDIFF);
 		this.multipleHeaterTempDiff = config.getDouble(MULTIPLE_HEATER_TEMPDIFF);
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
+		averageTemperature = new AvgCalculatingSensor(Configuration.getInstance().getDouble(THERMOMETER_MAXDIFF));
 		W1Bus w1Bus = new W1Bus();
 		for (String address : getTemperatureSensorAddresses()) {
 			Sensor sensor = w1Bus.getTemperatureSensor(address);
@@ -48,6 +47,7 @@ public abstract class HeatingSystem {
 						"Sensor with address '" + address + "' not found! Check configuration/installation!");
 			}
 			temperatureSensors.add(sensor);
+			averageTemperature.addSensor(sensor);
 		}
 		if (temperatureSensors.size() < 1) {
 			throw new ConfigurationException(
@@ -69,9 +69,9 @@ public abstract class HeatingSystem {
 	}
 
 	public double getTemperature() {
-		Value aktTemperature = SensorUtil.getValue(getLastTemperature(), temperatureSensors, thermometerMaxDiff);
-		handleSensorStatus(aktTemperature);
-		return aktTemperature.getValue();
+		double temp = averageTemperature.getValue();
+		handleSensorStatus();
+		return temp;
 	}
 
 	public boolean isInErrorStatus() {
@@ -86,13 +86,13 @@ public abstract class HeatingSystem {
 		switchOffTemperatureSensors();
 	}
 
-	private void handleSensorStatus(Value value) {
-		if (value.getSensorStatus() == sensorStatus) {
+	private void handleSensorStatus() {
+		if (averageTemperature.getSensorStatus() == sensorStatus) {
 			return;
 		}
-		notificationService.sendNotification(NotificationType.WARNING, "Sensor status " + value.getSensorStatus(),
-				value.getError());
-		sensorStatus = value.getSensorStatus();
+		notificationService.sendNotification(NotificationType.WARNING, "Sensor status " + averageTemperature.getSensorStatus(),
+				averageTemperature.getError());
+		sensorStatus = averageTemperature.getSensorStatus();
 	}
 
 	private void switchOffTemperatureSensors() {
@@ -118,7 +118,6 @@ public abstract class HeatingSystem {
 
 	protected abstract int[] getHeaterPins();
 
-	protected abstract double getLastTemperature();
 
 	protected abstract double getMinTemperatureIncreasePerMinute();
 

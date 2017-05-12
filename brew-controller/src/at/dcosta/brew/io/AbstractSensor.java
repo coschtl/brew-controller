@@ -1,60 +1,16 @@
 package at.dcosta.brew.io;
 
-import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.util.ManagedThread;
-import at.dcosta.brew.util.StoppableRunnable;
-import at.dcosta.brew.util.ThreadUtil;
 
 public abstract class AbstractSensor implements Sensor {
-
-	private class SensorDataCollector implements StoppableRunnable {
-
-		private final IOLog ioLog;
-		private boolean aborted;
-
-		public SensorDataCollector() {
-			ioLog = new IOLog();
-		}
-
-		@Override
-		public void abort() {
-			aborted = true;
-		}
-
-		public void logValue() {
-			ioLog.addEntry(
-					new IOData().setComponentId(getID()).setComponentType(getComponentType()).setValue(getValue()));
-		}
-
-		@Override
-		public boolean mustComplete() {
-			return false;
-		}
-
-		@Override
-		public void run() {
-			int count = Integer.MAX_VALUE;
-			int maxCount = IOLog.LOG_INTERVAL_MILLIS / ThreadUtil.SLEEP_MILLIS_DEFAULT;
-			while (!aborted) {
-				if (count++ >= maxCount) {
-					count = 0;
-					logValue();
-				}
-				ThreadUtil.sleepDefaultMillis();
-			}
-		}
-	}
 
 	private ManagedThread<SensorDataCollector> sensorDataCollectorThread;
 	private long switchOffTime;
 
-	public AbstractSensor() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@Override
-	public double getValue() {
+	public final double getValue() {
 		if (!sensorDataCollectorIsRunning()) {
 			startCollectingSensorData();
 		}
@@ -76,6 +32,10 @@ public abstract class AbstractSensor implements Sensor {
 			sensorDataCollectorThread.abort();
 		}
 	}
+	
+	protected boolean mayStartTemperatureCollection() {
+		return true;
+	}
 
 	private boolean sensorDataCollectorIsRunning() {
 		return sensorDataCollectorThread != null && sensorDataCollectorThread.isAlive();
@@ -90,9 +50,12 @@ public abstract class AbstractSensor implements Sensor {
 		if (switchOffTime > 0 && switchOffTime + IOLog.LOG_INTERVAL_MILLIS * 2 < System.currentTimeMillis()) {
 			return;
 		}
+		if (!mayStartTemperatureCollection()) {
+			return;
+		}
 		synchronized (this) {
 			if (!sensorDataCollectorIsRunning()) {
-				sensorDataCollectorThread = new ManagedThread<SensorDataCollector>(new SensorDataCollector(),
+				sensorDataCollectorThread = new ManagedThread<SensorDataCollector>(new SensorDataCollector(this),
 						"SensorDataCollector_" + getID());
 				sensorDataCollectorThread.start();
 			}
