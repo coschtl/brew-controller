@@ -146,21 +146,23 @@ function init() {
 				</tr>
 			</table>
 		</td>
-		<td width="510px" height="100%">
+		<td>
 			<div id="chartTab" class="tabcontent">
 				<canvas id="chartCanvas" width="500px" height="500px"></canvas>
 			</div>
 			
-			<div id="logTab" class="tabcontent" style="width:500px;height:500px">
-			  <h3>Brew-Log:</h3>
-			  <p>Was bisher geschah</p> 
+			<div id="logTab" class="tabcontent">
+				<div  style="width:500px;height:500px">
+			  		<h3>Brew-Log:</h3>
+			  		<p>Was bisher geschah</p>
+			  	</div> 
 			</div>
 			
 			<div class="tab">
 			  <button class="tablinks" onclick="showTab(event, 'chartTab')" id="clickChartTab">Chart</button>
 			  <button class="tablinks" onclick="showTab(event, 'logTab')" id="clickLogTab">Log</button>
 			</div>
-		
+	 
 		</td>
 		</tr>
 		<tr>
