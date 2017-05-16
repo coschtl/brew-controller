@@ -33,11 +33,11 @@ public class Recipes {
 	public StepList getSubsteps(@PathParam("recipeId") int recipeId, @PathParam("step") String step) {
 		System.out.println("returning steps for recipe=" + recipeId + ", step=" + step);
 		StepList l = new StepList();
-		l.addEntry(new Step("heat1", "aufheizen"));
-		l.addEntry(new Step("mashing", "einmaischen"));
-		l.addEntry(new Step("rest1", "rasten"));
-		l.addEntry(new Step("heat2", "heizen"));
-		l.addEntry(new Step("rest2", "rasten"));
+		l.addEntry(new Step("heat1", "aufheizen").setFinished(true));
+		l.addEntry(new Step("mashing", "einmaischen").setFinished(true));
+		l.addEntry(new Step("rest1", "rasten").setFinished(true));
+		l.addEntry(new Step("heat2", "heizen").setFinished(true));
+		l.addEntry(new Step("rest2", "rasten").setActive(true));
 		l.addEntry(new Step("heat3", "heizen"));
 		l.addEntry(new Step("rest3", "rasten"));
 		l.addEntry(new Step("heat4", "heizen"));

@@ -41,6 +41,11 @@ img.right {
 	font-size: 100%;
 }
 
+.menu_finished {
+	background-color: #ddd;
+	color: #666666;
+}
+
 .menu_selected {
 	background-color: #ff9999;
 	color: #666666;

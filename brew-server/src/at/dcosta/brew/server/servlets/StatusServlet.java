@@ -20,19 +20,6 @@ public class StatusServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	@Override
-	public void init() throws ServletException {
-		InputStream cfgIn = getClass().getClassLoader().getResourceAsStream("configuration.properties");
-		try {
-			Configuration.initialize(cfgIn);
-			cfgIn.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		super.init();
-	}
-
 	@SuppressWarnings("incomplete-switch")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,6 +53,19 @@ public class StatusServlet extends HttpServlet {
 		}
 		request.setAttribute("systemState", state);
 		request.getRequestDispatcher("app/status.jsp").forward(request, response);
+	}
+
+	@Override
+	public void init() throws ServletException {
+		InputStream cfgIn = getClass().getClassLoader().getResourceAsStream("configuration.properties");
+		try {
+			Configuration.initialize(cfgIn);
+			cfgIn.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		super.init();
 	}
 
 }

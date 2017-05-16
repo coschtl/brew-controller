@@ -10,8 +10,8 @@ img.statusIcon {
 
 .potTemp { 
    position: absolute; 
-   top: 8em; 
-   left: 3em;
+   top: 9em; 
+   left: 3.5em;
    width: 100%; 
 }
  
@@ -19,14 +19,12 @@ img.statusIcon {
  	padding:2em;
  }
  
- 
- 
- 
+
  div.tab {
     overflow: hidden;
     border-style: solid;
     border-color: #ccc;
-    border-width: 1px;
+    border-width: 0 1px 0 0;
     background: #eee;
  }
 
@@ -52,25 +50,43 @@ div.tab button.active {
 }
 
 /* Style the tab content */
-.tabcontent {
+.tabcontent  {
     display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
-    border-bottom: none;
+    /*border-bottom: none;*/
     height: 100%;
 }
 
-.tabcontent {
-    -webkit-animation: fadeEffect 1s;
-    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+
+
+#overlay {
+   position: fixed;
+   z-index:199;
+   top: 0px;
+   left: 0px;
+   height:100%;
+   width:100%;
 }
 
-@-webkit-keyframes fadeEffect {
-    from {opacity: 0;}
-    to {opacity: 1;}
+.overlayBG {
+   background-color:#000;
+   -ms-filter: "Alpha(Opacity=75)"; /* IE 8 */
+   filter:alpha(opacity=75); /* IE5-7 */
+   -moz-opacity: 0.75; /* Mozilla */
+   opacity: 0.75;
 }
 
-@keyframes fadeEffect {
-    from {opacity: 0;}
-    to {opacity: 1;}
+#lightBox {
+   position:fixed;
+   top:50%;
+   left:50%;
+   margin-left:-100px;
+   margin-top:-100px;
+   z-index:200;
+   width:200px;
+  /* height:200px;*/
+   background-color:#fff;
+   text-align:center;
 }
+

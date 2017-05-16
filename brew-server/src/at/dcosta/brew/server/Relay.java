@@ -27,12 +27,12 @@ public class Relay {
 		return on;
 	}
 
-	public void setOn(boolean on) {
-		this.on = on;
-	}
-
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setOn(boolean on) {
+		this.on = on;
 	}
 
 }

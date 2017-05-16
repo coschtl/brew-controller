@@ -27,12 +27,12 @@ public class Sensor {
 		return value;
 	}
 
-	public void setValue(double value) {
-		this.value = value;
-	}
-
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
 	}
 
 }

@@ -23,7 +23,7 @@ public class SystemState implements Serializable {
 	private Double rotation;
 
 	@XmlElement
-	private Double avgTemp;
+	private Sensor avgTemp;
 
 	@XmlElement
 	private String timeString;
@@ -31,10 +31,6 @@ public class SystemState implements Serializable {
 	public SystemState() {
 		heaters = new ArrayList<>();
 		temperatures = new ArrayList<>();
-	}
-
-	public List<Relay> getHeaters() {
-		return heaters;
 	}
 
 	public void addHeater(Relay heater) {
@@ -45,12 +41,24 @@ public class SystemState implements Serializable {
 		temperatures.add(temperature);
 	}
 
-	public Double getAvgTemp() {
+	public Sensor getAvgTemp() {
 		return avgTemp;
+	}
+
+	public List<Relay> getHeaters() {
+		return heaters;
 	}
 
 	public Double getRotation() {
 		return rotation;
+	}
+
+	public Relay getStirrer() {
+		return stirrer;
+	}
+
+	public List<Sensor> getTemperatures() {
+		return temperatures;
 	}
 
 	public String getTimeString() {
@@ -58,11 +66,7 @@ public class SystemState implements Serializable {
 	}
 
 	public void setAvgTemp(double avgTemp) {
-		this.avgTemp = avgTemp;
-	}
-
-	public List<Sensor> getTemperatures() {
-		return temperatures;
+		this.avgTemp = new Sensor("Average", avgTemp);
 	}
 
 	public void setRotation(double rotation) {
@@ -71,10 +75,6 @@ public class SystemState implements Serializable {
 
 	public void setStirrerRunning(Relay stirrer) {
 		this.stirrer = stirrer;
-	}
-
-	public Relay getStirrer() {
-		return stirrer;
 	}
 
 	public void setTimeString(String timeString) {

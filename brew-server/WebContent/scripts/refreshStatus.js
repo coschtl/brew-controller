@@ -11,11 +11,11 @@ function loadStatus() {
 		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");
 		setLinkedPngImage("icon_heater_2", statusData.heaters[1], "heater_", "ON / OFF");
 		setValue("temperature1", statusData.temperatures[0].value, "°C");
-		setLink("temperature1_icon", statusData.temperatures[0].id, "Temperature [°C]");
+		setLink("temperature1_icon", statusData.temperatures[0], "Temperature [°C]");
 		setValue("temperature2", statusData.temperatures[1].value, "°C");
-		setLink("temperature2_icon", statusData.temperatures[1].id, "Temperature [°C]");
-		setValue("avgTemp", statusData.avgTemp, "°C");
-		setLink("temperatureAvg_icon", "Average", "Temperature [°C]");
+		setLink("temperature2_icon", statusData.temperatures[1], "Temperature [°C]");
+		setValue("avgTemp", statusData.avgTemp.value, "°C");
+		setLink("temperatureAvg_icon", statusData.avgTemp, "Temperature [°C]");
 		setValue("time", statusData.timeString);
 		if (statusData.stirrerRunning) {
 			setValue("rotationSpeed", statusData.rotation, "U/min");
@@ -28,7 +28,7 @@ function loadStatus() {
 
 function setLinkedPngImage(id, relay, imageprefix, labelString) {
 	setPngImage(id, relay.on, imageprefix);
-	setLink(id, relay.id, labelString);
+	setLink(id, relay, labelString);
 }
 
 function setPngImage(id, booleanValue, imageprefix) {
@@ -47,13 +47,50 @@ function setImage(id, imageFile) {
 	document.getElementById(id).src = "../theme/" + imageFile;
 }
 
-function setLink(id, componentId, labelString) {
-	document.getElementById(id).onclick = function(){ 
-			drawChart(componentId , labelString, "chartCanvas", false);
-			document.getElementById("clickChartTab").click(); 
+var actionComponent;
+var actionLabelString;
+
+function setLink(id, component, labelString) {
+	document.getElementById(id).onclick = function() { 
+		setAction(id, component, labelString);	
 	};
 }
+
+function setAction(id, component, labelString) {
+	actionComponent = component;
+	actionLabelString = labelString;
 	
+	if (component.on == null) {
+		performAction('showChart');
+		return;
+	} else if (component.on) {
+		document.getElementById("switchOFF").style.display = "block";
+		document.getElementById("switchON").style.display = "none";
+	} else if (component.on) {
+		document.getElementById("switchON").style.display = "block";
+		document.getElementById("switchOFF").style.display = "none";
+	}
+	overlay('display');
+}
+
+function performAction(action) {
+	if ("showChart" == action) {
+		drawChart(actionComponent.id , actionLabelString, "chartCanvas", false);
+		document.getElementById("clickChartTab").click(); 
+	} else {
+		var serverAction = "switch_" + actionComponent.id;
+		if ("switchON" == action ) {
+			serverAction += "_ON";
+		} else {
+			if ("switchOFF" == action ) {
+				serverAction += "_OFF";
+			}
+		}
+		alert(serverAction);
+	}
+	overlay('hide');
+}
+
 function setValue(id, text, scale) {
 	if (text != null) {
 		if (scale != null) {

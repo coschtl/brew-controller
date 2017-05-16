@@ -17,14 +17,14 @@ public final class JspUtil {
 		return getOnOffImageName(state, prefix, ".png");
 	}
 
+	public static String getValue(double value, String scale) {
+		return new StringBuilder().append(value).append("&nbsp;").append(scale).toString();
+	}
 	public static String getValue(Double value, String scale) {
 		if (value == null) {
 			return "";
 		}
 		return getValue(value.doubleValue(), scale);
-	}
-	public static String getValue(double value, String scale) {
-		return new StringBuilder().append(value).append("&nbsp;").append(scale).toString();
 	}
 
 }

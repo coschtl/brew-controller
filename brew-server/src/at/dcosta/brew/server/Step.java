@@ -13,6 +13,12 @@ public class Step implements Serializable {
 
 	@XmlElement
 	private String name;
+	
+	@XmlElement
+	private boolean active;
+	
+	@XmlElement
+	private boolean finished;
 
 	public Step() {
 		// needed for jaxb
@@ -27,16 +33,36 @@ public class Step implements Serializable {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setText(String name) {
+	public boolean isActive() {
+		return active;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public Step setActive(boolean active) {
+		this.active = active;
+		return this;
+	}
+
+	public Step setFinished(boolean finished) {
+		this.finished = finished;
+		return this;
+	}
+
+	public Step setId(String id) {
+		this.id = id;
+		return this;
+	}
+
+	public Step setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 }

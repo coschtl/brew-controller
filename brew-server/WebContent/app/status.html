@@ -30,16 +30,23 @@ function loadSubmenu(step) {
 		var submenu = JSON.parse(r.responseText);
 		var last = submenu.entries.length-1;
 		for (var i=0;i<=last; i++) {
-			addSubmenuEntry(submenu.entries[i].name, i==0, i<last);
+			addSubmenuEntry(submenu.entries[i], i==0, i<last);
 		}
 	};
 	r.send();
 }
 
-function addSubmenuEntry(text, clearBeforeAdd, addArrow) {
+function addSubmenuEntry(menuEntry, clearBeforeAdd, addArrow) {
 	var submenu = document.getElementById("submenu");
 	var html = clearBeforeAdd ? "" : submenu.innerHTML;
-	html +="<span class=\"menu sub_menu\">" + text + "</span>";
+	html +="<span class=\"menu sub_menu";
+	if (menuEntry.active) {
+		html += " menu_selected";
+	}
+	if (menuEntry.finished) {
+		html += " menu_finished";
+	}
+	html += "\">" + menuEntry.name + "</span>";
 	if (addArrow) {
 		html +="<img src=\"../theme/up.png\" class=\"down rotateimg180\"/>";
 	}
@@ -47,18 +54,18 @@ function addSubmenuEntry(text, clearBeforeAdd, addArrow) {
 }
 
 ///// tabs /////
-function showTab(evt, tabName) {
+function showTab(evt, tabName, tabClassName, tabmenuClassName) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
     // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
+    tabcontent = document.getElementsByClassName(tabClassName);
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
 
     // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
+    tablinks = document.getElementsByClassName(tabmenuClassName);
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
@@ -66,6 +73,25 @@ function showTab(evt, tabName) {
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+}
+
+function overlay(mode) {
+   if (mode == 'display') {
+       if(document.getElementById("overlay") === null) {
+           div = document.createElement("div");
+           div.setAttribute('id', 'overlay');
+           div.setAttribute('className', 'overlayBG');
+           div.setAttribute('class', 'overlayBG');
+           document.getElementsByTagName("body")[0].appendChild(div);
+           document.getElementById("lightBox").style.display="block";
+       }
+   } else {
+		var overlay = document.getElementById("overlay");
+	   	if (overlay != null) {
+       		document.getElementsByTagName("body")[0].removeChild(overlay);
+       		document.getElementById("lightBox").style.display="none";
+	   	}
+   }
 }
 
 function init() {
@@ -117,7 +143,7 @@ function init() {
 					<td></td>
 					<td colspan="2" rowspan="2">
 						<div class="potImage">
-							<img src="../theme/pot.png"  id="temperatureAvg_icon" onclick="" width="150" height="225"/>
+							<img src="../theme/pot.png" id="temperatureAvg_icon" onclick="" width="150" height="225"/>
 							<span class="potTemp"><span id="avgTemp"></span></span>
 						</div>
 					</td>
@@ -147,6 +173,11 @@ function init() {
 			</table>
 		</td>
 		<td>
+			<div class="tab">
+			  <button class="tablinks" onclick="showTab(event, 'chartTab', 'tabcontent', 'tablinks')" id="clickChartTab">Chart</button>
+			  <button class="tablinks" onclick="showTab(event, 'logTab', 'tabcontent', 'tablinks')" id="clickLogTab">Log</button>
+			</div>
+			
 			<div id="chartTab" class="tabcontent">
 				<canvas id="chartCanvas" width="500px" height="500px"></canvas>
 			</div>
@@ -158,19 +189,22 @@ function init() {
 			  	</div> 
 			</div>
 			
-			<div class="tab">
-			  <button class="tablinks" onclick="showTab(event, 'chartTab')" id="clickChartTab">Chart</button>
-			  <button class="tablinks" onclick="showTab(event, 'logTab')" id="clickLogTab">Log</button>
-			</div>
-	 
 		</td>
 		</tr>
 		<tr>
-			<td colspan="2">hier kommt die Steuerung her</td>
+		<td colspan="2">
+		</td>
 		</tr>
 	</table>
 	<script type="text/javascript">
 		document.getElementById("clickLogTab").click();
 	</script>
+	
+	<div id="lightBox" style="display:none">
+		<p id="actionSource"></p>
+		<div id="showChart" class="menu sub_menu" onClick="performAction('showChart')">Chart<br/></div>
+		<div id="switchON" class="menu sub_menu" onClick="performAction('switchON')">ON<br/></div>
+		<div id="switchOFF" class="menu sub_menu" onClick="performAction('switchOFF')">OFF<br/></div>
+	</div>
 </body>
 </html>
