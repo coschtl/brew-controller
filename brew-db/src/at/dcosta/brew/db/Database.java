@@ -203,9 +203,13 @@ public abstract class Database {
 		try {
 			boolean createIndex = false;
 			String[] createStatements = getCreateTableStatements();
-			for (int i = 0; i < getTableNames().length; i++) {
+			String[] tableNames = getTableNames();
+			if (createStatements.length != tableNames.length) {
+				throw new DatabaseException(getClass().getSimpleName() + ": ERROR tableNames and create Statements have different size!");
+			}
+			for (int i = 0; i < tableNames.length; i++) {
 				st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
-				st.setString(1, getTableNames()[i]);
+				st.setString(1, tableNames[i]);
 				rs = st.executeQuery();
 				if (rs.next() && rs.getInt(1) == 1) {
 					continue;
@@ -220,7 +224,7 @@ public abstract class Database {
 			}
 			if (createIndex) {
 				createStatements = getCreateIndexStatements();
-				for (int i = 0; i < getTableNames().length; i++) {
+				for (int i = 0; i < createStatements.length; i++) {
 					err = "Can not create index: ";
 					st = con.prepareStatement(createStatements[i]);
 					st.executeUpdate();
@@ -228,7 +232,7 @@ public abstract class Database {
 				}
 			}
 		} catch (SQLException e) {
-			throw new DatabaseException(err + e.getMessage(), e);
+			throw new DatabaseException(getClass().getSimpleName() + ": " + err + e.getMessage(), e);
 		} finally {
 			close(rs);
 			close(st);

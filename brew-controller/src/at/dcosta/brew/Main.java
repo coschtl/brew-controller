@@ -25,6 +25,7 @@ import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.db.Database;
+import at.dcosta.brew.db.FetchType;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.db.Journal;
@@ -88,6 +89,9 @@ public class Main {
 		}
 		Configuration.initialize(configFile);
 
+		new BrewDB();
+		new Cookbook();
+
 		if (cmdLine.hasOption("scanW1")) {
 			new W1Bus().scanW1Bus();
 			return;
@@ -114,7 +118,7 @@ public class Main {
 		if (cmdLine.hasOption("listRecipes")) {
 			System.out.println("ID\tRecipe\t\taddedOn\t\tbrew count\trecipe source");
 			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
-			for (CookbookEntry entry : new Cookbook().listRecipes()) {
+			for (CookbookEntry entry : new Cookbook().listRecipes(FetchType.FULL)) {
 				System.out.println(entry.getId() + "\t" + entry.getName() + "\t" + df.format(entry.getAddedOn())
 						+ "\t\t" + entry.getBrewCount() + "\t" + entry.getRecipeSource());
 			}
@@ -240,11 +244,12 @@ public class Main {
 			DomReader reader = new DomReader();
 			Document document = reader.read(new FileInputStream(file));
 			DomWriter writer = new DomWriter();
-			File out = new File(new File("."), FileUtil.getFilename( "copy_", ".xml", false));
+			File out = new File(new File("."), FileUtil.getFilename("copy_", ".xml", false));
 			writer.write(document, out);
-			
+
 			Database.importFromXml(in);
-			//System.out.println("dumping " + db + " to " + out.getAbsolutePath());
+			// System.out.println("dumping " + db + " to " +
+			// out.getAbsolutePath());
 		}
 
 		int temperature = -1;
@@ -303,8 +308,8 @@ public class Main {
 		options.addOption(new Option("testRpm", "testRpm"));
 		options.addOption(
 				new Option("dump", true, "dump database tables [BrewDB | Cookbook | IOLog | Journal] to xml."));
-		options.addOption(
-				new Option("importXml", true, "import database tables [BrewDB | Cookbook | IOLog | Journal] from xml."));
+		options.addOption(new Option("importXml", true,
+				"import database tables [BrewDB | Cookbook | IOLog | Journal] from xml."));
 		options.addOption(new Option("shutDown", "shutDown"));
 		return options;
 	}

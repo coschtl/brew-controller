@@ -3,6 +3,7 @@
 <meta charset="utf-8"/>
 <head>
 <title>Brew Controller Status</title>
+<link rel="stylesheet" type="text/css" href="../theme/main.css" />
 <link rel="stylesheet" type="text/css" href="../theme/status.css" />
 <link rel="stylesheet" type="text/css" href="../theme/menu.css" />
 <script type="text/javascript" src="../scripts/Chart.bundle.js" ></script>
@@ -22,15 +23,15 @@ var aktSubmenu;
 
 function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
-	r.open("GET", contextPath + "/v1/api/recipes/0/" + step, true);
+	r.open("GET", contextPath + "/v1/api/recipes/0/steps/" + step, true);
 	r.onreadystatechange = function() {
 		if (r.readyState != 4 || r.status != 200) {
 			return;
 		}
 		var submenu = JSON.parse(r.responseText);
-		var last = submenu.entries.length-1;
+		var last = submenu.length-1;
 		for (var i=0;i<=last; i++) {
-			addSubmenuEntry(submenu.entries[i], i==0, i<last);
+			addSubmenuEntry(submenu[i], i==0, i<last);
 		}
 	};
 	r.send();

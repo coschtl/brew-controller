@@ -19,8 +19,7 @@ public class BrewDB extends Database {
 					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), BREW_END timestamp)",
 			"CREATE TABLE " + TABLE_NAMES[1]
 					+ " (BREW_ID int, STEP_NAME varchar(255), STEP_START timestamp, STEP_END timestamp)" };
-	private static final String[] CREATE_INDEX_STATEMENTS = new String[] {
-			"CREATE INDEX I_BREWID ON " + TABLE_BREW + " (BREW_ID ASC)" };
+	private static final String[] CREATE_INDEX_STATEMENTS = new String[] { };
 	private static final String SQL_INSERT_BREW = "INSERT INTO " + TABLE_BREW
 			+ " (COOKBOOK_ENTRY_ID, BREW_START, BREW_STATUS) VALUES (?, ?, ?)";
 	private static final String SQL_BREW_BY_ID = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE ROWID=?";

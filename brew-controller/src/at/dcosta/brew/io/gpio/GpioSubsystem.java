@@ -36,8 +36,11 @@ public class GpioSubsystem {
 		relays = new HashMap<>();
 	}
 
-	public Relay getRelay(String name, int pi4jPinNumber) {
-		Relay relay = relays.get(pi4jPinNumber);
+	public Relay getRelayByPi4JPin(int pi4jPinNumber) {
+		return relays.get(pi4jPinNumber);
+	}
+		public Relay getRelay(String name, int pi4jPinNumber) {
+		Relay relay = getRelayByPi4JPin(pi4jPinNumber);
 		if (relay == null) {
 			if (isMockPi) {
 				relay = new MockRelay(name, pi4jPinNumber);

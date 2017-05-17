@@ -1,7 +1,5 @@
 package at.dcosta.brew.server.resources;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +10,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import at.dcosta.brew.Configuration;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.server.ChartData;
@@ -22,16 +19,11 @@ import at.dcosta.brew.server.SystemState;
 
 @Path("states")
 public class States {
-
+	
+	private final IOLog ioLog;
+	
 	public States() {
-		InputStream cfgIn = getClass().getClassLoader().getResourceAsStream("configuration.properties");
-		try {
-			Configuration.initialize(cfgIn);
-			cfgIn.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ioLog =  new IOLog();
 	}
 
 	@GET
@@ -39,7 +31,6 @@ public class States {
 	@Produces(MediaType.APPLICATION_JSON)
 	public ChartData chartData(@QueryParam(value = "componentId") String componentId) {
 		ChartData data = new ChartData();
-		IOLog ioLog = new IOLog();
 		DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 		String id = null;
 		List<IOData> entries = ioLog.getEntries(componentId);
@@ -71,7 +62,6 @@ public class States {
 	@Path("system")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SystemState getSystemState() {
-		IOLog ioLog = new IOLog();
 		List<IOData> entries = ioLog.getLatestEntries();
 		SystemState state = new SystemState();
 		state.setTimeString(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()));

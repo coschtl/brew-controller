@@ -9,8 +9,8 @@ public class ConfigurationException extends RuntimeException {
 				"Configuration error: key '" + key + "' has an unsupported value: " + String.valueOf(value));
 	}
 
-	public static ConfigurationException createParameterMissingException(String key) {
-		return new ConfigurationException("Configuration error: key '" + key + "' is missing or has no value!");
+	public static ConfigurationException createParameterMissingException(String key, Configuration configuration) {
+		return new ConfigurationException("Configuration error: key '" + key + "' is missing or has no value: " + configuration);
 	}
 
 	public ConfigurationException(String message) {

@@ -107,7 +107,7 @@ public class Configuration {
 	public String getString(String key) {
 		String value = configuration.get(key);
 		if (value == null || value.isEmpty()) {
-			throw ConfigurationException.createParameterMissingException(key);
+			throw ConfigurationException.createParameterMissingException(key, this);
 		}
 		return value;
 	}

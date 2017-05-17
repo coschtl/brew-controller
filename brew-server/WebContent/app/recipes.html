@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8"/>
+<head>
+<title>Brew Server</title>
+<link rel="stylesheet" type="text/css" href="../theme/main.css" />
+<script type="text/javascript" src="../scripts/main.js" ></script>
+<script type="text/javascript">
+
+var contextPath = document.location.href;
+var posStart = contextPath.indexOf("/",  contextPath.indexOf("/") + 2);
+var posEnd = contextPath.indexOf("/", posStart + 1);
+contextPath = contextPath.substring(posStart, posEnd);
+if (contextPath.substring(0,4) == "/app") {
+	contextPath = "";
+}
+
+function loadRecipe(recipeId) {
+	var r = new XMLHttpRequest();
+	r.open("GET", contextPath + "/v1/api/recipes/" + recipeId, true);
+	r.onreadystatechange = function() {
+		if (r.readyState != 4 || r.status != 200) {
+			byId("aktRecipe").innerHTML = "A recipe with id=" + recipeId + " can not get loaded from the Database!";
+			show("aktRecipe");
+			return;
+		}
+		var recipe = JSON.parse(r.responseText);
+		byId("aktRecipe").innerHTML = recipe.name;
+		show("aktRecipe");
+	};
+	r.send();
+}
+
+function loadRecipes() {
+	var r = new XMLHttpRequest();
+	r.open("GET", contextPath + "/v1/api/recipes/", true);
+	r.onreadystatechange = function() {
+		if (r.readyState != 4 || r.status != 200) {
+			return;
+		}
+		var recipes = JSON.parse(r.responseText);
+		var select = byId("recipes");
+		for (var i=0; i< recipes.length; i++) {
+			var opt = document.createElement('option');
+		    opt.value = recipes[i].name;
+		    opt.innerHTML = recipes[i].name;
+		    select.appendChild(opt);
+		}
+		show("aktRecipe");
+	};
+	r.send();
+}
+
+function init() {
+	var queryArgs = getQueryArguments();
+	
+	if (queryArgs['recipeId'] != null) {
+		loadRecipe(queryArgs['recipeId']);
+	}
+	loadRecipes();
+	
+}
+
+</script>
+</head>
+<body onload="init();">
+	<h1>Brau-Server</h1>
+	<div id="aktRecipe" style="display:none">
+		<p id="aktRecipeName"></p>
+	</div>
+	<br/>
+	<select size="1" id="recipes"></select>
+</body>
+</html>

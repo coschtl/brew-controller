@@ -76,7 +76,7 @@ public class Cookbook extends Database {
 		}
 	}
 
-	public List<CookbookEntry> listRecipes() {
+	public List<CookbookEntry> listRecipes(FetchType fetchType) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -90,7 +90,9 @@ public class Cookbook extends Database {
 				entry.setBrewCount(rs.getInt("BREW_COUNT"));
 				entry.setId(rs.getInt("ROWID"));
 				entry.setName(rs.getString("RECIPE_NAME"));
-				entry.setRecipe(RecipeReader.read(rs.getString("RECIPE")));
+				if (fetchType == FetchType.FULL) {
+					entry.setRecipe(RecipeReader.read(rs.getString("RECIPE")));
+				}
 				entry.setRecipeSource(rs.getString("RECIPE_SOURCE"));
 				entries.add(entry);
 			}

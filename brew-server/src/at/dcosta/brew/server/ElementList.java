@@ -6,22 +6,22 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class StepList implements Serializable {
+public class ElementList<T> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@XmlElement
-	private List<Step> entries;
+	private List<T> entries;
 	
-	public StepList() {
+	public ElementList() {
 		entries = new ArrayList<>();
 	}
 	
-	public void addEntry(Step entry) {
+	public void addEntry(T entry) {
 		entries.add(entry);
 	}
 	
-	public List<Step> getEntries() {
+	public List<T> getEntries() {
 		return entries;
 	}
 
