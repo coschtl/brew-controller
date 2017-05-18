@@ -8,13 +8,15 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+
 import at.dcosta.brew.Configuration;
 import at.dcosta.brew.server.resources.Recipes;
 import at.dcosta.brew.server.resources.States;
 
 @ApplicationPath("/v1/api/")
 public class BrewServerApplication extends Application {
-	
+
 	public BrewServerApplication() {
 		InputStream cfgIn = getClass().getClassLoader().getResourceAsStream("configuration.properties");
 		try {
@@ -31,6 +33,9 @@ public class BrewServerApplication extends Application {
 		Set<Class<?>> s = new HashSet<Class<?>>();
 		s.add(States.class);
 		s.add(Recipes.class);
+		
+		s.add(MultiPartFeature.class);
+		s.add(BrewServerExceptionMapper.class);
 		return s;
 	}
 

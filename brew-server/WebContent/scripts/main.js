@@ -17,6 +17,19 @@ function byId(id) {
 	return document.getElementById(id);
 }
 
+function empty(id) {
+	var elm = byId(id);
+	return elm.value == null || elm.value == "";
+}
+
+function alertEmpty(id, name) {
+	if (empty(id) ) {
+		alert(name + " fehlt!");
+		return true;
+	}
+	return false;
+}
+
 function show(id, disp) {
 	if (disp == null) {
 		disp = "block";

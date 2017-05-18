@@ -3,6 +3,7 @@ package at.dcosta.brew.server.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -11,35 +12,39 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.db.FetchType;
-import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.server.Recipe;
 import at.dcosta.brew.server.Step;
 
 @Path("")
-public class Recipes {
-	
-	private final  Cookbook cookbook;
-	
+public class Recipes extends AbstractResource {
+
+	private final Cookbook cookbook;
+
 	public Recipes() {
 		cookbook = new Cookbook();
 	}
-	
+
 	public static enum ReturnType {
-		MINIMAL,
-		FULL;
+		MINIMAL, FULL;
 	}
 
 	@POST
 	@Path("recipes")
-	public void addRecipe(@QueryParam("recipeName") String recipeName, @QueryParam("recipeSource") String recipeSource,
-			@QueryParam("recipe") String recipe) {
-
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public void addRecipe(@FormDataParam("recipeName") String recipeName,
+			@FormDataParam("recipeSource") String recipeSource, @FormDataParam("recipe") String recipe) {
+		assertNotEmpty("recipeName", recipeName);
+		assertNotEmpty("recipeSource", recipeSource);
+		assertNotEmpty("recipe", recipe);
+		
+		cookbook.addRecipe(recipeName, recipeSource,recipe);
 	}
 
-	
 	@GET
 	@Path("recipes/{recipeId}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -54,11 +59,11 @@ public class Recipes {
 		}
 		return createDto(entry, fetchType);
 	}
-	
+
 	@GET
 	@Path("recipes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Recipe> getRecipes( @QueryParam("fetchType") FetchType fetchType) {
+	public List<Recipe> getRecipes(@QueryParam("fetchType") FetchType fetchType) {
 		if (fetchType == null) {
 			fetchType = FetchType.MINIMAL;
 		}
@@ -68,7 +73,7 @@ public class Recipes {
 		}
 		return recipes;
 	}
-	
+
 	private Recipe createDto(CookbookEntry cookbookEntry, FetchType fetchType) {
 		Recipe recipe = new Recipe();
 		recipe.setId(cookbookEntry.getId());
@@ -77,12 +82,11 @@ public class Recipes {
 		recipe.setName(cookbookEntry.getName());
 		recipe.setSource(cookbookEntry.getRecipeSource());
 		if (fetchType == FetchType.FULL) {
-			recipe.setRecipe(new RecipeWriter(cookbookEntry.getRecipe(), true).getRecipeAsXmlString());
+			recipe.setRecipe(cookbookEntry.getRecipe());
 		}
 		return recipe;
 	}
-	
-	
+
 	@GET
 	@Path("recipes/{recipeId}/steps/{step}")
 	@Produces(MediaType.APPLICATION_JSON)

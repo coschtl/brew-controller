@@ -2,13 +2,11 @@ package at.dcosta.brew.db;
 
 import java.sql.Timestamp;
 
-import at.dcosta.brew.recipe.Recipe;
-
 public class CookbookEntry {
 
 	private int id;
 	private String name;
-	private Recipe recipe;
+	private String recipe;
 	private Timestamp addedOn;
 	private int brewCount;
 	private String recipeSource;
@@ -27,10 +25,6 @@ public class CookbookEntry {
 
 	public String getName() {
 		return name;
-	}
-
-	public Recipe getRecipe() {
-		return recipe;
 	}
 
 	public String getRecipeSource() {
@@ -57,14 +51,19 @@ public class CookbookEntry {
 		return this;
 	}
 
-	public CookbookEntry setRecipe(Recipe recipe) {
-		this.recipe = recipe;
-		return this;
-	}
-
 	public CookbookEntry setRecipeSource(String recipeSource) {
 		this.recipeSource = recipeSource;
 		return this;
 	}
+
+	public String getRecipe() {
+		return recipe;
+	}
+
+	public void setRecipe(String recipeString) {
+		this.recipe = recipeString;
+	}
+	
+	
 
 }

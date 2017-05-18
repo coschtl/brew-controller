@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.dcosta.brew.recipe.Recipe;
-import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 
 public class Cookbook extends Database {
@@ -27,12 +26,16 @@ public class Cookbook extends Database {
 	}
 
 	public void addRecipe(Recipe recipe, String recipeSource) {
+		addRecipe(recipe.getName(), recipeSource, new RecipeWriter(recipe, false).getRecipeAsXmlString());
+	}
+
+	public void addRecipe(String recipeName, String recipeSource, String recipeAsXml) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		try {
 			st = con.prepareStatement(SQL_ADD_ENTRY);
-			st.setString(1, recipe.getName());
-			st.setString(2, new RecipeWriter(recipe, false).getRecipeAsXmlString());
+			st.setString(1, recipeName);
+			st.setString(2, recipeAsXml);
 			st.setTimestamp(3, now());
 			st.setInt(4, 0);
 			st.setString(5, recipeSource);
@@ -62,7 +65,7 @@ public class Cookbook extends Database {
 				entry.setBrewCount(rs.getInt("BREW_COUNT"));
 				entry.setId(rs.getInt("ROWID"));
 				entry.setName(rs.getString("RECIPE_NAME"));
-				entry.setRecipe(RecipeReader.read(rs.getString("RECIPE")));
+				entry.setRecipe(rs.getString("RECIPE"));
 				entry.setRecipeSource(rs.getString("RECIPE_SOURCE"));
 				return entry;
 			}
@@ -91,7 +94,7 @@ public class Cookbook extends Database {
 				entry.setId(rs.getInt("ROWID"));
 				entry.setName(rs.getString("RECIPE_NAME"));
 				if (fetchType == FetchType.FULL) {
-					entry.setRecipe(RecipeReader.read(rs.getString("RECIPE")));
+					entry.setRecipe(rs.getString("RECIPE"));
 				}
 				entry.setRecipeSource(rs.getString("RECIPE_SOURCE"));
 				entries.add(entry);

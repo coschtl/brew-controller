@@ -8,6 +8,7 @@ import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.recipe.InfusionRecipe;
+import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.StoppableRunnable;
 
@@ -39,7 +40,7 @@ public class BrewController implements StoppableRunnable {
 	@Override
 	public void run() {
 		try {
-			InfusionRecipe recipe = (InfusionRecipe) new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe();
+			InfusionRecipe recipe = (InfusionRecipe) RecipeReader.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
 			// mashing
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
 			// heat to the mashing temperature

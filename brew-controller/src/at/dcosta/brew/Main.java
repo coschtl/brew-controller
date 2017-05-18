@@ -138,7 +138,7 @@ public class Main {
 			System.out.println("brew count: " + entry.getBrewCount());
 			System.out.println("recipe source: " + entry.getRecipeSource());
 			System.out.println();
-			System.out.println(new RecipeWriter(entry.getRecipe(), true).getRecipeAsXmlString());
+			System.out.println(new RecipeWriter(RecipeReader.read(entry.getRecipe()), true).getRecipeAsXmlString());
 			return;
 		}
 		// Recipe recipe = RecipeReader.loadSampleRecipe();

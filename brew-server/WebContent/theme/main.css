@@ -3,6 +3,21 @@ body {
 	color: grey;
 }
 
+fieldset {
+	border: 2px solid #C5D8E1; 
+    border-radius: 6px; 
+    background: white;
+    width: auto;
+}
+
+legend {
+	padding:5px;
+}
+
+input {
+	margin:2px;
+}
+
 
 #overlay {
    position: fixed;
