@@ -7,8 +7,8 @@ public class InfusionRecipe extends Recipe {
 
 	private final List<Rest> rests;
 
-	public InfusionRecipe(String name, float wort) {
-		super(name, wort);
+	public InfusionRecipe(String name, FermentationType fermentationType, float wort) {
+		super(name, fermentationType, wort);
 		this.rests = new ArrayList<>();
 	}
 

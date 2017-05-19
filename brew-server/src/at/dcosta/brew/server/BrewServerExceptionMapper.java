@@ -11,6 +11,7 @@ public class BrewServerExceptionMapper implements
     @Override
     public Response toResponse(BrewServerException ex) {
         return Response.status(ex.getHttpReturnCode())
+        		.header("x-server-error", "Fehler: " + ex.getMessage())
                 .entity(ex.getMessage()).build();
     }
 }

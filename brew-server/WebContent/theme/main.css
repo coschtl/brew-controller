@@ -18,6 +18,25 @@ input {
 	margin:2px;
 }
 
+.message {
+	text-align: center;
+	width:50%;
+	font-size: 120%;
+	display: none;
+	margin: auto;
+	padding: 15px;
+	border-style: solid;
+	border-width: 2px;
+}
+
+.errorMessage {
+	color:red;
+	border-color: red;
+}
+.okMessage {
+	color: grey;
+	border-color: green;
+}
 
 #overlay {
    position: fixed;

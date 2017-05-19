@@ -42,7 +42,7 @@ function loadRecipes() {
 		var select = byId("recipes");
 		for (var i=0; i< recipes.length; i++) {
 			var opt = document.createElement('option');
-		    opt.value = recipes[i].name;
+		    opt.value = recipes[i].id;
 		    opt.innerHTML = recipes[i].name;
 		    select.appendChild(opt);
 		}
@@ -55,9 +55,46 @@ function addRecipe() {
 	if (alertEmpty("recipeName", "Bier-Name") || alertEmpty("recipeSource", "Rezept-Quelle") || alertEmpty("beerRecipe", "Rezept")) {
 		return false;
 	}
-	document.recipeForm.action =  contextPath + "/v1/api/recipes";
-	document.recipeForm.submit();
-	setTimeout(loadRecipes, 1000);
+	clearMessages();
+	var formData = new FormData();
+	var file = new FileReader().readAsDataURL(byId("beerRecipe").files[0]);
+	formData.append('recipeName', byId("recipeName").value);
+	formData.append('recipeSource', byId("recipeSource").value);
+	formData.append('recipe', byId("beerRecipe").files[0]);
+	
+	fetch(contextPath + "/v1/api/recipes", {
+	  method: 'POST',
+	  body: formData
+	}).then((response) => {
+		if (response.status == 201) {
+			messageFromHeader(response);
+			loadRecipes();
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+function showRecipe() {
+	clearMessages();
+	
+	var recipes = byId("recipes");
+	var recipe = recipes.options[recipes.selectedIndex].value;
+	fetch(contextPath + "/v1/api/recipes/" + recipe + "?fetchType=FULL", {
+	  method: 'GET',
+	}).then((response) => {
+		if (response.status == 200) {
+			response.json().then(function(recipe) {
+				alert(maskXml(recipe.recipe));
+				byId("recipeDetail").innerHTML = maskXml(recipe.recipe);
+			});
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
 }
 
 function init() {
@@ -73,16 +110,18 @@ function init() {
 </script>
 </head>
 <body onload="init();">
-	<h1>Brau-Server</h1>
+	<h1>Kochbuch</h1>
 	<div id="aktRecipe" style="display:none">
 		<p id="aktRecipeName"></p>
 	</div>
+	<div id="error" class="message errorMessage" ondblclick="hide('error')"></div>
+	<div id="message" class="message okMessage" ondblclick="hide('message')"></div>
 	<table>
 	<tr valign="top">
 		<td>
 			<fieldset>
 	    	<legend>Rezept auswählen</legend>
-			<select size="1" id="recipes"></select>
+			<select size="1" id="recipes" onchange="showRecipe();"></select>
 			</fieldset>
 		</td>
 		<td><div style="padding:30px"> --- oder ---</div></td>
@@ -102,5 +141,7 @@ function init() {
 		</td>
 	</tr>
 	</table>
+	<br/>
+	<pre id="recipeDetail"></pre>
 </body>
 </html>

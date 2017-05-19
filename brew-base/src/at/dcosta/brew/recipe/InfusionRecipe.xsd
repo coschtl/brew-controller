@@ -1,96 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="recipe">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="malts">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="malt" maxOccurs="unbounded" minOccurs="1">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="name" use="optional"/>
-                      <xs:attribute type="xs:int" name="amount" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="mashing">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="rest" maxOccurs="unbounded" minOccurs="0">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:int" name="temperature" use="optional"/>
-                      <xs:attribute type="xs:int" name="time" use="optional"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:int" name="water"/>
-            <xs:attribute type="xs:int" name="temperature"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="lautering">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:int" name="rest"/>
-                <xs:attribute type="xs:int" name="water"/>
-              </xs:extension>
-            </xs:simpleContent>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="boiling">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="hop" maxOccurs="unbounded" minOccurs="1">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="name" />
-                      <xs:attribute type="xs:float" name="alpha" />
-                      <xs:attribute type="xs:int" name="amount"/>
-                      <xs:attribute type="xs:int" name="boilingTime"/>
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute type="xs:int" name="time"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="whirlpool">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:int" name="time"/>
-              </xs:extension>
-            </xs:simpleContent>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="yeast">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:string" name="name"/>
-                <xs:attribute type="xs:int" name="amount"/>
-              </xs:extension>
-            </xs:simpleContent>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-      <xs:attribute type="xs:float" name="version"/>
-      <xs:attribute type="xs:string" name="name"/>
-      <xs:attribute type="xs:string" name="type"/>
-      <xs:attribute type="xs:float" name="wort"/>
-    </xs:complexType>
-  </xs:element>
+<xs:schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="recipe">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="malts">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="malt" maxOccurs="unbounded"
+								minOccurs="1">
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:string" name="name" use="optional" />
+											<xs:attribute type="xs:int" name="amount" use="optional" />
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="mashing">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="rest" maxOccurs="unbounded"
+								minOccurs="0">
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:int" name="temperature"
+												use="optional" />
+											<xs:attribute type="xs:int" name="time" use="optional" />
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute type="xs:int" name="water" />
+						<xs:attribute type="xs:int" name="temperature" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="lautering">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute type="xs:int" name="rest" />
+								<xs:attribute type="xs:int" name="water" />
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="boiling">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="hop" maxOccurs="unbounded"
+								minOccurs="1">
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:string" name="name" />
+											<xs:attribute type="xs:float" name="alpha" />
+											<xs:attribute type="xs:int" name="amount" />
+											<xs:attribute type="xs:int" name="boilingTime" />
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute type="xs:int" name="time" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="whirlpool">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute type="xs:int" name="time" />
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="yeast">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute type="xs:string" name="name" />
+								<xs:attribute type="xs:int" name="amount" />
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+
+			<xs:attribute type="xs:float" name="version" />
+			<xs:attribute type="xs:string" name="name" use="required" />
+			<xs:attribute type="xs:string" name="type" />
+			<xs:attribute type="fermentationType" name="fermentationType"
+				use="required" />
+			<xs:attribute type="xs:float" name="wort" use="required" />
+		</xs:complexType>
+
+	</xs:element>
+	<xs:simpleType name="fermentationType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="TOP" />
+			<xs:enumeration value="BOTTOM" />
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>
 

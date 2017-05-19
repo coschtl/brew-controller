@@ -30,12 +30,42 @@ function alertEmpty(id, name) {
 	return false;
 }
 
+function errorFromHeader(response) {
+	error(response.headers.get('x-server-error'));
+}
+
+function error(text) {
+	byId("error").innerHTML = text;
+	show("error");
+}
+
+function messageFromHeader(response) {
+	message(response.headers.get('x-server-message'));
+}
+
+function message(text) {
+	byId("message").innerHTML = text;
+	show("message");
+}
+
+function clearMessages() {
+	byId("error").innerHTML = "";
+	hide("error");
+	byId("message").innerHTML = "";
+	hide("message");
+}
+
 function show(id, disp) {
 	if (disp == null) {
 		disp = "block";
 	}
 	byId(id).style.display = disp;
 }
+
 function hide(id) {
 	byId(id).style.display = "none";
+}
+
+function maskXml(xml) {
+	return xml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }

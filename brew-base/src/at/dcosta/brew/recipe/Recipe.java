@@ -4,8 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Recipe {
+	
+	public enum FermentationType {
+		TOP,
+		BOTTOM;
+	}
 
 	private final String name;
+	private final FermentationType fermentationType;
 	private final float wort;
 
 	private int mashTemperature;
@@ -19,13 +25,17 @@ public abstract class Recipe {
 	private int mashingTemperature;
 	private int lauteringRest;
 
-	public Recipe(String name, float wort) {
+	public Recipe(String name,FermentationType fermentationType, float wort) {
 		this.name = name;
+		this.fermentationType = fermentationType;
 		this.wort = wort;
 		this.malts = new ArrayList<>();
 		this.hops = new ArrayList<>();
 	}
 
+	public FermentationType getFermentationType() {
+		return fermentationType;
+	}
 	public void addHop(Hop hop) {
 		hops.add(hop);
 	}

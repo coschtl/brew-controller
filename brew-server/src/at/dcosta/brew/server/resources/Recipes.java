@@ -11,12 +11,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.db.FetchType;
+import at.dcosta.brew.recipe.RecipeReader;
+import at.dcosta.brew.recipe.RecipeWriter;
+import at.dcosta.brew.server.BrewServerException;
 import at.dcosta.brew.server.Recipe;
 import at.dcosta.brew.server.Step;
 
@@ -36,13 +41,23 @@ public class Recipes extends AbstractResource {
 	@POST
 	@Path("recipes")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public void addRecipe(@FormDataParam("recipeName") String recipeName,
+	public Response addRecipe(@FormDataParam("recipeName") String recipeName,
 			@FormDataParam("recipeSource") String recipeSource, @FormDataParam("recipe") String recipe) {
+		System.out.println(recipeName);
+		System.out.println(recipeSource);
+		System.out.println(recipe);
 		assertNotEmpty("recipeName", recipeName);
 		assertNotEmpty("recipeSource", recipeSource);
 		assertNotEmpty("recipe", recipe);
-		
-		cookbook.addRecipe(recipeName, recipeSource,recipe);
+
+		try {
+			RecipeReader.read(recipe);
+		} catch (Exception e) {
+			throw new BrewServerException("Recipe is not valid: " + e.getMessage(), Status.BAD_REQUEST);
+		}
+		cookbook.addRecipe(recipeName, recipeSource, recipe);
+		return Response.status(Status.CREATED)
+				.header("x-server-message", "Rezept '" + recipeName + "' erfolgreich hinzugefügt.").build();
 	}
 
 	@GET
@@ -82,7 +97,8 @@ public class Recipes extends AbstractResource {
 		recipe.setName(cookbookEntry.getName());
 		recipe.setSource(cookbookEntry.getRecipeSource());
 		if (fetchType == FetchType.FULL) {
-			recipe.setRecipe(cookbookEntry.getRecipe());
+			String prettyPrintXml = new RecipeWriter(RecipeReader.read(cookbookEntry.getRecipe()), true).getRecipeAsXmlString();
+			recipe.setRecipe(prettyPrintXml);
 		}
 		return recipe;
 	}

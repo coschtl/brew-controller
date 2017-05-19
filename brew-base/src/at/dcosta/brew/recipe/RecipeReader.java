@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import at.dcosta.brew.recipe.Recipe.FermentationType;
 import at.dcosta.brew.util.IOUtils;
 
 public class RecipeReader {
@@ -162,7 +163,7 @@ public class RecipeReader {
 
 	private static Recipe getRecipe(Element root) {
 		if ("infusion".equals(root.getAttribute("type"))) {
-			return new InfusionRecipe(root.getAttribute("name"), getFloatAttribute("wort", root));
+			return new InfusionRecipe(root.getAttribute("name"), FermentationType.valueOf(root.getAttribute("fermentationType")), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
 	}
