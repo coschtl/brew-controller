@@ -67,5 +67,8 @@ function hide(id) {
 }
 
 function maskXml(xml) {
+	if (xml == null) {
+		return xml;
+	}
 	return xml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }

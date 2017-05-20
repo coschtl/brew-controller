@@ -4,6 +4,7 @@
 <head>
 <title>Brew Server</title>
 <link rel="stylesheet" type="text/css" href="../theme/main.css" />
+<link rel="stylesheet" type="text/css" href="../theme/recipes.css" />
 <script type="text/javascript" src="../scripts/main.js" ></script>
 <script type="text/javascript">
 
@@ -40,6 +41,9 @@ function loadRecipes() {
 		}
 		var recipes = JSON.parse(r.responseText);
 		var select = byId("recipes");
+		while (select.options.length > 0) {                
+			 select.remove(0);
+		}
 		for (var i=0; i< recipes.length; i++) {
 			var opt = document.createElement('option');
 		    opt.value = recipes[i].id;
@@ -68,7 +72,11 @@ function addRecipe() {
 	}).then((response) => {
 		if (response.status == 201) {
 			messageFromHeader(response);
-			loadRecipes();
+			response.json().then(function(id) {
+				loadRecipes();
+				showRecipe(id);
+				
+			});
 			return;
 		}
 		errorFromHeader(response);
@@ -76,18 +84,27 @@ function addRecipe() {
 		error(data)
 	});
 }
-function showRecipe() {
+function showSelectedRecipe() {
 	clearMessages();
 	
 	var recipes = byId("recipes");
 	var recipe = recipes.options[recipes.selectedIndex].value;
+	showRecipe(recipe);
+}
+	
+function showRecipe(recipe) {	
 	fetch(contextPath + "/v1/api/recipes/" + recipe + "?fetchType=FULL", {
 	  method: 'GET',
 	}).then((response) => {
 		if (response.status == 200) {
 			response.json().then(function(recipe) {
-				alert(maskXml(recipe.recipe));
-				byId("recipeDetail").innerHTML = maskXml(recipe.recipe);
+				show("showRecipeTable");
+				byId("showRecipeId").innerHTML = recipe.id;
+				byId("showRecipeName").innerHTML = recipe.name;
+				byId("showRecipeSource").innerHTML = recipe.source;
+				byId("showRecipeAddedOn").innerHTML = maskXml(recipe.addedOn);
+				byId("showBrewCount").innerHTML = recipe.brewCount;
+				byId("showRecipeDetail").innerHTML = maskXml(recipe.recipe);
 			});
 			return;
 		}
@@ -121,7 +138,7 @@ function init() {
 		<td>
 			<fieldset>
 	    	<legend>Rezept auswählen</legend>
-			<select size="1" id="recipes" onchange="showRecipe();"></select>
+			<select size="1" id="recipes"></select>&nbsp;&nbsp;&nbsp;<img src="../theme/magnifier-tool.png" onclick="showSelectedRecipe();" width="20px" height="20px"/>
 			</fieldset>
 		</td>
 		<td><div style="padding:30px"> --- oder ---</div></td>
@@ -129,19 +146,30 @@ function init() {
 		<form name="recipeForm" onSubmit="return false;" method="post" enctype="multipart/form-data">
 		<fieldset>
 	    	<legend>Neues Rezept</legend>
-	    	<input type="text" placeholder="Bier-Name" id="recipeName" name="recipeName"/>
-	    	<br/>
-	       	<input type="text" placeholder="Rezept-Quelle" id="recipeSource" name="recipeSource"/>
-	    	<br/>
-	        <input type="file" name="recipe" id="beerRecipe" />
-	    	<br/>
-	    	<button onclick="addRecipe()">hinzufügen</button>
+	    	<table>
+	    	<tr>
+	    	<td><input type="text" size="50" placeholder="Bier-Name" id="recipeName" name="recipeName"/></td>
+	    	<td rowspan="3"><img src="../theme/add.png" onclick="addRecipe()" height="100px"/></td>
+	    	</tr>
+	    	<tr><td><input type="text" size="50" placeholder="Rezept-Quelle" id="recipeSource" name="recipeSource"/></td></tr>
+	        <tr><td><input type="file" dropzone="true" name="recipe" id="beerRecipe" /></td></tr>
+	    	</table>
 		</fieldset>
 		</form>
 		</td>
 	</tr>
 	</table>
 	<br/>
-	<pre id="recipeDetail"></pre>
+	<hr/>
+	<br/>
+	<table class="recipeTable" id="showRecipeTable" style="display: none">
+	<tr><td class="recipeTable right">ID:</td><td class="recipeTable" id="showRecipeId"></td></tr>
+	<tr><td class="recipeTable right">Bier-Name:</td><td  class="recipeTable" id="showRecipeName"></td></tr>
+	<tr><td class="recipeTable right">Rezept-Quelle:</td><td  class="recipeTable" id="showRecipeSource"></td></tr>
+	<tr><td class="recipeTable right">Hinzugefügt am:</td><td  class="recipeTable" id="showRecipeAddedOn"></td></tr>
+	<tr><td class="recipeTable right">Brau-Zähler:</td><td class="recipeTable"  id="showBrewCount"></td></tr>
+	<tr><td class="recipeTable right">Rezept:</td><td><pre  class="recipeTable" id="showRecipeDetail"></pre></td></tr>
+	</table>
+	
 </body>
 </html>

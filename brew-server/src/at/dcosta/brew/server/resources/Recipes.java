@@ -1,5 +1,6 @@
 package at.dcosta.brew.server.resources;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,9 +44,6 @@ public class Recipes extends AbstractResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addRecipe(@FormDataParam("recipeName") String recipeName,
 			@FormDataParam("recipeSource") String recipeSource, @FormDataParam("recipe") String recipe) {
-		System.out.println(recipeName);
-		System.out.println(recipeSource);
-		System.out.println(recipe);
 		assertNotEmpty("recipeName", recipeName);
 		assertNotEmpty("recipeSource", recipeSource);
 		assertNotEmpty("recipe", recipe);
@@ -55,9 +53,9 @@ public class Recipes extends AbstractResource {
 		} catch (Exception e) {
 			throw new BrewServerException("Recipe is not valid: " + e.getMessage(), Status.BAD_REQUEST);
 		}
-		cookbook.addRecipe(recipeName, recipeSource, recipe);
+		int id = cookbook.addRecipe(recipeName, recipeSource, recipe);
 		return Response.status(Status.CREATED)
-				.header("x-server-message", "Rezept '" + recipeName + "' erfolgreich hinzugefügt.").build();
+				.header("x-server-message", "Rezept '" + recipeName + "' erfolgreich hinzugefügt.").entity(Integer.valueOf(id)).build();
 	}
 
 	@GET
@@ -72,7 +70,8 @@ public class Recipes extends AbstractResource {
 			System.out.println("NO RECIPE!!!");
 			return null;
 		}
-		return createDto(entry, fetchType);
+		DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
+		return createDto(entry, fetchType, df);
 	}
 
 	@GET
@@ -82,22 +81,24 @@ public class Recipes extends AbstractResource {
 		if (fetchType == null) {
 			fetchType = FetchType.MINIMAL;
 		}
+		DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
 		List<Recipe> recipes = new ArrayList<>();
 		for (CookbookEntry recipe : cookbook.listRecipes(fetchType)) {
-			recipes.add(createDto(recipe, fetchType));
+			recipes.add(createDto(recipe, fetchType, df));
 		}
 		return recipes;
 	}
 
-	private Recipe createDto(CookbookEntry cookbookEntry, FetchType fetchType) {
+	private Recipe createDto(CookbookEntry cookbookEntry, FetchType fetchType, DateFormat df) {
 		Recipe recipe = new Recipe();
 		recipe.setId(cookbookEntry.getId());
-		recipe.setAddedOn(cookbookEntry.getAddedOn());
+		recipe.setAddedOn(df.format(cookbookEntry.getAddedOn()));
 		recipe.setBrewCount(cookbookEntry.getBrewCount());
 		recipe.setName(cookbookEntry.getName());
 		recipe.setSource(cookbookEntry.getRecipeSource());
 		if (fetchType == FetchType.FULL) {
-			String prettyPrintXml = new RecipeWriter(RecipeReader.read(cookbookEntry.getRecipe()), true).getRecipeAsXmlString();
+			String prettyPrintXml = new RecipeWriter(RecipeReader.read(cookbookEntry.getRecipe()), true)
+					.getRecipeAsXmlString();
 			recipe.setRecipe(prettyPrintXml);
 		}
 		return recipe;

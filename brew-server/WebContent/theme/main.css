@@ -4,10 +4,11 @@ body {
 }
 
 fieldset {
-	border: 2px solid #C5D8E1; 
+	border: 2px solid #d6d6d6; 
     border-radius: 6px; 
     background: white;
     width: auto;
+    vertical-align: middle;
 }
 
 legend {

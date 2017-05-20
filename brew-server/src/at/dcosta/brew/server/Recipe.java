@@ -1,7 +1,6 @@
 package at.dcosta.brew.server;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -22,7 +21,7 @@ public class Recipe implements Serializable {
 	private String source;
 	
 	@XmlElement
-	private Date addedOn;
+	private String addedOn;
 	
 	@XmlElement
 	private int  brewCount;
@@ -51,11 +50,11 @@ public class Recipe implements Serializable {
 		this.source = source;
 	}
 
-	public Date getAddedOn() {
+	public String getAddedOn() {
 		return addedOn;
 	}
 
-	public void setAddedOn(Date addedOn) {
+	public void setAddedOn(String addedOn) {
 		this.addedOn = addedOn;
 	}
 

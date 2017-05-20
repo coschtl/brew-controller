@@ -124,6 +124,7 @@ public class RecipeWriter {
 		attribute("version", "1.0");
 		attribute("name", recipe.getName());
 		attribute("type", recipe.getBrewType());
+		attribute("fermentationType", recipe.getFermentationType().toString());
 		attribute("wort", recipe.getWort());
 		attribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		attribute("xsi:noNamespaceSchemaLocation", "InfusionRecipe.xsd");

@@ -29,7 +29,7 @@ public class Cookbook extends Database {
 		addRecipe(recipe.getName(), recipeSource, new RecipeWriter(recipe, false).getRecipeAsXmlString());
 	}
 
-	public void addRecipe(String recipeName, String recipeSource, String recipeAsXml) {
+	public int addRecipe(String recipeName, String recipeSource, String recipeAsXml) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		try {
@@ -43,6 +43,7 @@ public class Cookbook extends Database {
 			if (rows != 1) {
 				throw new DatabaseException("can not add Cookbook (no row created)!");
 			}
+			return getLastInsertedRowId( con);
 		} catch (SQLException e) {
 			throw new DatabaseException("can not add Cookbook: " + e.getMessage(), e);
 		} finally {
