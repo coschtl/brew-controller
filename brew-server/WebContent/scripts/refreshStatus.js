@@ -78,15 +78,15 @@ function performAction(action) {
 		drawChart(actionComponent.id , actionLabelString, "chartCanvas", false);
 		document.getElementById("clickChartTab").click(); 
 	} else {
-		var serverAction = "switch_" + actionComponent.id;
-		if ("switchON" == action ) {
-			serverAction += "_ON";
-		} else {
-			if ("switchOFF" == action ) {
-				serverAction += "_OFF";
-			}
-		}
-		alert(serverAction);
+		fetch(contextPath + "/v1/api/devices/relay/" + actionComponent.id + "/"+ action, {
+			  method: 'PUT',
+			}).then((response) => {
+				if (response.status != 200) {
+					error(response);
+				}
+			}).catch((data) => {
+				error(data)
+			});
 	}
 	overlay('hide');
 }

@@ -35,8 +35,13 @@ function errorFromHeader(response) {
 }
 
 function error(text) {
-	byId("error").innerHTML = text;
-	show("error");
+	var elm = byId("error");
+	if (elm == null) {
+		alert(text);
+	} else {
+		elm.innerHTML = text;
+		show("error");
+	}
 }
 
 function messageFromHeader(response) {
@@ -44,8 +49,13 @@ function messageFromHeader(response) {
 }
 
 function message(text) {
-	byId("message").innerHTML = text;
-	show("message");
+	var elm = byId("message");
+	if (elm == null) {
+		alert(text);
+	} else {
+		elm.innerHTML = text;
+		show("message");
+	}
 }
 
 function clearMessages() {

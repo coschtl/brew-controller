@@ -11,6 +11,7 @@ import javax.ws.rs.core.Application;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import at.dcosta.brew.Configuration;
+import at.dcosta.brew.server.resources.Devices;
 import at.dcosta.brew.server.resources.Recipes;
 import at.dcosta.brew.server.resources.States;
 
@@ -33,6 +34,7 @@ public class BrewServerApplication extends Application {
 		Set<Class<?>> s = new HashSet<Class<?>>();
 		s.add(States.class);
 		s.add(Recipes.class);
+		s.add(Devices.class);
 		
 		s.add(MultiPartFeature.class);
 		s.add(BrewServerExceptionMapper.class);
