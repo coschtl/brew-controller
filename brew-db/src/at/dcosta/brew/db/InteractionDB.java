@@ -36,7 +36,7 @@ public class InteractionDB extends Database {
 		manualAction.setType(Type.valueOf(rs.getString(3)));
 		manualAction.setTarget(rs.getString(4));
 		manualAction.setArguments(rs.getString(5));
-		manualAction.setDuration(rs.getInt(6));
+		manualAction.setDurationMinutes(rs.getInt(6));
 		manualAction.setExecutionTime(rs.getTimestamp(7));
 		return manualAction;
 	}
@@ -51,7 +51,7 @@ public class InteractionDB extends Database {
 			st.setString(2, manualAction.getType().toString());
 			st.setString(3, manualAction.getTarget());
 			st.setString(4, manualAction.getArguments());
-			st.setInt(5, manualAction.getDuration());
+			st.setInt(5, manualAction.getDurationMinutes());
 			int rows = st.executeUpdate();
 			if (rows != 1) {
 				throw new DatabaseException("can not add ManualAction entry (no row created)!");

@@ -6,10 +6,10 @@ public class Relay {
 
 	@XmlElement
 	private boolean on;
-	
+
 	@XmlElement
 	private String id;
-	
+
 	public Relay() {
 		// needed for jaxb
 	}

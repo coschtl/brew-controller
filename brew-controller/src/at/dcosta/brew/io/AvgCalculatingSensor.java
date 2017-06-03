@@ -84,6 +84,7 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		if (sensors.size() == 1) {
 			Sensor sensor = sensors.get(0);
 			System.out.println(sensor.getID() + ": " + sensor.getValue() + sensor.getScale());
+			sensorStatus = SensorStatus.OK;
 			return sensor.getValue();
 		}
 		List<Sensor> l = new ArrayList<>(sensors.size() + 1);
@@ -106,6 +107,7 @@ public class AvgCalculatingSensor extends AbstractSensor {
 			error = err.toString();
 			sensorStatus = SensorStatus.ERROR;
 		}
+		sensorStatus = SensorStatus.OK;
 		return average;
 	}
 

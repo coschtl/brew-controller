@@ -56,3 +56,20 @@ img.right {
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
 }
+
+a:link {
+    color: grey;
+    text-decoration: none;
+}
+
+a:visited {
+    color: grey;
+}
+
+a:hover {
+    color: grey;
+}
+
+a:active {
+    color: grey;
+}

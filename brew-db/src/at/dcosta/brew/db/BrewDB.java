@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import at.dcosta.brew.BrewStatus;
+import at.dcosta.brew.db.BrewStep.StepName;
 
 public class BrewDB extends Database {
 
@@ -18,11 +19,18 @@ public class BrewDB extends Database {
 			"CREATE TABLE " + TABLE_NAMES[0]
 					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), BREW_END timestamp)",
 			"CREATE TABLE " + TABLE_NAMES[1]
-					+ " (BREW_ID int, STEP_NAME varchar(255), STEP_START timestamp, STEP_END timestamp)" };
+					+ " (BREW_ID int, NAME varchar(255), DESCRIPTION varchar(255), STEP_START timestamp, STEP_END timestamp)" };
 	private static final String[] CREATE_INDEX_STATEMENTS = new String[] { };
+	private static final String SQL_UPDATE_BREW = "UPDATE " + TABLE_BREW
+			+ " SET BREW_STATUS=?, BREW_END=? WHERE ROWID=?";
+	private static final String SQL_COMPLETE_STEP = "UPDATE " + TABLE_BREW_STEPS
+			+ " SET STEP_END=? ROWID=?";
 	private static final String SQL_INSERT_BREW = "INSERT INTO " + TABLE_BREW
 			+ " (COOKBOOK_ENTRY_ID, BREW_START, BREW_STATUS) VALUES (?, ?, ?)";
+	private static final String SQL_INSERT_STEP = "INSERT INTO " + TABLE_BREW_STEPS
+			+ " (BREW_ID, NAME, DESCRIPTION, STEP_START) VALUES (?,?, ?, ?)";
 	private static final String SQL_BREW_BY_ID = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE ROWID=?";
+	private static final String SQL_GET_RUNNING = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE BREW_END is null";
 	private static final String SQL_STEPS_FOR_BREW = "SELECT ROWID, * FROM " + TABLE_BREW_STEPS + " WHERE BREW_ID=?";
 
 	public BrewDB() {
@@ -52,9 +60,10 @@ public class BrewDB extends Database {
 				while (rs.next()) {
 					BrewStep step = new BrewStep();
 					step.setId(rs.getInt("ROWID"));
-					step.setStepName(rs.getString("STEP_NAME"));
-					step.setStartTime(rs.getTimestamp("BREW_START"));
-					step.setStartTime(rs.getTimestamp("BREW_END"));
+					step.setStepName(new StepName(rs.getString("NAME")));
+					step.setDescription(rs.getString("DESCRIPTION"));
+					step.setStartTime(rs.getTimestamp("STEP_START"));
+					step.setStartTime(rs.getTimestamp("STEP_END"));
 					brew.addStep(step);
 				}
 				return brew;
@@ -62,6 +71,31 @@ public class BrewDB extends Database {
 			return null;
 		} catch (SQLException e) {
 			throw new DatabaseException("can not load brew with id=" + brewId + ": " + e.getMessage(), e);
+		} finally {
+			close(rs);
+			close(st);
+			close(con);
+		}
+	}
+	
+	public Brew getRunningBrew() {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = con.prepareStatement(SQL_GET_RUNNING);
+			rs = st.executeQuery();
+			if (rs.next()) {
+				Brew brew = new Brew(rs.getInt("COOKBOOK_ENTRY_ID"));
+				brew.setId(rs.getInt("ROWID"));
+				brew.setBrewStatus(BrewStatus.valueOf(rs.getString("BREW_STATUS")));
+				brew.setStartTime(rs.getTimestamp("BREW_START"));
+				brew.setStartTime(rs.getTimestamp("BREW_END"));
+				return brew;
+			}
+			return null;
+		} catch (SQLException e) {
+			throw new DatabaseException("can not load running brew: " + e.getMessage(), e);
 		} finally {
 			close(rs);
 			close(st);
@@ -92,6 +126,81 @@ public class BrewDB extends Database {
 			close(con);
 		}
 		return brew;
+	}
+
+	public BrewStep addStep(int brewId, StepName stepName, String description) {
+		BrewStep step = new BrewStep();
+		step.setBrew(getBrewById(brewId));
+		step.setStartTime(now());
+		step.setStepName(stepName);
+		step.setDescription(description);
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		try {
+			st = con.prepareStatement(SQL_INSERT_STEP);
+			st.setInt(1, brewId);
+			st.setString(2, stepName.toString());
+			st.setString(3, description);
+			st.setTimestamp(4, step.getStartTime());
+			int rows = st.executeUpdate();
+			if (rows != 1) {
+				throw new DatabaseException("can not add brew step (no row created)!");
+			}
+			step.setId(getLastInsertedRowId(con));
+		} catch (SQLException e) {
+			throw new DatabaseException("can not add brew step: " + e.getMessage(), e);
+		} finally {
+			close(st);
+			close(con);
+		}
+		return step;
+	}
+
+	public void persist(Brew brew) {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		try {
+			st = con.prepareStatement(SQL_UPDATE_BREW);
+			st.setString(1, brew.getBrewStatus().toString());
+			st.setTimestamp(2, brew.getEndTime());
+			st.setInt(3, brew.getId());
+			int rows = st.executeUpdate();
+			if (rows != 1) {
+				throw new DatabaseException("can not update brew (no row updated)!");
+			}
+			brew.setId(getLastInsertedRowId(con));
+		} catch (SQLException e) {
+			throw new DatabaseException("can not update brew: " + e.getMessage(), e);
+		} finally {
+			close(st);
+			close(con);
+		}
+	}
+	public void complete(BrewStep step) {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		try {
+			st = con.prepareStatement(SQL_COMPLETE_STEP);
+			st.setTimestamp(1, now());
+			st.setInt(2, step.getId());
+			int rows = st.executeUpdate();
+			if (rows != 1) {
+				throw new DatabaseException("can not update brew step (no row updated)!");
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("can not update brew step: " + e.getMessage(), e);
+		} finally {
+			close(st);
+			close(con);
+		}
+	}
+	
+	public boolean isBrewRunning(int cookbookEntryId) {
+		Brew runningBrew = getRunningBrew();
+		if (runningBrew == null) {
+			return false;
+		}
+		return runningBrew.getCookbookEntryId() == cookbookEntryId;
 	}
 
 	@Override

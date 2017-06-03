@@ -7,6 +7,8 @@ public abstract class AbstractRelay implements Relay {
 
 	private final IOLog ioLog;
 	private final String id;
+	private long manualControlTimeEnd;
+	private boolean controlledManually;
 
 	public AbstractRelay(String name, int pi4jPinNumber) {
 		this.id = name + "_GPIO_" + pi4jPinNumber;
@@ -21,6 +23,32 @@ public abstract class AbstractRelay implements Relay {
 	@Override
 	public void off() {
 		log(0);
+	}
+
+	@Override
+	public boolean isControlledAutomatically() {
+		if (controlledManually) {
+			if (manualControlTimeEnd < System.currentTimeMillis()) {
+				controlledManually = false;
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void setControlManually(long manualControlTimeMillis) {
+		if (manualControlTimeMillis < 0) {
+			manualControlTimeEnd = Long.MAX_VALUE;
+		} else if (manualControlTimeMillis == 0) {
+			manualControlTimeEnd = 0;
+			controlledManually = false;
+			return;
+		} else {
+			manualControlTimeEnd = System.currentTimeMillis() + manualControlTimeMillis;
+		}
+		controlledManually = true;
 	}
 
 	@Override

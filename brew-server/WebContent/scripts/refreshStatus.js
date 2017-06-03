@@ -10,15 +10,15 @@ function loadStatus() {
 		setLinkedPngImage("icon_stirrer", statusData.stirrer, "motor_", "ON / OFF");
 		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");
 		setLinkedPngImage("icon_heater_2", statusData.heaters[1], "heater_", "ON / OFF");
-		setValue("temperature1", statusData.temperatures[0].value, "°C");
+		setDecimalValue("temperature1", statusData.temperatures[0].value, "°C");
 		setLink("temperature1_icon", statusData.temperatures[0], "Temperature [°C]");
-		setValue("temperature2", statusData.temperatures[1].value, "°C");
+		setDecimalValue("temperature2", statusData.temperatures[1].value, "°C");
 		setLink("temperature2_icon", statusData.temperatures[1], "Temperature [°C]");
-		setValue("avgTemp", statusData.avgTemp.value, "°C");
+		setDecimalValue("avgTemp", statusData.avgTemp.value, "°C");
 		setLink("temperatureAvg_icon", statusData.avgTemp, "Temperature [°C]");
 		setValue("time", statusData.timeString);
 		if (statusData.stirrerRunning) {
-			setValue("rotationSpeed", statusData.rotation, "U/min");
+			setDecimalValue("rotationSpeed", statusData.rotation, "U/min");
 		} else {
 			setValue("rotationSpeed", "");
 		}
@@ -60,25 +60,31 @@ function setAction(id, component, labelString) {
 	actionComponent = component;
 	actionLabelString = labelString;
 	
+	console.log(component);
+	
 	if (component.on == null) {
 		performAction('showChart');
 		return;
 	} else if (component.on) {
 		document.getElementById("switchOFF").style.display = "block";
 		document.getElementById("switchON").style.display = "none";
-	} else if (component.on) {
+	} else  {
 		document.getElementById("switchON").style.display = "block";
 		document.getElementById("switchOFF").style.display = "none";
 	}
 	overlay('display');
 }
 
-function performAction(action) {
+function performAction(action, time) {
 	if ("showChart" == action) {
 		drawChart(actionComponent.id , actionLabelString, "chartCanvas", false);
 		document.getElementById("clickChartTab").click(); 
 	} else {
-		fetch(contextPath + "/v1/api/devices/relay/" + actionComponent.id + "/"+ action, {
+		var url = contextPath + "/v1/api/devices/relay/" + actionComponent.id + "/"+ action;
+		if (time != null) {
+			url += "?duration=" + time;
+		}
+		fetch (url, {
 			  method: 'PUT',
 			}).then((response) => {
 				if (response.status != 200) {
@@ -89,6 +95,11 @@ function performAction(action) {
 			});
 	}
 	overlay('hide');
+}
+
+function setDecimalValue(id, value, scale) {
+	var text = value.toLocaleString( undefined, { maximumFractionDigits: 2 });
+	setValue(id, text, scale);
 }
 
 function setValue(id, text, scale) {

@@ -38,6 +38,7 @@ public class BrewServerApplication extends Application {
 		
 		s.add(MultiPartFeature.class);
 		s.add(BrewServerExceptionMapper.class);
+		s.add(DefaultExceptionMapper.class);
 		return s;
 	}
 

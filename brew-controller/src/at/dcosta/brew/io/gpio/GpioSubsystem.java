@@ -23,7 +23,8 @@ public class GpioSubsystem {
 	}
 
 	private final GpioController gpio;
-	private final Map<Integer, Relay> relays;
+	private final Map<Integer, Relay> relaysByPi4JPin;
+	private final Map<String, Relay> relaysById;
 	private final boolean isMockPi;
 
 	private GpioSubsystem() {
@@ -33,13 +34,18 @@ public class GpioSubsystem {
 		} else {
 			gpio = GpioFactory.getInstance();
 		}
-		relays = new HashMap<>();
+		relaysByPi4JPin = new HashMap<>();
+		relaysById = new HashMap<>();
 	}
 
 	public Relay getRelayByPi4JPin(int pi4jPinNumber) {
-		return relays.get(pi4jPinNumber);
+		return relaysByPi4JPin.get(pi4jPinNumber);
 	}
-		public Relay getRelay(String name, int pi4jPinNumber) {
+	public Relay getRelayById(String id) {
+		return relaysById.get(id);
+	}
+
+	public Relay getRelay(String name, int pi4jPinNumber) {
 		Relay relay = getRelayByPi4JPin(pi4jPinNumber);
 		if (relay == null) {
 			if (isMockPi) {
@@ -47,7 +53,8 @@ public class GpioSubsystem {
 			} else {
 				relay = new GpioRelay(name, pi4jPinNumber, gpio);
 			}
-			relays.put(pi4jPinNumber, relay);
+			relaysByPi4JPin.put(pi4jPinNumber, relay);
+			relaysById.put(relay.getID(), relay);
 		}
 		return relay;
 	}
@@ -60,10 +67,10 @@ public class GpioSubsystem {
 	}
 
 	public void shutdown() {
-		for (Relay relay : relays.values()) {
+		for (Relay relay : relaysByPi4JPin.values()) {
 			relay.off();
 		}
-		relays.clear();
+		relaysByPi4JPin.clear();
 		if (!isMockPi) {
 			gpio.shutdown();
 		}

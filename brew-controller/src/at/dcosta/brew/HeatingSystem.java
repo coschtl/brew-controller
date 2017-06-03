@@ -14,9 +14,10 @@ import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 
-public abstract class HeatingSystem {
+public abstract class HeatingSystem  {
 
 	private static final long SWITCHING_INTERVAL = 1000l * 10l;
 
@@ -30,6 +31,7 @@ public abstract class HeatingSystem {
 	private long lastSwitchingTime;
 	private SensorStatus sensorStatus = SensorStatus.OK;
 	private String errorStatus;
+
 
 	public HeatingSystem(NotificationService notificationService) {
 		this.notificationService = notificationService;
@@ -62,6 +64,8 @@ public abstract class HeatingSystem {
 		if (heaters.size() < 1) {
 			throw new ConfigurationException("No valid " + getClass().getSimpleName() + " heater(s) configured!)");
 		}
+		
+		ThreadManager.getInstance().newThread(new UserInteractionExecuter(), "UserInteractionExecuter").start();
 	}
 
 	public NotificationService getNotificationService() {
@@ -73,6 +77,7 @@ public abstract class HeatingSystem {
 		handleSensorStatus();
 		return temp;
 	}
+	
 
 	public boolean isInErrorStatus() {
 		return errorStatus != null;
@@ -90,8 +95,8 @@ public abstract class HeatingSystem {
 		if (averageTemperature.getSensorStatus() == sensorStatus) {
 			return;
 		}
-		notificationService.sendNotification(NotificationType.WARNING, "Sensor status " + averageTemperature.getSensorStatus(),
-				averageTemperature.getError());
+		notificationService.sendNotification(NotificationType.WARNING,
+				"Sensor status " + averageTemperature.getSensorStatus(), averageTemperature.getError());
 		sensorStatus = averageTemperature.getSensorStatus();
 	}
 
@@ -108,16 +113,17 @@ public abstract class HeatingSystem {
 		double aktTemperature = getTemperature();
 		for (int i = 0; i < heaters.size(); i++) {
 			Relay heater = heaters.get(i);
-			if (aktTemperature + multipleHeaterTempDiff * i < targetTemperature) {
-				heater.on();
-			} else {
-				heater.off();
+			if (heater.isControlledAutomatically()) {
+				if (aktTemperature + multipleHeaterTempDiff * i < targetTemperature) {
+					heater.on();
+				} else {
+					heater.off();
+				}
 			}
 		}
 	}
 
 	protected abstract int[] getHeaterPins();
-
 
 	protected abstract double getMinTemperatureIncreasePerMinute();
 

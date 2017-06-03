@@ -68,10 +68,10 @@ public class MashingSystem extends HeatingSystem {
 			ThreadUtil.sleepSeconds(10);
 			aktRestTimeMinutes++;
 			if (aktRestTimeMinutes == 5) {
-				startStirrer();
+				startStirrer(false);
 			} else if (aktRestTimeMinutes == 6) {
 				aktRestTimeMinutes = 0;
-				stoptStirrer();
+				stoptStirrer(false);
 				if (getTemperature() < minTemp) {
 					logTemperature();
 					heatToTemperature(rest.getTemperature(),
@@ -83,7 +83,7 @@ public class MashingSystem extends HeatingSystem {
 	}
 
 	public void heat(double targetTemperature) throws BrewException {
-		startStirrer();
+		startStirrer(true);
 		heatingMonitor.start();
 		try {
 
@@ -103,7 +103,7 @@ public class MashingSystem extends HeatingSystem {
 	public void switchOff() {
 		super.switchOff();
 		rpmSensor.switchOff();
-		stoptStirrer();
+		stoptStirrer(true);
 	}
 
 	private boolean isStirrerRunning(int maxWaitSeconds) {
@@ -117,12 +117,16 @@ public class MashingSystem extends HeatingSystem {
 		return false;
 	}
 
-	private void startStirrer() {
-		stirrer.start();
+	private void startStirrer(boolean force) {
+		if (force || stirrer.isControlledAutomatically()) {
+			stirrer.on();
+		}
 	}
 
-	private void stoptStirrer() {
-		stirrer.stop();
+	private void stoptStirrer(boolean force) {
+		if (force || stirrer.isControlledAutomatically()) {
+			stirrer.off();
+		}
 	}
 
 	private void stoptStirrerDelayed() {

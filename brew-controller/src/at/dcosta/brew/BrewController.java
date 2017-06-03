@@ -4,6 +4,9 @@ import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.db.Brew;
 import at.dcosta.brew.db.BrewDB;
+import at.dcosta.brew.db.BrewStep;
+import at.dcosta.brew.db.BrewStep.Name;
+import at.dcosta.brew.db.BrewStepNameFactory;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
@@ -41,18 +44,33 @@ public class BrewController implements StoppableRunnable {
 	public void run() {
 		try {
 			InfusionRecipe recipe = (InfusionRecipe) RecipeReader.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
+			BrewStepNameFactory stepnames = new BrewStepNameFactory();
 			// mashing
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			brew.setBrewStatus(BrewStatus.MASHING);
+			brewDb.persist(brew);
+			
 			// heat to the mashing temperature
+			BrewStep currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_WATER), "Heat water to " + recipe.getMashingTemperature() + "°C");
 			mashingSystem.heat(recipe.getMashingTemperature());
+			brewDb.complete(currentBrewStep);
 
 			// add malts
+			currentBrewStep = brewDb.addStep(brew.getId(),stepnames.stepname(Name.ADD_MALTS), "Add malts");
 			mashingSystem.addMalts();
+			brewDb.complete(currentBrewStep);
 
 			// do the rests
+			int count =1;
 			for (Rest rest : recipe.getRests()) {
+				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_FOR_REST),  "Heat to "+ rest.getTemperature()+ "°C for rest " + count);
 				mashingSystem.heat(rest.getTemperature());
+				brewDb.complete(currentBrewStep);
+				
+				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.REST), "Rest " + count);
 				mashingSystem.doRest(rest);
+				brewDb.complete(currentBrewStep);
+				count++;
 			}
 			notificationService.sendNotification(NotificationType.INFO, "Malting finised",
 					"The malting has finished. Please start lauthering and do not forget to heat the secundary water!");

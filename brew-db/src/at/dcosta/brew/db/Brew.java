@@ -1,6 +1,7 @@
 package at.dcosta.brew.db;
 
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -54,6 +55,9 @@ public class Brew {
 	}
 
 	public Set<BrewStep> getSteps() {
+		if (steps == null) {
+			return Collections.emptySet();
+		}
 		return steps;
 	}
 

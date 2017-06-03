@@ -23,7 +23,7 @@ var aktSubmenu;
 
 function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
-	r.open("GET", contextPath + "/v1/api/recipes/0/steps/" + step, true);
+	r.open("GET", contextPath + "/v1/api/recipes/-1/steps/" + step, true);
 	r.onreadystatechange = function() {
 		if (r.readyState != 4 || r.status != 200) {
 			return;
@@ -96,7 +96,7 @@ function overlay(mode) {
 }
 
 function init() {
-	loadSubmenu("mashing");
+	loadSubmenu("MASHING");
 	loadStatus();
 	setInterval(loadStatus, 2500);
 }
@@ -104,10 +104,10 @@ function init() {
 </script>
 </head>
 <body onload="init();">
-	<table border ="0">
+	<table>
 		<tr>
 		<td valign="middle" align="center" colspan="3">
-			<div class="menu main_menu">Rezept</div>
+			<div class="menu main_menu"><a href="recipes.html">Rezept</a></div>
 			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
 			<div class="menu_selected menu main_menu">Einmaischen</div>
 			<img src="../theme/left.png"  class="right rotateimg180" onclick=""/>
@@ -127,7 +127,7 @@ function init() {
 		<td align="center" id="submenu" rowspan="2">
 		</td>
 		<td align="center">
-			<table class="status" border="0">
+			<table class="status">
 				<tr>
 					<td></td>
 					<td colspan="2" align="center"><span id="rotationSpeed"></span><br /></td>
@@ -185,7 +185,7 @@ function init() {
 			
 			<div id="logTab" class="tabcontent">
 				<div  style="width:500px;height:500px">
-			  		<h3>Brew-Log:</h3>
+			  		<h3>Brau-Log:</h3>
 			  		<p>Was bisher geschah</p>
 			  	</div> 
 			</div>
@@ -204,8 +204,19 @@ function init() {
 	<div id="lightBox" style="display:none">
 		<p id="actionSource"></p>
 		<div id="showChart" class="menu sub_menu" onClick="performAction('showChart')">Chart<br/></div>
-		<div id="switchON" class="menu sub_menu" onClick="performAction('switchOn')">ON<br/></div>
-		<div id="switchOFF" class="menu sub_menu" onClick="performAction('switchOff')">OFF<br/></div>
+		<div id="switchAUTO" class="menu sub_menu" onClick="performAction('switchAuto')">Automatik<br/></div>
+		<div id="switchON">
+			<div class="menu sub_menu" onClick="performAction('switchOn')">ON<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOn', 1)">ON für 1 Minute<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOn', 5)">ON für 5 Minuten<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOn', 10)">ON für 10 Minuten<br/></div>
+		</div>
+		<div id="switchOFF">
+			<div class="menu sub_menu" onClick="performAction('switchOff')">OFF<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOff', 1)">OFF für 1 Minute<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOff', 5)">OFF für 5 Minuten<br/></div>
+			<div class="menu sub_menu" onClick="performAction('switchOff', 10)">OFF für 10 Minuten<br/></div>
+		</div>
 	</div>
 </body>
 </html>

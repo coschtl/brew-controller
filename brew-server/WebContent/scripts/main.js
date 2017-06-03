@@ -39,7 +39,7 @@ function error(text) {
 	if (elm == null) {
 		alert(text);
 	} else {
-		elm.innerHTML = text;
+		elm.innerHTML = maskXml(text);
 		show("error");
 	}
 }
@@ -53,7 +53,7 @@ function message(text) {
 	if (elm == null) {
 		alert(text);
 	} else {
-		elm.innerHTML = text;
+		elm.innerHTML = maskXml(text);
 		show("message");
 	}
 }

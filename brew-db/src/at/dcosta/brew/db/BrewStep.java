@@ -4,9 +4,31 @@ import java.sql.Timestamp;
 
 public class BrewStep {
 
+	public static enum Name {
+		HEAT_WATER, ADD_MALTS, HEAT_FOR_REST, REST, BOILING, ADD_HOP, LAUTHERING, LAUTHERING_REST, WHIRLPOOL, COOL;
+	}
+	
+	public static class StepName {
+		
+		private final String name; 
+		
+		public StepName(Name name, int instanceNumber) {
+			this.name = name.toString() + "_" + instanceNumber;
+		}
+		public StepName(String stepName) {
+			this.name = stepName;
+		}
+		
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
 	private int id;
 	private Brew brew;
-	private String stepName;
+	private StepName stepName;
+	private String description;
 	private Timestamp startTime, endTime;
 
 	public Brew getBrew() {
@@ -21,12 +43,21 @@ public class BrewStep {
 		return id;
 	}
 
+	public StepName getStepName() {
+		return stepName;
+	}
+
+	public BrewStep setStepName(StepName stepName) {
+		this.stepName = stepName;
+		return this;
+	}
+
 	public Timestamp getStartTime() {
 		return startTime;
 	}
 
-	public String getStepName() {
-		return stepName;
+	public String getDescription() {
+		return description;
 	}
 
 	public BrewStep setBrew(Brew brew) {
@@ -49,8 +80,8 @@ public class BrewStep {
 		return this;
 	}
 
-	public BrewStep setStepName(String stepName) {
-		this.stepName = stepName;
+	public BrewStep setDescription(String description) {
+		this.description = description;
 		return this;
 	}
 

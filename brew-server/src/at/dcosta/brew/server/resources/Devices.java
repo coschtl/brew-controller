@@ -13,7 +13,7 @@ import at.dcosta.brew.db.ManualAction.Type;
 @Path("devices")
 public class Devices {
 	
-	private static final String _GPIO_ = "_GPIO_";
+	//private static final String _GPIO_ = "_GPIO_";
 	private final InteractionDB interactionDB;
 
 	public Devices() {
@@ -25,20 +25,21 @@ public class Devices {
 	public void switchRelay(@PathParam("deviceId") String deviceId, @PathParam("action") String action,
 			@QueryParam("duration") @DefaultValue("-1") int duration, @QueryParam("arguments") String arguments) {
 		ManualAction manualAction = new ManualAction();
-		manualAction.setTarget(deviceId2PI4JPin(deviceId));
+		manualAction.setTarget(deviceId);
 		manualAction.setType(Type.fromAction(action));
-		manualAction.setDuration(duration);
+		manualAction.setDurationMinutes(duration);
 		manualAction.setArguments(arguments);
 		System.out.println(manualAction);
 		interactionDB.addEntry(manualAction);
 	}
 	
-	private String deviceId2PI4JPin(String deviceId) {
-		int pos = deviceId.indexOf(_GPIO_);
-		if (pos < 1) {
-			throw new IllegalArgumentException("unknown deviceId: " + deviceId);
-		}
-		return deviceId.substring(pos + _GPIO_.length());
-	}
+//	private String deviceId2PI4JPin(String deviceId) {
+//		System.out.println(deviceId);
+//		int pos = deviceId.indexOf(_GPIO_);
+//		if (pos < 1) {
+//			throw new IllegalArgumentException("unknown deviceId: " + deviceId);
+//		}
+//		return deviceId.substring(pos + _GPIO_.length());
+//	}
 
 }

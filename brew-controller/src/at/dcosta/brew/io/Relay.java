@@ -2,9 +2,10 @@ package at.dcosta.brew.io;
 
 public interface Relay extends Actor {
 
-	public boolean isOn();
+	 boolean isOn();
 
-	public void off();
+	 void off();
 
-	public void on();
+	 void on();
+	
 }

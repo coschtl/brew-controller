@@ -10,7 +10,7 @@ public class ManualAction implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static enum Type {
-		SWITCH_ON("switchOn"), SWITCH_OFF("switchOff"), ADD_TIME("addTime");
+		SWITCH_ON("switchOn"), SWITCH_OFF("switchOff"), SWITCH_TO_AUTOMATIC ("switchAuto"), ADD_TIME("addTime");
 
 		private static final Map<String, Type> BY_ACTION;
 		static {
@@ -38,10 +38,10 @@ public class ManualAction implements Serializable {
 	private Timestamp time, executionTime;
 	private Type type;
 	private String target, arguments;
-	private int id, duration;
+	private int id, durationMinutes;
 
 	public ManualAction() {
-		this.duration = -1;
+		this.durationMinutes = -1;
 	}
 
 	public void setId(int id) {
@@ -92,12 +92,12 @@ public class ManualAction implements Serializable {
 		this.arguments = arguments;
 	}
 
-	public int getDuration() {
-		return duration;
+	public int getDurationMinutes() {
+		return durationMinutes;
 	}
 
-	public void setDuration(int duration) {
-		this.duration = duration;
+	public void setDurationMinutes(int durationMinutes) {
+		this.durationMinutes = durationMinutes;
 	}
 
 	@Override
@@ -107,8 +107,8 @@ public class ManualAction implements Serializable {
 		if (arguments != null) {
 			b.append(" (").append(arguments).append(")");
 		}
-		if (duration > 0) {
-			b.append(", duration=").append(duration).append(" minutes");
+		if (durationMinutes > 0) {
+			b.append(", duration=").append(durationMinutes).append(" minutes");
 		}
 		return b.toString();
 	}

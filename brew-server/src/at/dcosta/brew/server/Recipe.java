@@ -5,26 +5,29 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlElement;
 
 public class Recipe implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@XmlElement
 	private int id;
-	
+
 	@XmlElement
 	private String name;
 
 	@XmlElement
 	private String recipe;
-	
+
 	@XmlElement
 	private String source;
-	
+
 	@XmlElement
 	private String addedOn;
-	
+
 	@XmlElement
-	private int  brewCount;
+	private int brewCount;
+
+	@XmlElement
+	private boolean brewRunning;
 
 	public String getName() {
 		return name;
@@ -32,6 +35,14 @@ public class Recipe implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public boolean isBrewRunning() {
+		return brewRunning;
+	}
+
+	public void setBrewRunning(boolean brewRunning) {
+		this.brewRunning = brewRunning;
 	}
 
 	public String getRecipe() {
@@ -73,5 +84,5 @@ public class Recipe implements Serializable {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 }
