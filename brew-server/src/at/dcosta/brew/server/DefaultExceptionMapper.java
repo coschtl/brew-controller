@@ -8,6 +8,7 @@ public class DefaultExceptionMapper implements ExceptionMapper<Throwable> {
 
 	@Override
 	public Response toResponse(Throwable t) {
+		t.printStackTrace();
 		return Response.status(Status.INTERNAL_SERVER_ERROR).header("x-server-error", "Fehler: " + t.getMessage())
 				.entity(t.getMessage()).build();
 	}

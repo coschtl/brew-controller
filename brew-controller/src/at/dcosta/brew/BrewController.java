@@ -44,29 +44,36 @@ public class BrewController implements StoppableRunnable {
 	public void run() {
 		try {
 			InfusionRecipe recipe = (InfusionRecipe) RecipeReader.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
+			System.out.println("starting recipe: " + recipe.getName());
 			BrewStepNameFactory stepnames = new BrewStepNameFactory();
+			
 			// mashing
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
 			brew.setBrewStatus(BrewStatus.MASHING);
 			brewDb.persist(brew);
+			System.out.println("start mashing");
 			
 			// heat to the mashing temperature
 			BrewStep currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_WATER), "Heat water to " + recipe.getMashingTemperature() + "°C");
+			System.out.println("start heating");
 			mashingSystem.heat(recipe.getMashingTemperature());
 			brewDb.complete(currentBrewStep);
 
 			// add malts
 			currentBrewStep = brewDb.addStep(brew.getId(),stepnames.stepname(Name.ADD_MALTS), "Add malts");
+			System.out.println("add malts");
 			mashingSystem.addMalts();
 			brewDb.complete(currentBrewStep);
 
 			// do the rests
-			int count =1;
+			int count = 0;
 			for (Rest rest : recipe.getRests()) {
+				System.out.println("heating for rest " + count);
 				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_FOR_REST),  "Heat to "+ rest.getTemperature()+ "°C for rest " + count);
 				mashingSystem.heat(rest.getTemperature());
 				brewDb.complete(currentBrewStep);
 				
+				System.out.println("doing rest " + count);
 				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.REST), "Rest " + count);
 				mashingSystem.doRest(rest);
 				brewDb.complete(currentBrewStep);

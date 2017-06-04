@@ -19,6 +19,12 @@ public class Step implements Serializable {
 	
 	@XmlElement
 	private boolean finished;
+	
+	@XmlElement
+	private String headerText;
+	
+	@XmlElement
+	private String description;
 
 	public Step() {
 		// needed for jaxb
@@ -57,6 +63,24 @@ public class Step implements Serializable {
 
 	public Step setId(String id) {
 		this.id = id;
+		return this;
+	}
+	
+	public String getHeaderText() {
+		return headerText;
+	}
+
+	public Step setHeaderText(String headerText) {
+		this.headerText = headerText;
+		return this;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Step setDescription(String description) {
+		this.description = description;
 		return this;
 	}
 

@@ -7,6 +7,7 @@
 <link rel="stylesheet" type="text/css" href="../theme/status.css" />
 <link rel="stylesheet" type="text/css" href="../theme/menu.css" />
 <script type="text/javascript" src="../scripts/Chart.bundle.js" ></script>
+<script type="text/javascript" src="../scripts/main.js" ></script>
 <script type="text/javascript" src="../scripts/chartLoader.js" ></script>
 <script type="text/javascript" src="../scripts/refreshStatus.js" ></script>
 <script type="text/javascript">
@@ -20,6 +21,7 @@ if (contextPath.substring(0,4) == "/app") {
 }
 
 var aktSubmenu;
+ 
 
 function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
@@ -29,6 +31,10 @@ function loadSubmenu(step) {
 			return;
 		}
 		var submenu = JSON.parse(r.responseText);
+		if (aktSubmenu == submenu) {
+			return;
+		}
+		aktSubmenu = submenu;
 		var last = submenu.length-1;
 		for (var i=0;i<=last; i++) {
 			addSubmenuEntry(submenu[i], i==0, i<last);
@@ -43,15 +49,22 @@ function addSubmenuEntry(menuEntry, clearBeforeAdd, addArrow) {
 	html +="<span class=\"menu sub_menu";
 	if (menuEntry.active) {
 		html += " menu_selected";
+		byId("currentStepHeader").innerHTML = maskXml(menuEntry.headerText);
+		byId("currentStepText").innerHTML = maskXml(menuEntry.description);
 	}
 	if (menuEntry.finished) {
 		html += " menu_finished";
 	}
+	html += "\" onclick=\"showStepDetails('" +  maskXml(menuEntry.description) + "');";
 	html += "\">" + menuEntry.name + "</span>";
 	if (addArrow) {
 		html +="<img src=\"../theme/up.png\" class=\"down rotateimg180\"/>";
 	}
 	submenu.innerHTML = html;
+}
+
+function showStepDetails(details) {
+	alert(details);
 }
 
 ///// tabs /////
@@ -95,9 +108,14 @@ function overlay(mode) {
    }
 }
 
-function init() {
+function loadMashingSubmenu() {
 	loadSubmenu("MASHING");
+}
+
+function init() {
+	loadMashingSubmenu();
 	loadStatus();
+	setInterval(loadMashingSubmenu, 5000);
 	setInterval(loadStatus, 2500);
 }
 
@@ -123,7 +141,7 @@ function init() {
 			<hr style="color:#d6d6d6"/>
 		</td>
 		</tr>
-		<tr>
+		<tr valign="top">
 		<td align="center" id="submenu" rowspan="2">
 		</td>
 		<td align="center">
@@ -172,6 +190,8 @@ function init() {
 					<td></td>
 				</tr>
 			</table>
+			<div id="currentStepHeader" class="currentStep currentStepHeader"></div>
+			<div id="currentStepText"class="currentStep"></div>
 		</td>
 		<td>
 			<div class="tab">

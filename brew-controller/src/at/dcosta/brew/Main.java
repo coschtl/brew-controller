@@ -21,6 +21,7 @@ import at.dcosta.brew.com.MailNotificationService;
 import at.dcosta.brew.com.Notification;
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.Brew;
 import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
@@ -38,6 +39,7 @@ import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.FileUtil;
+import at.dcosta.brew.util.ManagedThread;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 import at.dcosta.brew.xml.dom.Document;
@@ -89,8 +91,17 @@ public class Main {
 		}
 		Configuration.initialize(configFile);
 
-		new BrewDB();
+		BrewDB brewDB = new BrewDB();
 		new Cookbook();
+
+		if (cmdLine.hasOption("brew")) {
+			Brew brew = brewDB.getRunningBrew();
+			ThreadManager.getInstance()
+					.newThread(new BrewController(brew, new NotificationService(brew.getCookbookEntryId())),
+							"BrewController")
+					.start();
+			return;
+		}
 
 		if (cmdLine.hasOption("scanW1")) {
 			new W1Bus().scanW1Bus();
@@ -294,6 +305,7 @@ public class Main {
 		options.addOption(new Option("importRecipe", true, "import the given recipe"));
 		options.addOption(new Option("recipeSource", true, "the source of the recipe just getting imported"));
 		options.addOption(new Option("listRecipes", "list all recipes"));
+		options.addOption(new Option("brew", false, "brew the recipe which has been selected via GUI."));
 		options.addOption(new Option("showRecipe", true, "output the xml of the recipe"));
 		options.addOption(new Option("temperature", true, "use this argument with -heat or -rest"));
 		options.addOption(new Option("heat", "heat to the temperature given with the -temperature argument"));

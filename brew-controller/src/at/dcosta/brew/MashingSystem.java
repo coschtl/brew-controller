@@ -44,6 +44,7 @@ public class MashingSystem extends HeatingSystem {
 			rpmSensor = new MockSensor(ComponentType.ROTATION_SPEED_SENSOR, "RPM-Sensor", "u/min").setValue(30);
 		}
 		stirrer = new Stirrer();
+		System.out.println(getClass().getSimpleName() + " initialized");
 	}
 
 	public void addMalts() {

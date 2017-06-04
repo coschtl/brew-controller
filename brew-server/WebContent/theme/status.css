@@ -16,9 +16,25 @@ img.statusIcon {
 }
  
 .status {
- 	padding:2em;
+ 	padding:0.5em 2em 1em 2em;
  }
  
+ div.currentStep {
+ 	border-style: solid;
+    border-color: #ccc;
+    border-width: 1px;
+    height: 150px;
+    padding: 10px;
+    text-align: left;
+    border-radius: 0 0 6px 6px;
+ }
+ 
+ div.currentStepHeader {
+ 	background: #eee;
+ 	text-align: center;
+ 	height: auto;
+ 	border-radius: 6px 6px 0 0;
+ }
 
  div.tab {
     overflow: hidden;
@@ -26,6 +42,7 @@ img.statusIcon {
     border-color: #ccc;
     border-width: 0 1px 0 0;
     background: #eee;
+    border-radius: 6px 6px 0 0;
  }
 
 /* Style the buttons inside the tab */
@@ -54,7 +71,7 @@ div.tab button.active {
     display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
-    /*border-bottom: none;*/
+   	border-radius: 0 0 6px 6px; 
     height: 100%;
 }
 

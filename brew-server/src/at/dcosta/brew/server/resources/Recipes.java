@@ -35,6 +35,7 @@ import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.db.FetchType;
 import at.dcosta.brew.recipe.InfusionRecipe;
+import at.dcosta.brew.recipe.Ingredient;
 import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.recipe.Rest;
@@ -180,18 +181,59 @@ public class Recipes extends AbstractResource {
 		List<Step> l = new ArrayList<>();
 		switch (brewStatus) {
 		case MASHING:
-			l.add(new Step("heat1", "aufheizen").setFinished(isStepFinished(stepnames.stepname(Name.HEAT_WATER), runningBrew)));
-			l.add(new Step("mashing", "einmaischen").setFinished(isStepFinished(stepnames.stepname(Name.ADD_MALTS), runningBrew)));
-			for (int i=0; i<recipe.getRests().size(); i++) {
-				l.add(new Step("heat2", "heizen").setFinished(isStepFinished(stepnames.stepname(Name.HEAT_FOR_REST), runningBrew)));
-				l.add(new Step("rest1", "rasten").setFinished(isStepFinished(stepnames.stepname(Name.REST), runningBrew)));
+			l.add(createStep(Name.HEAT_WATER, "aufheizen", stepnames, runningBrew, recipe));
+			l.add(createStep(Name.ADD_MALTS, "einmaischen", stepnames, runningBrew, recipe));
+			for (int i = 0; i < recipe.getRests().size(); i++) {
+				l.add(createStep(Name.HEAT_FOR_REST, "heizen", stepnames, runningBrew, recipe));
+				l.add(createStep(Name.REST, "rasten", stepnames, runningBrew, recipe));
 			}
 			break;
 		default:
 			break;
 		}
-
 		return l;
+	}
+
+	private Step createStep(Name name, String text, BrewStepNameFactory stepNames, Brew runningBrew,
+			InfusionRecipe recipe) {
+		StepName stepName = stepNames.stepname(name);
+		Step step = new Step(stepName.toString(), text).setFinished(isStepFinished(stepName, runningBrew))
+				.setActive(isStepActive(stepName, runningBrew));
+		return addDescription(stepName, recipe, step);
+	}
+
+	private Step addDescription(StepName stepName, InfusionRecipe recipe, Step step) {
+		StringBuilder descr = new StringBuilder();
+		Rest rest;
+		switch (stepName.getName()) {
+		case HEAT_WATER:
+			return step.setHeaderText("Aufheizen auf Einmaisch-Temperatur").setDescription(
+					recipe.getPrimaryWater() + " Liter Brauwasser werden bis zur Einmaischtemperatur von "
+							+ recipe.getMashingTemperature() + "°C erhitzt.");
+		case ADD_MALTS:
+			descr.append("Folgende Malze werden hinzugefügt:<ul>");
+			for (Ingredient malt : recipe.getMalts()) {
+				descr.append("<li>").append(malt.getAmount()).append("g ").append(malt.getName()).append("</li>");
+			}
+			descr.append("</ul>");
+			return step.setHeaderText("Malze hinzufügen").setDescription(descr.toString());
+		case REST:
+			rest = recipe.getRests().get(stepName.getInstanceNumber());
+			descr.append(stepName.getInstanceNumber() + 1).append(". Rast: ").append(rest.getMinutes())
+					.append(" Minuten bei ").append(rest.getTemperature()).append("°C");
+			return step.setHeaderText("Rasten").setDescription(descr.toString());
+		case HEAT_FOR_REST:
+			rest = recipe.getRests().get(stepName.getInstanceNumber());
+			descr.append("Aufheizen der Maische auf ").append(rest.getTemperature()).append("°C für die ")
+					.append(stepName.getInstanceNumber() + 1).append(". Rast.");
+			return step.setHeaderText("Maische aufheizen").setDescription(descr.toString());
+		case LAUTHERING_REST:
+			descr.append("Umfüllen der Maische in den Läuter-Behälter.<br/>Anschließend muss eine Läuterruhe von ")
+					.append(recipe.getLauteringRest()).append(" Minuten eingehalten werden.");
+			return step.setHeaderText("Läuter-Rast").setDescription(descr.toString());
+		}
+		return step;
+
 	}
 
 	private boolean isStepFinished(StepName stepName, Brew runningBrew) {
@@ -201,6 +243,21 @@ public class Recipes extends AbstractResource {
 		for (BrewStep step : runningBrew.getSteps()) {
 			if (step.getStepName().equals(stepName)) {
 				return step.getEndTime() != null;
+			}
+		}
+		return false;
+	}
+
+	private boolean isStepActive(StepName stepName, Brew runningBrew) {
+		System.out.println("isStepActive: " + stepName.toString()+" runningBrew:" +runningBrew.getSteps());
+		if (runningBrew == null) {
+			return false;
+		}
+		for (BrewStep step : runningBrew.getSteps()) {
+			System.out.println("isStepActive: " + stepName.toString() );
+			if (step.getStepName().equals(stepName)) {
+				System.out.println("isStepActive: "+ stepName + ": " + step.getStartTime() + " - " + step.getEndTime() );
+				return step.getStartTime() != null && step.getEndTime() == null;
 			}
 		}
 		return false;

@@ -80,7 +80,8 @@ public class HeatingMonitor {
 	}
 
 	private void createMonitorThread() {
-		monitorThread = ThreadManager.getInstance().newThread(new HeatingMonitorMonitor(heatingSystem),
+		HeatingMonitorMonitor heatingMonitorMonitor = new HeatingMonitorMonitor(heatingSystem);
+		monitorThread = ThreadManager.getInstance().newThread(heatingMonitorMonitor,
 				"Heating Monitor");
 	}
 

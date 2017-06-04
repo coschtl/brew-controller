@@ -7,22 +7,62 @@ public class BrewStep {
 	public static enum Name {
 		HEAT_WATER, ADD_MALTS, HEAT_FOR_REST, REST, BOILING, ADD_HOP, LAUTHERING, LAUTHERING_REST, WHIRLPOOL, COOL;
 	}
-	
+
 	public static class StepName {
-		
-		private final String name; 
-		
-		public StepName(Name name, int instanceNumber) {
-			this.name = name.toString() + "_" + instanceNumber;
-		}
+
+		private final Name name;
+		private final int instanceNumber;
+
 		public StepName(String stepName) {
-			this.name = stepName;
+			int pos = stepName.lastIndexOf('_');
+			name = Name.valueOf(stepName.substring(0, pos));
+			instanceNumber = Integer.parseInt(stepName.substring(pos + 1));
 		}
-		
-		@Override
-		public String toString() {
+
+		public StepName(Name name, int instanceNumber) {
+			this.name = name;
+			this.instanceNumber = instanceNumber;
+		}
+
+		public Name getName() {
 			return name;
 		}
+
+		public int getInstanceNumber() {
+			return instanceNumber;
+		}
+
+		@Override
+		public String toString() {
+			return new StringBuilder().append(name.toString()).append('_').append(instanceNumber).toString();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + instanceNumber;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StepName other = (StepName) obj;
+			if (instanceNumber != other.instanceNumber)
+				return false;
+			if (name != other.name)
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	private int id;
@@ -83,6 +123,11 @@ public class BrewStep {
 	public BrewStep setDescription(String description) {
 		this.description = description;
 		return this;
+	}
+	
+	@Override
+	public String toString() {
+		return getStepName().toString();
 	}
 
 }

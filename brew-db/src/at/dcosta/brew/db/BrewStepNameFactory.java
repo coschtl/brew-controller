@@ -18,7 +18,7 @@ public class BrewStepNameFactory {
 		Integer count = stepnames.get(name);
 		int c;
 		if (count == null) {
-			c = 1;
+			c = 0;
 		} else {
 			c = count.intValue() + 1;
 		}
