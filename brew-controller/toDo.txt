@@ -1,0 +1,2 @@
+ - der controller muss das rezept am richtigen step fortsetzen
+ - heiz-warnung erst nach ein paar minuten heizen aktivieren (heizen ist zu träge)

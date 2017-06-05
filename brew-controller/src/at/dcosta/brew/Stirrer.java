@@ -3,7 +3,6 @@ package at.dcosta.brew;
 import static at.dcosta.brew.Configuration.STIRRER_MOTOR_PIN;
 import static at.dcosta.brew.Configuration.STIRRER_OVERTIME_SECONDS;
 
-import at.dcosta.brew.io.Actor;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.util.StoppableRunnable;

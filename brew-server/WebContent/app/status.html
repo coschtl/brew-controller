@@ -49,8 +49,8 @@ function addSubmenuEntry(menuEntry, clearBeforeAdd, addArrow) {
 	html +="<span class=\"menu sub_menu";
 	if (menuEntry.active) {
 		html += " menu_selected";
-		byId("currentStepHeader").innerHTML = maskXml(menuEntry.headerText);
-		byId("currentStepText").innerHTML = maskXml(menuEntry.description);
+		byId("currentStepHeader").innerHTML = menuEntry.headerText;
+		byId("currentStepText").innerHTML = menuEntry.description;
 	}
 	if (menuEntry.finished) {
 		html += " menu_finished";

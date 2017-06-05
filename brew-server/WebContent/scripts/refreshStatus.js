@@ -87,7 +87,8 @@ function performAction(action, time) {
 		fetch (url, {
 			  method: 'PUT',
 			}).then((response) => {
-				if (response.status != 200) {
+				console.log(response);
+				if (response.status != 204) {
 					error(response);
 				}
 			}).catch((data) => {

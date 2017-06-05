@@ -108,14 +108,16 @@ public class MashingSystem extends HeatingSystem {
 	}
 
 	private boolean isStirrerRunning(int maxWaitSeconds) {
-		int done = maxWaitSeconds > 0 ? 10 * maxWaitSeconds : 1;
-		for (int i = 0; i < done; i++) {
-			if (rpmSensor.getValue() > 0) {
-				return true;
-			}
-			ThreadUtil.sleepMillis(100);
-		}
-		return false;
+		// FIXME: uncomment when rpm-sensor i´has been added (HARDWARE!)
+		// int done = maxWaitSeconds > 0 ? 10 * maxWaitSeconds : 1;
+		// for (int i = 0; i < done; i++) {
+		// if (rpmSensor.getValue() > 0) {
+		// return true;
+		// }
+		// ThreadUtil.sleepMillis(100);
+		// }
+		// return false;
+		return true;
 	}
 
 	private void startStirrer(boolean force) {
@@ -139,7 +141,6 @@ public class MashingSystem extends HeatingSystem {
 		return Configuration.getInstance().getIntArray(MASHING_HEATER_PINS);
 	}
 
-
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {
 		return Configuration.getInstance().getDouble(MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
@@ -152,6 +153,10 @@ public class MashingSystem extends HeatingSystem {
 
 	@Override
 	protected void heatToTemperatureWaiting() {
+		startStirrer(false);
+		if (!stirrer.isOn()) {
+			return;
+		}
 		if (!isStirrerRunning(1)) {
 			throw new BrewException("Stirrer does run anymore! --> heating stopped at " + getTemperature()
 					+ getTemperatureSensors().get(0).getScale());

@@ -130,6 +130,14 @@ public class BrewDB extends Database {
 		}
 		return brew;
 	}
+	public void abortRunningBrew() {
+		Brew runningBrew = getRunningBrew();
+		if (runningBrew != null) {
+			runningBrew.setBrewStatus(BrewStatus.ABORTED);
+			runningBrew.setEndTime(now());
+			persist(runningBrew);
+		}
+	}
 
 	public BrewStep addStep(int brewId, StepName stepName, String description) {
 		BrewStep step = new BrewStep();

@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -139,6 +140,13 @@ public class Recipes extends AbstractResource {
 		URI statusUri = URI.create(getAppBaseUri() + "/app/status.html");
 		return Response.status(Status.CREATED).location(statusUri).build();
 	}
+	@DELETE
+	@Path("recipes/abortRunningBrew")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response abortRunningBrew() {
+		brewDB.abortRunningBrew();
+		return Response.status(Status.OK).build();
+	}
 
 	private String getAppBaseUri() {
 		String restBaseUri = uriInfo.getBaseUri().toString();
@@ -249,14 +257,11 @@ public class Recipes extends AbstractResource {
 	}
 
 	private boolean isStepActive(StepName stepName, Brew runningBrew) {
-		System.out.println("isStepActive: " + stepName.toString()+" runningBrew:" +runningBrew.getSteps());
 		if (runningBrew == null) {
 			return false;
 		}
 		for (BrewStep step : runningBrew.getSteps()) {
-			System.out.println("isStepActive: " + stepName.toString() );
 			if (step.getStepName().equals(stepName)) {
-				System.out.println("isStepActive: "+ stepName + ": " + step.getStartTime() + " - " + step.getEndTime() );
 				return step.getStartTime() != null && step.getEndTime() == null;
 			}
 		}
