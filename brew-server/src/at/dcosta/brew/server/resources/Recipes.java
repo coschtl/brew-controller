@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,18 +48,14 @@ import at.dcosta.brew.server.Step;
 @Path("")
 public class Recipes extends AbstractResource {
 
-	@Context
-	private UriInfo uriInfo;
-
-	@Context
-	private HttpServletRequest request;
-
 	private final Cookbook cookbook;
 	private final BrewDB brewDB;
+	private final DateFormat dateFormat;
 
 	public Recipes() {
 		cookbook = new Cookbook();
 		brewDB = new BrewDB();
+		dateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 	}
 
 	public static enum ReturnType {
@@ -123,7 +120,8 @@ public class Recipes extends AbstractResource {
 	@PUT
 	@Path("recipes/{recipeId}/startBrew")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response startBrew(@PathParam("recipeId") int recipeId) {
+	public Response startBrew(@Context UriInfo uriInfo, @Context HttpServletRequest request,
+			@PathParam("recipeId") int recipeId) {
 		Brew runningBrew = brewDB.getRunningBrew();
 		if (runningBrew != null && runningBrew.getCookbookEntryId() != recipeId) {
 			CookbookEntry runningCookbookEntry = cookbook.getEntryById(runningBrew.getCookbookEntryId());
@@ -137,9 +135,10 @@ public class Recipes extends AbstractResource {
 		if (runningBrew == null) {
 			brewDB.startNewBrew(recipeId, new Timestamp(System.currentTimeMillis()));
 		}
-		URI statusUri = URI.create(getAppBaseUri() + "/app/status.html");
+		URI statusUri = URI.create(getAppBaseUri(uriInfo, request) + "/app/status.html");
 		return Response.status(Status.CREATED).location(statusUri).build();
 	}
+
 	@DELETE
 	@Path("recipes/abortRunningBrew")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -148,7 +147,7 @@ public class Recipes extends AbstractResource {
 		return Response.status(Status.OK).build();
 	}
 
-	private String getAppBaseUri() {
+	private String getAppBaseUri(UriInfo uriInfo, HttpServletRequest request) {
 		String restBaseUri = uriInfo.getBaseUri().toString();
 		String contextPath = request.getContextPath();
 		String appBaseUri = restBaseUri.substring(0, restBaseUri.indexOf(contextPath) + contextPath.length());
@@ -205,67 +204,79 @@ public class Recipes extends AbstractResource {
 	private Step createStep(Name name, String text, BrewStepNameFactory stepNames, Brew runningBrew,
 			InfusionRecipe recipe) {
 		StepName stepName = stepNames.stepname(name);
-		Step step = new Step(stepName.toString(), text).setFinished(isStepFinished(stepName, runningBrew))
-				.setActive(isStepActive(stepName, runningBrew));
-		return addDescription(stepName, recipe, step);
+		Step step = new Step(stepName.toString(), text);
+		BrewStep brewStep = getBrewStep(stepName, runningBrew);
+		Timestamp startTime = null;
+		Timestamp endTime = null;
+		if (brewStep != null) {
+			startTime = brewStep.getStartTime();
+			endTime = brewStep.getEndTime();
+			step.setFinished(brewStep.isFinished());
+			step.setActive(brewStep.isActive());
+		}
+		return addDescription(stepName, recipe, step, startTime, endTime);
 	}
 
-	private Step addDescription(StepName stepName, InfusionRecipe recipe, Step step) {
+	private Step addDescription(StepName stepName, InfusionRecipe recipe, Step step, Date startTime, Date endTime) {
+		String header = null;
 		StringBuilder descr = new StringBuilder();
-		Rest rest;
+		Rest rest = null;
 		switch (stepName.getName()) {
 		case HEAT_WATER:
-			return step.setHeaderText("Aufheizen auf Einmaisch-Temperatur").setDescription(
-					recipe.getPrimaryWater() + " Liter Brauwasser werden bis zur Einmaischtemperatur von "
-							+ recipe.getMashingTemperature() + "°C erhitzt.");
+			header = "Aufheizen auf Einmaisch-Temperatur";
+			descr.append(recipe.getPrimaryWater()).append(" Liter Brauwasser werden bis zur Einmaischtemperatur von ")
+					.append(recipe.getMashingTemperature()).append("°C erhitzt.");
+			break;
 		case ADD_MALTS:
+			header = "Malze hinzufügen";
 			descr.append("Folgende Malze werden hinzugefügt:<ul>");
 			for (Ingredient malt : recipe.getMalts()) {
 				descr.append("<li>").append(malt.getAmount()).append("g ").append(malt.getName()).append("</li>");
 			}
 			descr.append("</ul>");
-			return step.setHeaderText("Malze hinzufügen").setDescription(descr.toString());
+			break;
 		case REST:
+			header = "Rasten";
 			rest = recipe.getRests().get(stepName.getInstanceNumber());
 			descr.append(stepName.getInstanceNumber() + 1).append(". Rast: ").append(rest.getMinutes())
 					.append(" Minuten bei ").append(rest.getTemperature()).append("°C");
-			return step.setHeaderText("Rasten").setDescription(descr.toString());
+			break;
 		case HEAT_FOR_REST:
+			header = "Maische aufheizen";
 			rest = recipe.getRests().get(stepName.getInstanceNumber());
 			descr.append("Aufheizen der Maische auf ").append(rest.getTemperature()).append("°C für die ")
 					.append(stepName.getInstanceNumber() + 1).append(". Rast.");
-			return step.setHeaderText("Maische aufheizen").setDescription(descr.toString());
+			break;
 		case LAUTHERING_REST:
+			header = "Läuter-Rast";
 			descr.append("Umfüllen der Maische in den Läuter-Behälter.<br/>Anschließend muss eine Läuterruhe von ")
 					.append(recipe.getLauteringRest()).append(" Minuten eingehalten werden.");
-			return step.setHeaderText("Läuter-Rast").setDescription(descr.toString());
+			break;
 		}
+
+		if (startTime != null) {
+			descr.append("<br/><br/>Start: ").append(dateFormat.format(startTime));
+			if (rest != null) {
+				endTime = new Date(startTime.getTime() + rest.getMinutes() * MINUTE);
+			}
+			if (endTime != null) {
+				descr.append("&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;Ende: ").append(dateFormat.format(endTime));
+			}
+		}
+		step.setHeaderText(header);
+		step.setDescription(descr.toString());
 		return step;
-
 	}
 
-	private boolean isStepFinished(StepName stepName, Brew runningBrew) {
+	private BrewStep getBrewStep(StepName stepName, Brew runningBrew) {
 		if (runningBrew == null) {
-			return false;
+			return null;
 		}
 		for (BrewStep step : runningBrew.getSteps()) {
 			if (step.getStepName().equals(stepName)) {
-				return step.getEndTime() != null;
+				return step;
 			}
 		}
-		return false;
+		return null;
 	}
-
-	private boolean isStepActive(StepName stepName, Brew runningBrew) {
-		if (runningBrew == null) {
-			return false;
-		}
-		for (BrewStep step : runningBrew.getSteps()) {
-			if (step.getStepName().equals(stepName)) {
-				return step.getStartTime() != null && step.getEndTime() == null;
-			}
-		}
-		return false;
-	}
-
 }

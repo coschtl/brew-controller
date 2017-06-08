@@ -1,2 +1,42 @@
- - der controller muss das rezept am richtigen step fortsetzen
  - heiz-warnung erst nach ein paar minuten heizen aktivieren (heizen ist zu träge)
+   --> verspäteter Start via Config
+   
+ 
+ - rezept benden resultiert in 404: http://192.168.1.50:8080/brew-server/app/null
+   --> fixed
+ 
+ 
+ - der aktuelle status in der gui wird oft nicht erkannt
+  --> fixed: LinkedHashSet für BrewSteps im Brew
+  	
+  	
+ - zeit von ... bis muss zum schritt
+   --> implementiert
+ 
+ 
+ - rührer wird während rasten oft ein/ausgeschaltet
+   --> works as designed (rührer wird zwecks temperatur-ermittlung für eine minute eingeschaltet)
+   
+  
+ - temperatur wird max. 0.5°C zu nieder gemessen
+   --> Korrekturfaktor in Config
+  
+ 
+ - der controller muss das rezept am richtigen step fortsetzen
+   --> implementiert
+ 
+ 
+ - wenn für den aktuellen brauvorgang keine daten -> bild und schrittbeschreibung ausblenden
+ 
+ 
+ 
+ - der status muss immer 2 heaters zurückliefern ODER das js muss damit umgehen können wenn was fehlt
+ 
+ 
+ 
+ - i2c muss korrekt heruntergefahren werden und zwar IMMER! (stirrer muss ausschalten)
+ 
+ 
+ 
+ 
+  

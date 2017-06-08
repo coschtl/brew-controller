@@ -59,8 +59,12 @@ public class Main {
 			return;
 		}
 
-		execute(cmdLine, options);
-		ThreadManager.getInstance().waitForAllThreadsToComplete();
+		try {
+			execute(cmdLine, options);
+			ThreadManager.getInstance().waitForAllThreadsToComplete();
+		} finally {
+			GpioSubsystem.getInstance().shutdown();
+		}
 		System.out.println("DONE");
 	}
 
@@ -94,6 +98,17 @@ public class Main {
 		BrewDB brewDB = new BrewDB();
 		new Cookbook();
 
+		if (cmdLine.hasOption("reset")) {
+			GpioSubsystem gpio = GpioSubsystem.getInstance();
+			Configuration cfg = Configuration.getInstance();
+			gpio.getRelay("maltStore", cfg.getInt(Configuration.MALT_STORE_OPENER_PIN)).off();
+			gpio.getRelay("stirrer", cfg.getInt(Configuration.STIRRER_MOTOR_PIN)).off();
+			int i = 0;
+			for (int hp : cfg.getIntArray(Configuration.COOKING_HEATER_PINS)) {
+				gpio.getRelay("heater_" + i++, hp).off();
+			}
+			return;
+		}
 		if (cmdLine.hasOption("brew")) {
 			Brew brew = brewDB.getRunningBrew();
 			ThreadManager.getInstance()
@@ -318,6 +333,7 @@ public class Main {
 		options.addOption(new Option("testTemperature", "testTemperature"));
 		options.addOption(new Option("testRelais", "testRelais"));
 		options.addOption(new Option("testRpm", "testRpm"));
+		options.addOption(new Option("reset", "reset"));
 		options.addOption(
 				new Option("dump", true, "dump database tables [BrewDB | Cookbook | IOLog | Journal] to xml."));
 		options.addOption(new Option("importXml", true,

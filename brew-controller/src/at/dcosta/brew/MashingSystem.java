@@ -1,6 +1,6 @@
 package at.dcosta.brew;
 
-import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_PIN;
+import static at.dcosta.brew.Configuration.*;
 import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_TIMEOUT_SECONDS;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_PINS;
@@ -65,8 +65,7 @@ public class MashingSystem extends HeatingSystem {
 		double minTemp = rest.getTemperature()
 				- Configuration.getInstance().getDouble(Configuration.MASHING_TEMPERATURE_MAX_DROP);
 		while (System.currentTimeMillis() < restEnd) {
-			// ThreadUtil.sleepMinutes(1);
-			ThreadUtil.sleepSeconds(10);
+			ThreadUtil.sleepMinutes(1);
 			aktRestTimeMinutes++;
 			if (aktRestTimeMinutes == 5) {
 				startStirrer(false);
@@ -144,6 +143,11 @@ public class MashingSystem extends HeatingSystem {
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {
 		return Configuration.getInstance().getDouble(MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
+	}
+	
+	@Override
+	protected double getHeatingMonitorStartupDelayMinutes() {
+		return Configuration.getInstance().getDouble(MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
 	}
 
 	@Override

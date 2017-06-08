@@ -55,7 +55,7 @@ function addSubmenuEntry(menuEntry, clearBeforeAdd, addArrow) {
 	if (menuEntry.finished) {
 		html += " menu_finished";
 	}
-	html += "\" onclick=\"showStepDetails('" +  maskXml(menuEntry.description) + "');";
+	html += "\" onclick=\"showStepDetails('" +  htmlToUnicode(menuEntry.description) + "');";
 	html += "\">" + menuEntry.name + "</span>";
 	if (addArrow) {
 		html +="<img src=\"../theme/up.png\" class=\"down rotateimg180\"/>";

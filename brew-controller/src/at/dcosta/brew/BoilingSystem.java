@@ -3,6 +3,7 @@ package at.dcosta.brew;
 import static at.dcosta.brew.Configuration.COOKING_COOKING_TEMPERATURE;
 import static at.dcosta.brew.Configuration.COOKING_COOKING_TEMPERATURE_MIN;
 import static at.dcosta.brew.Configuration.COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
+import static at.dcosta.brew.Configuration.COOKING_HEATER_MONITOR_STARTUP_DELAY_MINUTES;
 import static at.dcosta.brew.Configuration.COOKING_HEATER_PINS;
 import static at.dcosta.brew.Configuration.COOKING_THERMOMETER_ADRESSES;
 
@@ -59,6 +60,11 @@ public class BoilingSystem extends HeatingSystem {
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {
 		return Configuration.getInstance().getDouble(COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
+	}
+	
+	@Override
+	protected double getHeatingMonitorStartupDelayMinutes() {
+		return Configuration.getInstance().getDouble(COOKING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
 	}
 
 	@Override

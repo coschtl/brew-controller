@@ -7,6 +7,7 @@ function loadStatus() {
 		}
 		var statusData = JSON.parse(r.responseText);
 		
+		
 		setLinkedPngImage("icon_stirrer", statusData.stirrer, "motor_", "ON / OFF");
 		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");
 		setLinkedPngImage("icon_heater_2", statusData.heaters[1], "heater_", "ON / OFF");
@@ -27,8 +28,12 @@ function loadStatus() {
 }
 
 function setLinkedPngImage(id, relay, imageprefix, labelString) {
-	setPngImage(id, relay.on, imageprefix);
-	setLink(id, relay, labelString);
+	if (relay != null) {
+		setPngImage(id, relay.on, imageprefix);
+		setLink(id, relay, labelString);
+	} else {
+		setPngImage(id, false, imageprefix);
+	}
 }
 
 function setPngImage(id, booleanValue, imageprefix) {
@@ -99,7 +104,7 @@ function performAction(action, time) {
 }
 
 function setDecimalValue(id, value, scale) {
-	var text = value.toLocaleString( undefined, { maximumFractionDigits: 2 });
+	var text = value == null ? null : value.toLocaleString( undefined, { maximumFractionDigits: 2 });
 	setValue(id, text, scale);
 }
 

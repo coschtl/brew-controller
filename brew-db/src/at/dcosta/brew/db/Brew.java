@@ -1,12 +1,12 @@
 package at.dcosta.brew.db;
 
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import at.dcosta.brew.BrewStatus;
+import at.dcosta.brew.db.BrewStep.StepName;
 
 public class Brew {
 
@@ -18,7 +18,7 @@ public class Brew {
 
 	public Brew(int cookbookEntryId) {
 		this.cookbookEntryId = cookbookEntryId;
-		steps = new HashSet<>();
+		steps = new LinkedHashSet<>();
 	}
 
 	public void addStep(BrewStep step) {

@@ -1,11 +1,14 @@
 package at.dcosta.brew;
 
+import java.util.Iterator;
+
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
 import at.dcosta.brew.db.Brew;
 import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.BrewStep;
 import at.dcosta.brew.db.BrewStep.Name;
+import at.dcosta.brew.db.BrewStep.StepName;
 import at.dcosta.brew.db.BrewStepNameFactory;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.Journal;
@@ -43,40 +46,74 @@ public class BrewController implements StoppableRunnable {
 	@Override
 	public void run() {
 		try {
-			InfusionRecipe recipe = (InfusionRecipe) RecipeReader.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
+			InfusionRecipe recipe = (InfusionRecipe) RecipeReader
+					.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
 			System.out.println("starting recipe: " + recipe.getName());
+			switch (brew.getBrewStatus()) {
+			case SCHEDULED:
+				System.out.println("start mashing");
+				brew.setBrewStatus(BrewStatus.MASHING);
+				brewDb.persist(brew);
+				// fall thru!
+			case MASHING:
+				System.out.println("continue mashing");
+				doMashing(recipe);
+				break;
+			default:
+				System.out.println("Can not start/continue brew of " + recipe.getName()
+						+ ", because the corresponding brew is in status " + brew.getBrewStatus());
+				return;
+			}
+		} finally {
+			GpioSubsystem.getInstance().shutdown();
+		}
+	}
+
+	private void doMashing(InfusionRecipe recipe) {
+		try {
 			BrewStepNameFactory stepnames = new BrewStepNameFactory();
-			
-			// mashing
+			StepName stepName;
+			BrewStep currentBrewStep;
 			MashingSystem mashingSystem = new MashingSystem(notificationService);
-			brew.setBrewStatus(BrewStatus.MASHING);
-			brewDb.persist(brew);
-			System.out.println("start mashing");
-			
+
 			// heat to the mashing temperature
-			BrewStep currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_WATER), "Heat water to " + recipe.getMashingTemperature() + "°C");
-			System.out.println("start heating");
-			mashingSystem.heat(recipe.getMashingTemperature());
-			brewDb.complete(currentBrewStep);
+			stepName = stepnames.stepname(Name.HEAT_WATER);
+			if (!stepIsFinished(stepName)) {
+				currentBrewStep = brewDb.addStep(brew.getId(), stepName,
+						"Heat water to " + recipe.getMashingTemperature() + "°C");
+				System.out.println("start heating");
+				mashingSystem.heat(recipe.getMashingTemperature());
+				brewDb.complete(currentBrewStep);
+			}
 
 			// add malts
-			currentBrewStep = brewDb.addStep(brew.getId(),stepnames.stepname(Name.ADD_MALTS), "Add malts");
-			System.out.println("add malts");
-			mashingSystem.addMalts();
-			brewDb.complete(currentBrewStep);
+			stepName = stepnames.stepname(Name.ADD_MALTS);
+			if (!stepIsFinished(stepName)) {
+				currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Add malts");
+				System.out.println("add malts");
+				mashingSystem.addMalts();
+				brewDb.complete(currentBrewStep);
+			}
 
 			// do the rests
 			int count = 0;
 			for (Rest rest : recipe.getRests()) {
-				System.out.println("heating for rest " + count);
-				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.HEAT_FOR_REST),  "Heat to "+ rest.getTemperature()+ "°C for rest " + count);
-				mashingSystem.heat(rest.getTemperature());
-				brewDb.complete(currentBrewStep);
-				
-				System.out.println("doing rest " + count);
-				currentBrewStep = brewDb.addStep(brew.getId(), stepnames.stepname(Name.REST), "Rest " + count);
-				mashingSystem.doRest(rest);
-				brewDb.complete(currentBrewStep);
+				stepName = stepnames.stepname(Name.HEAT_FOR_REST);
+				if (!stepIsFinished(stepName)) {
+					System.out.println("heating for rest " + count);
+					currentBrewStep = brewDb.addStep(brew.getId(), stepName,
+							"Heat to " + rest.getTemperature() + "°C for rest " + count);
+					mashingSystem.heat(rest.getTemperature());
+					brewDb.complete(currentBrewStep);
+				}
+
+				stepName = stepnames.stepname(Name.REST);
+				if (!stepIsFinished(stepName)) {
+					System.out.println("doing rest " + count);
+					currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Rest " + count);
+					mashingSystem.doRest(rest);
+					brewDb.complete(currentBrewStep);
+				}
 				count++;
 			}
 			notificationService.sendNotification(NotificationType.INFO, "Malting finised",
@@ -87,9 +124,18 @@ public class BrewController implements StoppableRunnable {
 		} catch (BrewException e) {
 			e.printStackTrace();
 			notificationService.sendNotification(NotificationType.ERROR, "FATAL Brewing system error", e.getMessage());
-		} finally {
-			GpioSubsystem.getInstance().shutdown();
 		}
+	}
+
+	private boolean stepIsFinished(StepName stepName) {
+		Iterator<BrewStep> it = brew.getSteps().iterator();
+		while (it.hasNext()) {
+			BrewStep step = it.next();
+			if (step.getStepName().equals(stepName)) {
+				return step.isFinished();
+			}
+		}
+		return false;
 	}
 
 }

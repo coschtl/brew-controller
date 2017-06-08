@@ -22,10 +22,12 @@ public class Configuration {
 
 	public static final String DATABASE_LOCATION = "databaseLocation";
 	public static final String THERMOMETER_MAXDIFF = "thermometer.maxDiff";
+	public static final String THERMOMETER_CORRECTION_VALUE = "thermometer.correctionValue";
 	public static final String MULTIPLE_HEATER_TEMPDIFF = "multipleHeater.tempdiff";
 
 	public static final String COOKING_HEATER_PINS = "cooking.heater.pi4jPinNumbers";
 	public static final String COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE = "cooking.heater.minimumIncreasePerMinute";
+	public static final String COOKING_HEATER_MONITOR_STARTUP_DELAY_MINUTES = "cooking.heater.heatingMonitorStartupDelayMinutes";
 	public static final String COOKING_THERMOMETER_ADRESSES = "cooking.thermometer.addresses";
 
 	public static final String COOKING_COOKING_TEMPERATURE = "cooking.cookingTemperature";
@@ -33,6 +35,7 @@ public class Configuration {
 
 	public static final String MASHING_HEATER_PINS = "mashing.heater.pi4jPinNumbers";
 	public static final String MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE = "mashing.heater.minimumIncreasePerMinute";
+	public static final String MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES = "mashing.heater.heatingMonitorStartupDelayMinutes";
 	public static final String MASHING_THERMOMETER_ADRESSES = "mashing.thermometer.addresses";
 	public static final String MASHING_TEMPERATURE_MAX_DROP = "mashing.temperature.maxDrop";
 	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";

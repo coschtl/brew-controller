@@ -125,6 +125,14 @@ public class BrewStep {
 		return this;
 	}
 	
+	public boolean isFinished() {
+		return startTime != null && endTime != null;
+	}
+	
+	public boolean isActive() {
+		return startTime != null && endTime == null;
+	}
+	
 	@Override
 	public String toString() {
 		return getStepName().toString();

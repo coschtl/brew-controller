@@ -16,10 +16,13 @@ public class HeatingMonitor {
 		private boolean active;
 		private double lastTemperature;
 		private double minIncreasePerMinute;
+		private long delayedMonitorStartTime;
+		private double startupDelayMinutes;
 
 		public HeatingMonitorMonitor(HeatingSystem heatingSystem) {
 			this.heatingSystem = heatingSystem;
 			this.minIncreasePerMinute = heatingSystem.getMinTemperatureIncreasePerMinute();
+			this.startupDelayMinutes = heatingSystem.getHeatingMonitorStartupDelayMinutes();
 		}
 
 		@Override
@@ -35,6 +38,7 @@ public class HeatingMonitor {
 		@Override
 		public void run() {
 			active = true;
+			delayedMonitorStartTime = System.currentTimeMillis() + (long) ( startupDelayMinutes * ThreadUtil.ONE_MINUTE);
 			while (active) {
 				if (isHeatingPowerTooLow()) {
 					heatingSystem.getNotificationService().sendNotification(NotificationType.WARNING,
@@ -52,9 +56,11 @@ public class HeatingMonitor {
 		}
 
 		private boolean isHeatingPowerTooLow() {
+			if (System.currentTimeMillis() < delayedMonitorStartTime) {
+				return false;
+			}
 			return lastTemperature + minIncreasePerMinute > heatingSystem.getTemperature();
 		}
-
 	}
 
 	private final HeatingSystem heatingSystem;

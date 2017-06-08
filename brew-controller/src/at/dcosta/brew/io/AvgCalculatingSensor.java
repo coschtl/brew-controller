@@ -20,11 +20,13 @@ public class AvgCalculatingSensor extends AbstractSensor {
 	private String error;
 	private double lastValue = -1;
 	private double maxDiff;
+	private double correctionValue;
 	private boolean mayStartTemperatureCollection;
 
-	public AvgCalculatingSensor(double maxDiff) {
+	public AvgCalculatingSensor(double maxDiff, double correctionValue) {
 		sensors = new ArrayList<>();
 		this.maxDiff = maxDiff;
+		this.correctionValue = correctionValue;
 	}
 
 	public void addSensor(Sensor sensor) {
@@ -101,8 +103,6 @@ public class AvgCalculatingSensor extends AbstractSensor {
 			}
 		}
 		double average = getAverage(sensors);
-		Sensor sensor = sensors.get(0);
-		System.out.println(sensor.getComponentType() + ": " + average + sensor.getScale());
 		if (err.length() > 0) {
 			error = err.toString();
 			sensorStatus = SensorStatus.ERROR;
@@ -127,12 +127,12 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		}
 	};
 
-	private static double getAverage(List<Sensor> sensors) {
+	private double getAverage(List<Sensor> sensors) {
 		double sum = 0;
 		for (Sensor sensor : sensors) {
 			sum += sensor.getValue();
 		}
-		return sum / sensors.size();
+		return (sum / sensors.size()) + correctionValue;
 	}
 
 	private static double getMedian(List<Sensor> sensors) {

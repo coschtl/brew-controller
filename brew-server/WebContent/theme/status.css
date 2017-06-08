@@ -23,7 +23,7 @@ img.statusIcon {
  	border-style: solid;
     border-color: #ccc;
     border-width: 1px;
-    height: 150px;
+   /* height: 150px;*/
     padding: 10px;
     text-align: left;
     border-radius: 0 0 6px 6px;

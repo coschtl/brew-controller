@@ -36,12 +36,9 @@ public class ThreadManager {
 	}
 
 	public synchronized <T extends Runnable> ManagedThread<T> newThread(T runnable, String name) {
-	//public  <T extends Runnable> ManagedThread<T> newThread(T runnable, String name) {
-		System.out.println("START newThread "+ name);
 		removeDiedThreads();
 		ManagedThread<T> thread = new ManagedThread<T>(runnable, name);
 		threads.put(thread.getName(), thread);
-		System.out.println("END newThread "+ name);
 		return thread;
 	}
 

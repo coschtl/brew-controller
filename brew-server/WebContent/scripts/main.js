@@ -82,3 +82,10 @@ function maskXml(xml) {
 	}
 	return xml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
+
+function htmlToUnicode(xml) {
+	if (xml == null) {
+		return xml;
+	}
+	return xml.replace(/<br\s*\/>/g, "\\n").replace(/<\/?ul>/g, "\\n").replace(/<\/li>/g, "\\n").replace(/<li>/g, "\\t•").replace(/&nbsp;/g, " ");
+}

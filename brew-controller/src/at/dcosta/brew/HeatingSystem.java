@@ -1,6 +1,7 @@
 package at.dcosta.brew;
 
 import static at.dcosta.brew.Configuration.MULTIPLE_HEATER_TEMPDIFF;
+import static at.dcosta.brew.Configuration.THERMOMETER_CORRECTION_VALUE;
 import static at.dcosta.brew.Configuration.THERMOMETER_MAXDIFF;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public abstract class HeatingSystem  {
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-		averageTemperature = new AvgCalculatingSensor(Configuration.getInstance().getDouble(THERMOMETER_MAXDIFF));
+		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF), config.getDouble(THERMOMETER_CORRECTION_VALUE));
 		W1Bus w1Bus = new W1Bus();
 		for (String address : getTemperatureSensorAddresses()) {
 			Sensor sensor = w1Bus.getTemperatureSensor(address);
@@ -126,6 +127,8 @@ public abstract class HeatingSystem  {
 	protected abstract int[] getHeaterPins();
 
 	protected abstract double getMinTemperatureIncreasePerMinute();
+	
+	protected abstract double getHeatingMonitorStartupDelayMinutes();
 
 	protected abstract String[] getTemperatureSensorAddresses();
 
