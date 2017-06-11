@@ -31,11 +31,11 @@
  
  
  - der status muss immer 2 heaters zurückliefern ODER das js muss damit umgehen können wenn was fehlt
- 
+   --> implementiert
  
  
  - i2c muss korrekt heruntergefahren werden und zwar IMMER! (stirrer muss ausschalten)
- 
+   --> implementiert
  
  
  

@@ -8,15 +8,10 @@ public class CookbookEntry {
 	private String name;
 	private String recipe;
 	private Timestamp addedOn;
-	private int brewCount;
 	private String recipeSource;
 
 	public Timestamp getAddedOn() {
 		return addedOn;
-	}
-
-	public int getBrewCount() {
-		return brewCount;
 	}
 
 	public int getId() {
@@ -33,11 +28,6 @@ public class CookbookEntry {
 
 	public CookbookEntry setAddedOn(Timestamp addedOn) {
 		this.addedOn = addedOn;
-		return this;
-	}
-
-	public CookbookEntry setBrewCount(int brewCount) {
-		this.brewCount = brewCount;
 		return this;
 	}
 

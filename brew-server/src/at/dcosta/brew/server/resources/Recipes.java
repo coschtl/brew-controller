@@ -50,12 +50,14 @@ public class Recipes extends AbstractResource {
 
 	private final Cookbook cookbook;
 	private final BrewDB brewDB;
-	private final DateFormat dateFormat;
+	private final DateFormat timeFormat;
+	private final DateFormat dateAndTimeFormat;
 
 	public Recipes() {
 		cookbook = new Cookbook();
 		brewDB = new BrewDB();
-		dateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+		timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+		dateAndTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	}
 
 	public static enum ReturnType {
@@ -139,6 +141,27 @@ public class Recipes extends AbstractResource {
 		return Response.status(Status.CREATED).location(statusUri).build();
 	}
 
+	@GET
+	@Path("recipes/{recipeId}/showBrews")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<at.dcosta.brew.server.Brew> showBrews(@PathParam("recipeId") int recipeId) {
+		List<Brew> brews = brewDB.getBrewsByRecipe(recipeId);
+		List<at.dcosta.brew.server.Brew> dtos = new ArrayList<>(brews.size());
+		for (Brew brew : brews) {
+			at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
+			String formattedStart = brew.getStartTime() == null ? "" : dateAndTimeFormat.format(brew.getStartTime());
+			String formattedEnd =  brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
+			String time = formattedStart;
+			if (!formattedEnd.isEmpty()) {
+				time += " - " + formattedEnd;
+			}
+			dto.setDate(time);
+			dto.setId(brew.getId());
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+
 	@DELETE
 	@Path("recipes/abortRunningBrew")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -158,7 +181,7 @@ public class Recipes extends AbstractResource {
 		Recipe recipe = new Recipe();
 		recipe.setId(cookbookEntry.getId());
 		recipe.setAddedOn(df.format(cookbookEntry.getAddedOn()));
-		recipe.setBrewCount(cookbookEntry.getBrewCount());
+		recipe.setBrewCount(brewDB.getBrewsByRecipe(cookbookEntry.getId()).size());
 		recipe.setName(cookbookEntry.getName());
 		recipe.setSource(cookbookEntry.getRecipeSource());
 		if (fetchType == FetchType.FULL) {
@@ -255,12 +278,12 @@ public class Recipes extends AbstractResource {
 		}
 
 		if (startTime != null) {
-			descr.append("<br/><br/>Start: ").append(dateFormat.format(startTime));
+			descr.append("<br/><br/>Start: ").append(timeFormat.format(startTime));
 			if (rest != null) {
 				endTime = new Date(startTime.getTime() + rest.getMinutes() * MINUTE);
 			}
 			if (endTime != null) {
-				descr.append("&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;Ende: ").append(dateFormat.format(endTime));
+				descr.append("&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;Ende: ").append(timeFormat.format(endTime));
 			}
 		}
 		step.setHeaderText(header);

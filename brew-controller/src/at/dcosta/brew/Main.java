@@ -146,7 +146,7 @@ public class Main {
 			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
 			for (CookbookEntry entry : new Cookbook().listRecipes(FetchType.FULL)) {
 				System.out.println(entry.getId() + "\t" + entry.getName() + "\t" + df.format(entry.getAddedOn())
-						+ "\t\t" + entry.getBrewCount() + "\t" + entry.getRecipeSource());
+						+ "\t\t" + entry.getRecipeSource());
 			}
 			return;
 		}
@@ -161,7 +161,6 @@ public class Main {
 			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
 			System.out.println("Recipe: " + entry.getName());
 			System.out.println("addedOn: " + df.format(entry.getAddedOn()));
-			System.out.println("brew count: " + entry.getBrewCount());
 			System.out.println("recipe source: " + entry.getRecipeSource());
 			System.out.println();
 			System.out.println(new RecipeWriter(RecipeReader.read(entry.getRecipe()), true).getRecipeAsXmlString());

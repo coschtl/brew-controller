@@ -15,9 +15,9 @@ public class Cookbook extends Database {
 
 	private static final String TABLE_NAME = "RECIPIES";
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] { "CREATE TABLE " + TABLE_NAME
-			+ " (RECIPE_NAME varchar(255), RECIPE varchar(65000), ADDED_ON timestamp, BREW_COUNT int, RECIPE_SOURCE varchar(255))", };
+			+ " (RECIPE_NAME varchar(255), RECIPE varchar(65000), ADDED_ON timestamp, RECIPE_SOURCE varchar(255))", };
 	private static final String SQL_ADD_ENTRY = "INSERT INTO " + TABLE_NAME
-			+ " (RECIPE_NAME, RECIPE, ADDED_ON, BREW_COUNT, RECIPE_SOURCE) VALUES (?, ?, ?, ?, ?)";
+			+ " (RECIPE_NAME, RECIPE, ADDED_ON,  RECIPE_SOURCE) VALUES (?, ?, ?, ?)";
 	private static final String SQL_GET_ALL = "SELECT ROWID, * FROM " + TABLE_NAME;
 	private static final String SQL_GET_BY_ID = SQL_GET_ALL + " WHERE ROWID=?";
 
@@ -37,8 +37,7 @@ public class Cookbook extends Database {
 			st.setString(1, recipeName);
 			st.setString(2, recipeAsXml);
 			st.setTimestamp(3, now());
-			st.setInt(4, 0);
-			st.setString(5, recipeSource);
+			st.setString(4, recipeSource);
 			int rows = st.executeUpdate();
 			if (rows != 1) {
 				throw new DatabaseException("can not add Cookbook (no row created)!");
@@ -63,7 +62,6 @@ public class Cookbook extends Database {
 			if (rs.next()) {
 				CookbookEntry entry = new CookbookEntry();
 				entry.setAddedOn(rs.getTimestamp("ADDED_ON"));
-				entry.setBrewCount(rs.getInt("BREW_COUNT"));
 				entry.setId(rs.getInt("ROWID"));
 				entry.setName(rs.getString("RECIPE_NAME"));
 				entry.setRecipe(rs.getString("RECIPE"));
@@ -91,7 +89,6 @@ public class Cookbook extends Database {
 			while (rs.next()) {
 				CookbookEntry entry = new CookbookEntry();
 				entry.setAddedOn(rs.getTimestamp("ADDED_ON"));
-				entry.setBrewCount(rs.getInt("BREW_COUNT"));
 				entry.setId(rs.getInt("ROWID"));
 				entry.setName(rs.getString("RECIPE_NAME"));
 				if (fetchType == FetchType.FULL) {

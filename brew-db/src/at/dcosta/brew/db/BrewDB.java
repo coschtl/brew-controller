@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import at.dcosta.brew.BrewStatus;
 import at.dcosta.brew.db.BrewStep.StepName;
@@ -31,6 +33,8 @@ public class BrewDB extends Database {
 	private static final String SQL_BREW_BY_ID = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE ROWID=?";
 	private static final String SQL_GET_RUNNING = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE BREW_END is null";
 	private static final String SQL_STEPS_FOR_BREW = "SELECT ROWID, * FROM " + TABLE_BREW_STEPS + " WHERE BREW_ID=?";
+	private static final String SQL_BREWS_BY_RECIPE = "SELECT ROWID, * FROM " + TABLE_BREW
+			+ " where COOKBOOK_ENTRY_ID=?";
 
 	public BrewDB() {
 		super();
@@ -45,7 +49,7 @@ public class BrewDB extends Database {
 			stBrew.setInt(1, brewId);
 			rs = stBrew.executeQuery();
 			if (rs.next()) {
-				return createDto( con, rs);
+				return createDto(con, rs, true);
 			}
 			return null;
 		} catch (SQLException e) {
@@ -57,31 +61,33 @@ public class BrewDB extends Database {
 		}
 	}
 
-	private Brew createDto( Connection con, ResultSet rs) throws SQLException {
+	private Brew createDto(Connection con, ResultSet rs, boolean includeSteps) throws SQLException {
 		Brew brew = new Brew(rs.getInt("COOKBOOK_ENTRY_ID"));
 		brew.setId(rs.getInt("ROWID"));
 		brew.setBrewStatus(BrewStatus.valueOf(rs.getString("BREW_STATUS")));
 		brew.setStartTime(rs.getTimestamp("BREW_START"));
-		brew.setStartTime(rs.getTimestamp("BREW_END"));
+		brew.setEndTime(rs.getTimestamp("BREW_END"));
 
-		PreparedStatement stSteps = null;
-		ResultSet rsSteps = null;
-		try {
-			stSteps = con.prepareStatement(SQL_STEPS_FOR_BREW);
-			stSteps.setInt(1, brew.getId());
-			rsSteps = stSteps.executeQuery();
-			while (rsSteps.next()) {
-				BrewStep step = new BrewStep();
-				step.setId(rsSteps.getInt("ROWID"));
-				step.setStepName(new StepName(rsSteps.getString("NAME")));
-				step.setDescription(rsSteps.getString("DESCRIPTION"));
-				step.setStartTime(rsSteps.getTimestamp("STEP_START"));
-				step.setEndTime(rsSteps.getTimestamp("STEP_END"));
-				brew.addStep(step);
+		if (includeSteps) {
+			PreparedStatement stSteps = null;
+			ResultSet rsSteps = null;
+			try {
+				stSteps = con.prepareStatement(SQL_STEPS_FOR_BREW);
+				stSteps.setInt(1, brew.getId());
+				rsSteps = stSteps.executeQuery();
+				while (rsSteps.next()) {
+					BrewStep step = new BrewStep();
+					step.setId(rsSteps.getInt("ROWID"));
+					step.setStepName(new StepName(rsSteps.getString("NAME")));
+					step.setDescription(rsSteps.getString("DESCRIPTION"));
+					step.setStartTime(rsSteps.getTimestamp("STEP_START"));
+					step.setEndTime(rsSteps.getTimestamp("STEP_END"));
+					brew.addStep(step);
+				}
+			} finally {
+				close(rsSteps);
+				close(stSteps);
 			}
-		} finally {
-			close(rsSteps);
-			close(stSteps);
 		}
 		return brew;
 	}
@@ -94,11 +100,34 @@ public class BrewDB extends Database {
 			st = con.prepareStatement(SQL_GET_RUNNING);
 			rs = st.executeQuery();
 			if (rs.next()) {
-				return createDto(con, rs);
+				return createDto(con, rs, true);
 			}
 			return null;
 		} catch (SQLException e) {
 			throw new DatabaseException("can not load running brew: " + e.getMessage(), e);
+		} finally {
+			close(rs);
+			close(st);
+			close(con);
+		}
+	}
+
+	public List<Brew> getBrewsByRecipe(int cookbookEntryId) {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<Brew> brews = new ArrayList<>();
+		try {
+			st = con.prepareStatement(SQL_BREWS_BY_RECIPE);
+			st.setInt(1, cookbookEntryId);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				brews.add(createDto(con, rs, false));
+			}
+			return brews;
+		} catch (SQLException e) {
+			throw new DatabaseException("can not load brews for recipeID=" + cookbookEntryId + ": " + e.getMessage(),
+					e);
 		} finally {
 			close(rs);
 			close(st);
@@ -130,6 +159,7 @@ public class BrewDB extends Database {
 		}
 		return brew;
 	}
+
 	public void abortRunningBrew() {
 		Brew runningBrew = getRunningBrew();
 		if (runningBrew != null) {

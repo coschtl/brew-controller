@@ -86,12 +86,14 @@ function addRecipe() {
 	});
 }
 
+function getSelectedRecipeId() {
+	var recipes = byId("recipes");
+	return recipes.options[recipes.selectedIndex].value;
+}
+
 function showSelectedRecipe() {
 	clearMessages();
-	
-	var recipes = byId("recipes");
-	var recipe = recipes.options[recipes.selectedIndex].value;
-	showRecipe(recipe);
+	showRecipe(getSelectedRecipeId());
 }
 	
 function showRecipe(recipe) {	
@@ -105,7 +107,7 @@ function showRecipe(recipe) {
 				byId("showRecipeName").innerHTML = recipe.name;
 				byId("showRecipeSource").innerHTML = recipe.source;
 				byId("showRecipeAddedOn").innerHTML = maskXml(recipe.addedOn);
-				byId("showBrewCount").innerHTML = recipe.brewCount;
+				byId("showBrewCount").innerHTML = recipe.brewCount + "<span id='showBrews' class='sub_menu' style='width:80px;'><a href='javascript:showBrewDates()'>Termine anzeigen</a></span>";
 				byId("showRecipeDetail").innerHTML = maskXml(recipe.recipe);
 				byId("startOrContinue").innerHTML = recipe.brewRunning ? "fortsetzen" : "starten";
 				recipe.brewRunning ? show("abortBrew") : hide("abortBrew");
@@ -132,6 +134,7 @@ function startOrContinueBrew() {
 		error(data)
 	});
 }
+
 function abortBrew() {
 	if (!confirm("Brauvorgang wirklich abbrechen?")) {
 		return;
@@ -139,9 +142,29 @@ function abortBrew() {
 	fetch(contextPath + "/v1/api/recipes/abortRunningBrew", {
 	  method: 'DELETE',
 	}).then((response) => {
-		console.log(response);
 		if (response.status == 200) {
 			showSelectedRecipe();
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function showBrewDates() {
+	fetch(contextPath + "/v1/api/recipes/" + getSelectedRecipeId() + "/showBrews", {
+	  method: 'get',
+	}).then((response) => {
+		if (response.status == 200) {
+			response.json().then(function(brews) {
+				show("showBrewDatesRow", "table-row");
+				var html = "<br/>";
+				for (var i=0; i<brews.length; i++) {
+					html += brews[i].date + "&nbsp;&nbsp;&nbsp;<a href='status.html?brew=" + brews[i].id + "'>Brauvorgang anzeigen</a><br/>";
+				}
+				byId("showBrewDates").innerHTML = html;
+			});
 			return;
 		}
 		errorFromHeader(response);
@@ -204,6 +227,7 @@ function init() {
 	<tr><td class="recipeTable right">Rezept-Quelle:</td><td  class="recipeTable" id="showRecipeSource"></td></tr>
 	<tr><td class="recipeTable right">Hinzugefügt am:</td><td  class="recipeTable" id="showRecipeAddedOn"></td></tr>
 	<tr><td class="recipeTable right">Brau-Zähler:</td><td class="recipeTable"  id="showBrewCount"></td></tr>
+	<tr id="showBrewDatesRow" style="display:none;"><td class="recipeTable right">&nbsp;</td><td class="recipeTable" id="showBrewDates" ></td></tr>
 	<tr><td class="recipeTable right">Rezept:</td><td><pre  class="recipeTable" id="showRecipeDetail"></pre></td></tr>
 	<tr><td>&nbsp;</td>
 	<td class="recipeTable right">
