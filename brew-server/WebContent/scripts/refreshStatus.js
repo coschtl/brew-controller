@@ -2,11 +2,18 @@ function loadStatus() {
 	var r = new XMLHttpRequest();
 	r.open("GET", contextPath + "/v1/api/states/system", true);
 	r.onreadystatechange = function() {
+		console.log(r);
 		if (r.readyState != 4 || r.status != 200) {
 			return;
 		}
 		var statusData = JSON.parse(r.responseText);
-		
+		if (statusData.temperatures[0] == null) {
+			show("noStatusAvailable");
+			hide("statusTable");
+			return;
+		}
+		hide("noStatusAvailable");
+		show("statusTable");
 		
 		setLinkedPngImage("icon_stirrer", statusData.stirrer, "motor_", "ON / OFF");
 		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");

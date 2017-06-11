@@ -39,6 +39,10 @@ function loadSubmenu(step) {
 		for (var i=0;i<=last; i++) {
 			addSubmenuEntry(submenu[i], i==0, i<last);
 		}
+		if (byId("currentStepHeader").innerHTML == "") {
+			hide("currentStepHeader");
+			hide("currentStepText");
+		}
 	};
 	r.send();
 }
@@ -51,6 +55,8 @@ function addSubmenuEntry(menuEntry, clearBeforeAdd, addArrow) {
 		html += " menu_selected";
 		byId("currentStepHeader").innerHTML = menuEntry.headerText;
 		byId("currentStepText").innerHTML = menuEntry.description;
+		show("currentStepHeader");
+		show("currentStepText");
 	}
 	if (menuEntry.finished) {
 		html += " menu_finished";
@@ -145,7 +151,8 @@ function init() {
 		<td align="center" id="submenu" rowspan="2">
 		</td>
 		<td align="center">
-			<table class="status">
+			<div id="noStatusAvailable">Für den ausgewählten Brauvorgang sind noch keine Daten verfügbar.</div>
+			<table class="status" id="statusTable" border ="1">
 				<tr>
 					<td></td>
 					<td colspan="2" align="center"><span id="rotationSpeed"></span><br /></td>

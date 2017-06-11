@@ -27,7 +27,7 @@
  
  
  - wenn für den aktuellen brauvorgang keine daten -> bild und schrittbeschreibung ausblenden
- 
+   --> implementiert
  
  
  - der status muss immer 2 heaters zurückliefern ODER das js muss damit umgehen können wenn was fehlt
