@@ -13,37 +13,15 @@ public class BrewStep {
 		private final Name name;
 		private final int instanceNumber;
 
-		public StepName(String stepName) {
-			int pos = stepName.lastIndexOf('_');
-			name = Name.valueOf(stepName.substring(0, pos));
-			instanceNumber = Integer.parseInt(stepName.substring(pos + 1));
-		}
-
 		public StepName(Name name, int instanceNumber) {
 			this.name = name;
 			this.instanceNumber = instanceNumber;
 		}
 
-		public Name getName() {
-			return name;
-		}
-
-		public int getInstanceNumber() {
-			return instanceNumber;
-		}
-
-		@Override
-		public String toString() {
-			return new StringBuilder().append(name.toString()).append('_').append(instanceNumber).toString();
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + instanceNumber;
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			return result;
+		public StepName(String stepName) {
+			int pos = stepName.lastIndexOf('_');
+			name = Name.valueOf(stepName.substring(0, pos));
+			instanceNumber = Integer.parseInt(stepName.substring(pos + 1));
 		}
 
 		@Override
@@ -61,6 +39,28 @@ public class BrewStep {
 				return false;
 			return true;
 		}
+
+		public int getInstanceNumber() {
+			return instanceNumber;
+		}
+
+		public Name getName() {
+			return name;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + instanceNumber;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return new StringBuilder().append(name.toString()).append('_').append(instanceNumber).toString();
+		}
 		
 		
 	}
@@ -75,6 +75,10 @@ public class BrewStep {
 		return brew;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
 	public Timestamp getEndTime() {
 		return endTime;
 	}
@@ -83,25 +87,29 @@ public class BrewStep {
 		return id;
 	}
 
-	public StepName getStepName() {
-		return stepName;
-	}
-
-	public BrewStep setStepName(StepName stepName) {
-		this.stepName = stepName;
-		return this;
-	}
-
 	public Timestamp getStartTime() {
 		return startTime;
 	}
 
-	public String getDescription() {
-		return description;
+	public StepName getStepName() {
+		return stepName;
+	}
+
+	public boolean isActive() {
+		return startTime != null && endTime == null;
+	}
+
+	public boolean isFinished() {
+		return startTime != null && endTime != null;
 	}
 
 	public BrewStep setBrew(Brew brew) {
 		this.brew = brew;
+		return this;
+	}
+
+	public BrewStep setDescription(String description) {
+		this.description = description;
 		return this;
 	}
 
@@ -114,23 +122,15 @@ public class BrewStep {
 		this.id = id;
 		return this;
 	}
-
+	
 	public BrewStep setStartTime(Timestamp startTime) {
 		this.startTime = startTime;
 		return this;
 	}
-
-	public BrewStep setDescription(String description) {
-		this.description = description;
+	
+	public BrewStep setStepName(StepName stepName) {
+		this.stepName = stepName;
 		return this;
-	}
-	
-	public boolean isFinished() {
-		return startTime != null && endTime != null;
-	}
-	
-	public boolean isActive() {
-		return startTime != null && endTime == null;
 	}
 	
 	@Override

@@ -48,9 +48,13 @@ import at.dcosta.brew.server.Step;
 @Path("")
 public class Recipes extends AbstractResource {
 
+	public static enum ReturnType {
+		MINIMAL, FULL;
+	}
 	private final Cookbook cookbook;
 	private final BrewDB brewDB;
 	private final DateFormat timeFormat;
+
 	private final DateFormat dateAndTimeFormat;
 
 	public Recipes() {
@@ -60,8 +64,12 @@ public class Recipes extends AbstractResource {
 		dateAndTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	}
 
-	public static enum ReturnType {
-		MINIMAL, FULL;
+	@DELETE
+	@Path("recipes/abortRunningBrew")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response abortRunningBrew() {
+		brewDB.abortRunningBrew();
+		return Response.status(Status.OK).build();
 	}
 
 	@POST
@@ -96,14 +104,6 @@ public class Recipes extends AbstractResource {
 		return createDto(entry, fetchType, df, brewDB.isBrewRunning(recipeId));
 	}
 
-	private CookbookEntry getCookbookEntry(int recipeId) {
-		CookbookEntry entry = cookbook.getEntryById(recipeId);
-		if (entry == null) {
-			throw new BrewServerException("Unknown recipeID: " + recipeId, Status.BAD_REQUEST);
-		}
-		return entry;
-	}
-
 	@GET
 	@Path("recipes")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -117,80 +117,6 @@ public class Recipes extends AbstractResource {
 			recipes.add(createDto(recipe, fetchType, df, false));
 		}
 		return recipes;
-	}
-
-	@PUT
-	@Path("recipes/{recipeId}/startBrew")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response startBrew(@Context UriInfo uriInfo, @Context HttpServletRequest request,
-			@PathParam("recipeId") int recipeId) {
-		Brew runningBrew = brewDB.getRunningBrew();
-		if (runningBrew != null && runningBrew.getCookbookEntryId() != recipeId) {
-			CookbookEntry runningCookbookEntry = cookbook.getEntryById(runningBrew.getCookbookEntryId());
-			String cookBookEntryName = runningCookbookEntry == null ? "<unknown>" : runningCookbookEntry.getName();
-			throw new BrewServerException(
-					"There is already a brew for '" + cookBookEntryName + "' (recipeID="
-							+ runningBrew.getCookbookEntryId()
-							+ ") running. This brew must get aborted or finished before a new recipe can get brewed!",
-					Status.BAD_REQUEST);
-		}
-		if (runningBrew == null) {
-			brewDB.startNewBrew(recipeId, new Timestamp(System.currentTimeMillis()));
-		}
-		URI statusUri = URI.create(getAppBaseUri(uriInfo, request) + "/app/status.html");
-		return Response.status(Status.CREATED).location(statusUri).build();
-	}
-
-	@GET
-	@Path("recipes/{recipeId}/showBrews")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<at.dcosta.brew.server.Brew> showBrews(@PathParam("recipeId") int recipeId) {
-		List<Brew> brews = brewDB.getBrewsByRecipe(recipeId);
-		List<at.dcosta.brew.server.Brew> dtos = new ArrayList<>(brews.size());
-		for (Brew brew : brews) {
-			at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
-			String formattedStart = brew.getStartTime() == null ? "" : dateAndTimeFormat.format(brew.getStartTime());
-			String formattedEnd =  brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
-			String time = formattedStart;
-			if (!formattedEnd.isEmpty()) {
-				time += " - " + formattedEnd;
-			}
-			dto.setDate(time);
-			dto.setId(brew.getId());
-			dtos.add(dto);
-		}
-		return dtos;
-	}
-
-	@DELETE
-	@Path("recipes/abortRunningBrew")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response abortRunningBrew() {
-		brewDB.abortRunningBrew();
-		return Response.status(Status.OK).build();
-	}
-
-	private String getAppBaseUri(UriInfo uriInfo, HttpServletRequest request) {
-		String restBaseUri = uriInfo.getBaseUri().toString();
-		String contextPath = request.getContextPath();
-		String appBaseUri = restBaseUri.substring(0, restBaseUri.indexOf(contextPath) + contextPath.length());
-		return appBaseUri;
-	}
-
-	private Recipe createDto(CookbookEntry cookbookEntry, FetchType fetchType, DateFormat df, boolean brewRunning) {
-		Recipe recipe = new Recipe();
-		recipe.setId(cookbookEntry.getId());
-		recipe.setAddedOn(df.format(cookbookEntry.getAddedOn()));
-		recipe.setBrewCount(brewDB.getBrewsByRecipe(cookbookEntry.getId()).size());
-		recipe.setName(cookbookEntry.getName());
-		recipe.setSource(cookbookEntry.getRecipeSource());
-		if (fetchType == FetchType.FULL) {
-			String prettyPrintXml = new RecipeWriter(RecipeReader.read(cookbookEntry.getRecipe()), true)
-					.getRecipeAsXmlString();
-			recipe.setRecipe(prettyPrintXml);
-		}
-		recipe.setBrewRunning(brewRunning);
-		return recipe;
 	}
 
 	@GET
@@ -224,20 +150,47 @@ public class Recipes extends AbstractResource {
 		return l;
 	}
 
-	private Step createStep(Name name, String text, BrewStepNameFactory stepNames, Brew runningBrew,
-			InfusionRecipe recipe) {
-		StepName stepName = stepNames.stepname(name);
-		Step step = new Step(stepName.toString(), text);
-		BrewStep brewStep = getBrewStep(stepName, runningBrew);
-		Timestamp startTime = null;
-		Timestamp endTime = null;
-		if (brewStep != null) {
-			startTime = brewStep.getStartTime();
-			endTime = brewStep.getEndTime();
-			step.setFinished(brewStep.isFinished());
-			step.setActive(brewStep.isActive());
+	@GET
+	@Path("recipes/{recipeId}/showBrews")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<at.dcosta.brew.server.Brew> showBrews(@PathParam("recipeId") int recipeId) {
+		List<Brew> brews = brewDB.getBrewsByRecipe(recipeId);
+		List<at.dcosta.brew.server.Brew> dtos = new ArrayList<>(brews.size());
+		for (Brew brew : brews) {
+			at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
+			String formattedStart = brew.getStartTime() == null ? "" : dateAndTimeFormat.format(brew.getStartTime());
+			String formattedEnd =  brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
+			String time = formattedStart;
+			if (!formattedEnd.isEmpty()) {
+				time += " - " + formattedEnd;
+			}
+			dto.setDate(time);
+			dto.setId(brew.getId());
+			dtos.add(dto);
 		}
-		return addDescription(stepName, recipe, step, startTime, endTime);
+		return dtos;
+	}
+
+	@PUT
+	@Path("recipes/{recipeId}/startBrew")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response startBrew(@Context UriInfo uriInfo, @Context HttpServletRequest request,
+			@PathParam("recipeId") int recipeId) {
+		Brew runningBrew = brewDB.getRunningBrew();
+		if (runningBrew != null && runningBrew.getCookbookEntryId() != recipeId) {
+			CookbookEntry runningCookbookEntry = cookbook.getEntryById(runningBrew.getCookbookEntryId());
+			String cookBookEntryName = runningCookbookEntry == null ? "<unknown>" : runningCookbookEntry.getName();
+			throw new BrewServerException(
+					"There is already a brew for '" + cookBookEntryName + "' (recipeID="
+							+ runningBrew.getCookbookEntryId()
+							+ ") running. This brew must get aborted or finished before a new recipe can get brewed!",
+					Status.BAD_REQUEST);
+		}
+		if (runningBrew == null) {
+			brewDB.startNewBrew(recipeId, new Timestamp(System.currentTimeMillis()));
+		}
+		URI statusUri = URI.create(getAppBaseUri(uriInfo, request) + "/app/status.html");
+		return Response.status(Status.CREATED).location(statusUri).build();
 	}
 
 	private Step addDescription(StepName stepName, InfusionRecipe recipe, Step step, Date startTime, Date endTime) {
@@ -291,6 +244,45 @@ public class Recipes extends AbstractResource {
 		return step;
 	}
 
+	private Recipe createDto(CookbookEntry cookbookEntry, FetchType fetchType, DateFormat df, boolean brewRunning) {
+		Recipe recipe = new Recipe();
+		recipe.setId(cookbookEntry.getId());
+		recipe.setAddedOn(df.format(cookbookEntry.getAddedOn()));
+		recipe.setBrewCount(brewDB.getBrewsByRecipe(cookbookEntry.getId()).size());
+		recipe.setName(cookbookEntry.getName());
+		recipe.setSource(cookbookEntry.getRecipeSource());
+		if (fetchType == FetchType.FULL) {
+			String prettyPrintXml = new RecipeWriter(RecipeReader.read(cookbookEntry.getRecipe()), true)
+					.getRecipeAsXmlString();
+			recipe.setRecipe(prettyPrintXml);
+		}
+		recipe.setBrewRunning(brewRunning);
+		return recipe;
+	}
+
+	private Step createStep(Name name, String text, BrewStepNameFactory stepNames, Brew runningBrew,
+			InfusionRecipe recipe) {
+		StepName stepName = stepNames.stepname(name);
+		Step step = new Step(stepName.toString(), text);
+		BrewStep brewStep = getBrewStep(stepName, runningBrew);
+		Timestamp startTime = null;
+		Timestamp endTime = null;
+		if (brewStep != null) {
+			startTime = brewStep.getStartTime();
+			endTime = brewStep.getEndTime();
+			step.setFinished(brewStep.isFinished());
+			step.setActive(brewStep.isActive());
+		}
+		return addDescription(stepName, recipe, step, startTime, endTime);
+	}
+
+	private String getAppBaseUri(UriInfo uriInfo, HttpServletRequest request) {
+		String restBaseUri = uriInfo.getBaseUri().toString();
+		String contextPath = request.getContextPath();
+		String appBaseUri = restBaseUri.substring(0, restBaseUri.indexOf(contextPath) + contextPath.length());
+		return appBaseUri;
+	}
+
 	private BrewStep getBrewStep(StepName stepName, Brew runningBrew) {
 		if (runningBrew == null) {
 			return null;
@@ -301,5 +293,13 @@ public class Recipes extends AbstractResource {
 			}
 		}
 		return null;
+	}
+
+	private CookbookEntry getCookbookEntry(int recipeId) {
+		CookbookEntry entry = cookbook.getEntryById(recipeId);
+		if (entry == null) {
+			throw new BrewServerException("Unknown recipeID: " + recipeId, Status.BAD_REQUEST);
+		}
+		return entry;
 	}
 }

@@ -39,7 +39,6 @@ import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.FileUtil;
-import at.dcosta.brew.util.ManagedThread;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 import at.dcosta.brew.xml.dom.Document;
@@ -194,7 +193,8 @@ public class Main {
 			System.out.println();
 			DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 			IOLog ioLog = new IOLog();
-			List<String> components = ioLog.getComponents();
+			Brew runningBrew = new BrewDB().getRunningBrew();
+			List<String> components = ioLog.getComponents(runningBrew);
 			Comparator<IOData> comparator = new Comparator<IOData>() {
 
 				@Override
@@ -207,7 +207,7 @@ public class Main {
 				}
 			};
 			while (true) {
-				List<IOData> entries = ioLog.getLatestEntries(components);
+				List<IOData> entries = ioLog.getLatestEntries(runningBrew, components);
 				if (!entries.isEmpty()) {
 					entries.sort(comparator);
 					StringBuilder b = new StringBuilder(df.format(new Date())).append(":");

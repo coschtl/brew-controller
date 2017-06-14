@@ -33,15 +33,15 @@ public abstract class AbstractSensor implements Sensor {
 		}
 	}
 	
-	protected boolean mayStartTemperatureCollection() {
-		return true;
-	}
-
 	private boolean sensorDataCollectorIsRunning() {
 		return sensorDataCollectorThread != null && sensorDataCollectorThread.isAlive();
 	}
 
 	protected abstract double doGetValue();
+
+	protected boolean mayStartTemperatureCollection() {
+		return true;
+	}
 
 	protected void startCollectingSensorData() {
 		// do wait at least two intervalls before starting the thread again

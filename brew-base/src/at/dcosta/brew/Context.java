@@ -4,20 +4,19 @@ public class Context {
 	
 	private static Context INSTANCE = new Context();
 	
+	public static  Context getInstance() {
+		return INSTANCE;
+	}
 	private int recipeId = -1;
+	
 	private int brewId =-1;
 	
 	private Context() {
 		// use getInstance()!
 	}
 	
-	public static  Context getInstance() {
-		return INSTANCE;
-	}
-	
-	public synchronized void initialize(int brewId, int recipeId) {
-		this.brewId = brewId;
-		this.recipeId = recipeId;
+	public int getBrewId() {
+		return brewId;
 	}
 	
 	
@@ -26,8 +25,9 @@ public class Context {
 		return recipeId;
 	}
 
-	public int getBrewId() {
-		return brewId;
+	public synchronized void initialize(int brewId, int recipeId) {
+		this.brewId = brewId;
+		this.recipeId = recipeId;
 	}
 	
 	

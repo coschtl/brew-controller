@@ -141,13 +141,13 @@ public class MashingSystem extends HeatingSystem {
 	}
 
 	@Override
-	protected double getMinTemperatureIncreasePerMinute() {
-		return Configuration.getInstance().getDouble(MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
+	protected double getHeatingMonitorStartupDelayMinutes() {
+		return Configuration.getInstance().getDouble(MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
 	}
 	
 	@Override
-	protected double getHeatingMonitorStartupDelayMinutes() {
-		return Configuration.getInstance().getDouble(MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
+	protected double getMinTemperatureIncreasePerMinute() {
+		return Configuration.getInstance().getDouble(MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
 	}
 
 	@Override

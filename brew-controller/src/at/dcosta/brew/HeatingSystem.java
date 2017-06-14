@@ -126,9 +126,9 @@ public abstract class HeatingSystem  {
 
 	protected abstract int[] getHeaterPins();
 
-	protected abstract double getMinTemperatureIncreasePerMinute();
-	
 	protected abstract double getHeatingMonitorStartupDelayMinutes();
+	
+	protected abstract double getMinTemperatureIncreasePerMinute();
 
 	protected abstract String[] getTemperatureSensorAddresses();
 

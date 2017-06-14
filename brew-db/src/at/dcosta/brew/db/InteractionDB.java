@@ -29,19 +29,6 @@ public class InteractionDB extends Database {
 	private static final String SQL_SET_PROCESSED = "UPDATE "
 			+ TABLE_NAME + " SET EXECUTION_TIME=? WHERE ROWID=?";
 	
-	private ManualAction create(ResultSet rs) throws SQLException {
-		ManualAction manualAction = new ManualAction();
-		manualAction.setId(rs.getInt(1));
-		manualAction.setTime(rs.getTimestamp(2));
-		manualAction.setType(Type.valueOf(rs.getString(3)));
-		manualAction.setTarget(rs.getString(4));
-		manualAction.setArguments(rs.getString(5));
-		manualAction.setDurationMinutes(rs.getInt(6));
-		manualAction.setExecutionTime(rs.getTimestamp(7));
-		return manualAction;
-	}
-	
-
 	public void addEntry(ManualAction manualAction) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
@@ -64,24 +51,6 @@ public class InteractionDB extends Database {
 		}
 	}
 	
-	public void setProcessed(ManualAction manualAction) {
-		Connection con = getConnection();
-		PreparedStatement st = null;
-		try {
-			st = con.prepareStatement(SQL_SET_PROCESSED);
-			st.setTimestamp(1,  now());
-			st.setInt(2, manualAction.getId());
-			int rows = st.executeUpdate();
-			if (rows != 1) {
-				throw new DatabaseException("can not update ManualAction entry (no row updated)!");
-			}
-		} catch (SQLException e) {
-			throw new DatabaseException("can not update ManualAction entry: " + e.getMessage(), e);
-		} finally {
-			close(st);
-			close(con);
-		}
-	}
 
 	public List<ManualAction> getUnprocessedActions() {
 		List<ManualAction> actions = new ArrayList<ManualAction>();
@@ -102,6 +71,37 @@ public class InteractionDB extends Database {
 			close(con);
 		}
 		return actions;
+	}
+	
+	public void setProcessed(ManualAction manualAction) {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		try {
+			st = con.prepareStatement(SQL_SET_PROCESSED);
+			st.setTimestamp(1,  now());
+			st.setInt(2, manualAction.getId());
+			int rows = st.executeUpdate();
+			if (rows != 1) {
+				throw new DatabaseException("can not update ManualAction entry (no row updated)!");
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("can not update ManualAction entry: " + e.getMessage(), e);
+		} finally {
+			close(st);
+			close(con);
+		}
+	}
+
+	private ManualAction create(ResultSet rs) throws SQLException {
+		ManualAction manualAction = new ManualAction();
+		manualAction.setId(rs.getInt(1));
+		manualAction.setTime(rs.getTimestamp(2));
+		manualAction.setType(Type.valueOf(rs.getString(3)));
+		manualAction.setTarget(rs.getString(4));
+		manualAction.setArguments(rs.getString(5));
+		manualAction.setDurationMinutes(rs.getInt(6));
+		manualAction.setExecutionTime(rs.getTimestamp(7));
+		return manualAction;
 	}
 
 

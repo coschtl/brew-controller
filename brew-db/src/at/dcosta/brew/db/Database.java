@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,14 +45,14 @@ public abstract class Database {
 			types = new ArrayList<>();
 		}
 
-		public void addColumn(String name, String typeAsString) {
-			addColumn(name, Integer.parseInt(typeAsString));
-		}
-
 		public void addColumn(String name, int type) {
 			Integer typeValue = Integer.valueOf(type);
 			typeMapping.put(name, typeValue);
 			types.add(typeValue);
+		}
+
+		public void addColumn(String name, String typeAsString) {
+			addColumn(name, Integer.parseInt(typeAsString));
 		}
 
 		public Object convert(int columnId, String value) {
@@ -84,58 +85,6 @@ public abstract class Database {
 	private static final String SQL_LAST_ROW_ID = "SELECT last_insert_rowid()";
 	private static final String JDBC_URL_PREFIX = "jdbc:sqlite:";
 
-	private final String jdbcUrl;
-
-	protected Database() {
-		jdbcUrl = getJdbcUrl();
-		createTablesIfNecessary();
-	}
-
-	private static String getJdbcUrl() {
-		return JDBC_URL_PREFIX + Configuration.getInstance().getString(DATABASE_LOCATION);
-	}
-
-	public void dumpToXml(File outputFile) throws IOException {
-		Connection con = getConnection();
-		PreparedStatement st = null;
-		ResultSet rs = null;
-		try {
-			Document xml = new Document("tables");
-			for (String tableName : getTableNames()) {
-				Element table = new Element("table").addAttribute("name", tableName);
-				xml.addElement(table);
-				st = con.prepareStatement("select * from " + tableName);
-				rs = st.executeQuery();
-				ResultSetMetaData metaData = rs.getMetaData();
-				int columnCount = metaData.getColumnCount();
-				Element columnDefinition = new Element("columnDefinition");
-				table.addChild(columnDefinition);
-				for (int i = 1; i <= columnCount; i++) {
-					columnDefinition.addChild(new Element("column").addAttribute("name", metaData.getColumnName(i))
-							.addAttribute("type", metaData.getColumnType(i)));
-				}
-				Element rows = new Element("rows");
-				table.addChild(rows);
-				while (rs.next()) {
-					Element row = new Element("row");
-					rows.addChild(row);
-					for (int i = 1; i <= columnCount; i++) {
-						Element column = new Element("column").addChild(new Text(String.valueOf(rs.getObject(i))));
-						row.addChild(column);
-					}
-				}
-			}
-			DomWriter writer = new DomWriter();
-			writer.write(xml, outputFile);
-		} catch (SQLException e) {
-			throw new DatabaseException("Can not dump " + getClass().getSimpleName() + ": " + e.getMessage(), e);
-		} finally {
-			close(rs);
-			close(st);
-			close(con);
-		}
-	}
-
 	public static void importFromXml(File xmlFile) throws IOException, ParserConfigurationException, SAXException {
 		DomReader reader = new DomReader();
 		Element rootElement = reader.read(xmlFile).getRootElement();
@@ -144,6 +93,10 @@ public abstract class Database {
 			Element table = tables.next();
 			importTable(table);
 		}
+	}
+
+	private static String getJdbcUrl() {
+		return JDBC_URL_PREFIX + Configuration.getInstance().getString(DATABASE_LOCATION);
 	}
 
 	private static void importTable(Element table) {
@@ -195,6 +148,92 @@ public abstract class Database {
 		}
 	}
 
+	protected static void close(Connection con) {
+		try {
+			if (con != null) {
+				con.close();
+			}
+		} catch (SQLException e) {
+			// ignore
+		}
+	}
+
+	protected static void close(ResultSet rs) {
+		try {
+			if (rs != null) {
+				rs.close();
+			}
+		} catch (SQLException e) {
+			// ignore
+		}
+	}
+
+	protected static void close(Statement st) {
+		try {
+			if (st != null) {
+				st.close();
+			}
+		} catch (SQLException e) {
+			// ignore
+		}
+	}
+
+	protected static Connection getConnection(String url) {
+		try {
+			return DriverManager.getConnection(url);
+		} catch (SQLException e) {
+			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
+		}
+	}
+
+	private final String jdbcUrl;
+
+	protected Database() {
+		jdbcUrl = getJdbcUrl();
+		createTablesIfNecessary();
+	}
+
+	public void dumpToXml(File outputFile) throws IOException {
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			Document xml = new Document("tables");
+			for (String tableName : getTableNames()) {
+				Element table = new Element("table").addAttribute("name", tableName);
+				xml.addElement(table);
+				st = con.prepareStatement("select * from " + tableName);
+				rs = st.executeQuery();
+				ResultSetMetaData metaData = rs.getMetaData();
+				int columnCount = metaData.getColumnCount();
+				Element columnDefinition = new Element("columnDefinition");
+				table.addChild(columnDefinition);
+				for (int i = 1; i <= columnCount; i++) {
+					columnDefinition.addChild(new Element("column").addAttribute("name", metaData.getColumnName(i))
+							.addAttribute("type", metaData.getColumnType(i)));
+				}
+				Element rows = new Element("rows");
+				table.addChild(rows);
+				while (rs.next()) {
+					Element row = new Element("row");
+					rows.addChild(row);
+					for (int i = 1; i <= columnCount; i++) {
+						Element column = new Element("column").addChild(new Text(String.valueOf(rs.getObject(i))));
+						row.addChild(column);
+					}
+				}
+			}
+			DomWriter writer = new DomWriter();
+			writer.write(xml, outputFile);
+		} catch (SQLException e) {
+			throw new DatabaseException("Can not dump " + getClass().getSimpleName() + ": " + e.getMessage(), e);
+		} finally {
+			close(rs);
+			close(st);
+			close(con);
+		}
+	}
+
 	private void createTablesIfNecessary() {
 		String err = "Can not check if table exists: ";
 		Connection con = getConnection();
@@ -205,7 +244,8 @@ public abstract class Database {
 			String[] createStatements = getCreateTableStatements();
 			String[] tableNames = getTableNames();
 			if (createStatements.length != tableNames.length) {
-				throw new DatabaseException(getClass().getSimpleName() + ": ERROR tableNames and create Statements have different size!");
+				throw new DatabaseException(
+						getClass().getSimpleName() + ": ERROR tableNames and create Statements have different size!");
 			}
 			for (int i = 0; i < tableNames.length; i++) {
 				st = con.prepareStatement(SQL_CHECK_TABLE_EXISTS);
@@ -240,46 +280,8 @@ public abstract class Database {
 		}
 	}
 
-	protected static void close(Connection con) {
-		try {
-			if (con != null) {
-				con.close();
-			}
-		} catch (SQLException e) {
-			// ignore
-		}
-	}
-
-	protected static void close(ResultSet rs) {
-		try {
-			if (rs != null) {
-				rs.close();
-			}
-		} catch (SQLException e) {
-			// ignore
-		}
-	}
-
-	protected static void close(Statement st) {
-		try {
-			if (st != null) {
-				st.close();
-			}
-		} catch (SQLException e) {
-			// ignore
-		}
-	}
-
 	protected Connection getConnection() {
 		return getConnection(jdbcUrl);
-	}
-
-	protected static Connection getConnection(String url) {
-		try {
-			return DriverManager.getConnection(url);
-		} catch (SQLException e) {
-			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
-		}
 	}
 
 	protected abstract String[] getCreateIndexStatements();
@@ -308,6 +310,15 @@ public abstract class Database {
 
 	protected Timestamp now() {
 		return new Timestamp(System.currentTimeMillis());
+	}
+
+	protected Timestamp today() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return new Timestamp(cal.getTimeInMillis());
 	}
 
 }

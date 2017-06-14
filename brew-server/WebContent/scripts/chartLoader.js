@@ -2,7 +2,7 @@ var myChart;
 
 function drawChart(componentId, labelString, canvasId, responsiveRendering) {
 	 var r = new XMLHttpRequest();
-		r.open("GET", contextPath + "/v1/api/states/chartData?componentId=" + componentId, true);
+		r.open("GET", contextPath + "/v1/api/states/chartData?brew=" + getBrewId() + "&componentId=" + componentId, true);
 		r.onreadystatechange = function() {
 			if (r.readyState != 4 || r.status != 200) {
 				return;

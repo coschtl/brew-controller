@@ -18,6 +18,16 @@ public class UserInteractionExecuter implements StoppableRunnable {
 	}
 
 	@Override
+	public void abort() {
+		keepRunning = false;
+	}
+
+	@Override
+	public boolean mustComplete() {
+		return false;
+	}
+
+	@Override
 	public void run() {
 		keepRunning = true;
 		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
@@ -48,16 +58,6 @@ public class UserInteractionExecuter implements StoppableRunnable {
 			}
 			ThreadUtil.sleepMillis(100);
 		}
-	}
-
-	@Override
-	public void abort() {
-		keepRunning = false;
-	}
-
-	@Override
-	public boolean mustComplete() {
-		return false;
 	}
 
 }

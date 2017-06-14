@@ -21,7 +21,8 @@ if (contextPath.substring(0,4) == "/app") {
 }
 
 var aktSubmenu;
- 
+var submenuReloadIntervalId;
+var statusReloadIntervalId;
 
 function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
@@ -119,10 +120,10 @@ function loadMashingSubmenu() {
 }
 
 function init() {
+	submenuReloadIntervalId = setInterval(loadMashingSubmenu, 5000);
+	statusReloadIntervalId = setInterval(loadStatus, 2500);
 	loadMashingSubmenu();
 	loadStatus();
-	setInterval(loadMashingSubmenu, 5000);
-	setInterval(loadStatus, 2500);
 }
 
 </script>

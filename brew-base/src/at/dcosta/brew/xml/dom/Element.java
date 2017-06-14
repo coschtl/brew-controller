@@ -18,13 +18,8 @@ public class Element extends Node {
 		this.attributes = attributes;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public Element addChild(Node child) {
-		return (Element) super.addChild(child);
+	public Element addAttribute(String name, int value) {
+		return addAttribute(name, Integer.toString(value));
 	}
 
 	public Element addAttribute(String name, String value) {
@@ -32,12 +27,17 @@ public class Element extends Node {
 		return this;
 	}
 
-	public Element addAttribute(String name, int value) {
-		return addAttribute(name, Integer.toString(value));
+	@Override
+	public Element addChild(Node child) {
+		return (Element) super.addChild(child);
 	}
 
-	public boolean hasChildElements() {
-		return getElementIterator().hasNext();
+	public String getAttribute(String name) {
+		return attributes.get(name);
+	}
+
+	public Map<String, String> getAttributes() {
+		return attributes;
 	}
 
 	public Iterator<Element> getElementIterator() {
@@ -73,21 +73,6 @@ public class Element extends Node {
 		};
 	}
 
-	public Map<String, String> getAttributes() {
-		return attributes;
-	}
-	
-	public String getAttribute(String name) {
-		return attributes.get(name);
-	}
-	
-	public Text getText() {
-		if (!getChildren().isEmpty()) {
-			return (Text) getChildren().iterator().next();
-		}
-		return null;
-	}
-
 	public Element getFirstChild(String name) {
 		Iterator<Element> it = getElementIterator();
 		if (!it.hasNext()) {
@@ -104,6 +89,21 @@ public class Element extends Node {
 			}
 		}
 		return null;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Text getText() {
+		if (!getChildren().isEmpty()) {
+			return (Text) getChildren().iterator().next();
+		}
+		return null;
+	}
+
+	public boolean hasChildElements() {
+		return getElementIterator().hasNext();
 	}
 
 	@Override

@@ -29,60 +29,60 @@ public class Recipe implements Serializable {
 	@XmlElement
 	private boolean brewRunning;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public boolean isBrewRunning() {
-		return brewRunning;
-	}
-
-	public void setBrewRunning(boolean brewRunning) {
-		this.brewRunning = brewRunning;
-	}
-
-	public String getRecipe() {
-		return recipe;
-	}
-
-	public void setRecipe(String recipe) {
-		this.recipe = recipe;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
 	public String getAddedOn() {
 		return addedOn;
-	}
-
-	public void setAddedOn(String addedOn) {
-		this.addedOn = addedOn;
 	}
 
 	public int getBrewCount() {
 		return brewCount;
 	}
 
-	public void setBrewCount(int brewCount) {
-		this.brewCount = brewCount;
-	}
-
 	public int getId() {
 		return id;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getRecipe() {
+		return recipe;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public boolean isBrewRunning() {
+		return brewRunning;
+	}
+
+	public void setAddedOn(String addedOn) {
+		this.addedOn = addedOn;
+	}
+
+	public void setBrewCount(int brewCount) {
+		this.brewCount = brewCount;
+	}
+
+	public void setBrewRunning(boolean brewRunning) {
+		this.brewRunning = brewRunning;
+	}
+
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setRecipe(String recipe) {
+		this.recipe = recipe;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 }

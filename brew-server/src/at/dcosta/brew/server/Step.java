@@ -35,6 +35,14 @@ public class Step implements Serializable {
 		this.name = name;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public String getHeaderText() {
+		return headerText;
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -55,19 +63,15 @@ public class Step implements Serializable {
 		this.active = active;
 		return this;
 	}
+	
+	public Step setDescription(String description) {
+		this.description = description;
+		return this;
+	}
 
 	public Step setFinished(boolean finished) {
 		this.finished = finished;
 		return this;
-	}
-
-	public Step setId(String id) {
-		this.id = id;
-		return this;
-	}
-	
-	public String getHeaderText() {
-		return headerText;
 	}
 
 	public Step setHeaderText(String headerText) {
@@ -75,12 +79,8 @@ public class Step implements Serializable {
 		return this;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public Step setDescription(String description) {
-		this.description = description;
+	public Step setId(String id) {
+		this.id = id;
 		return this;
 	}
 

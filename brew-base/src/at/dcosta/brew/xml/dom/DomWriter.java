@@ -15,45 +15,12 @@ public class DomWriter {
 	private int depth;
 	private String indentationString = "\t";
 
-	public void setIndentationString(String indentationString) {
-		this.indentationString = indentationString;
-	}
-
 	public DomWriter() {
 		xml = new StringBuilder();
 	}
 
-	private void visit(Document document) {
-		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
-		document.accept(this);
-	}
-
-	public void write(Document document, File file) throws IOException {
-		FileOutputStream out = new FileOutputStream(file);
-		write(document, out);
-		out.close();
-	}
-
-	public void write(Document document, OutputStream out) throws IOException {
-		visit(document);
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-		writer.write(xml.toString());
-		writer.flush();
-		writer.close();
-	}
-
-	public void visit(Node node) {
-		if (node instanceof Text) {
-			visit((Text) node);
-		} else if (node instanceof Element) {
-			visit((Element) node);
-		} else {
-			node.accept(this);
-		}
-	}
-
-	public void visit(Text text) {
-		xml.append(text.getText());
+	public void setIndentationString(String indentationString) {
+		this.indentationString = indentationString;
 	}
 
 	public void visit(Element element) {
@@ -74,19 +41,47 @@ public class DomWriter {
 		endElement(element.getName());
 	}
 
+	public void visit(Node node) {
+		if (node instanceof Text) {
+			visit((Text) node);
+		} else if (node instanceof Element) {
+			visit((Element) node);
+		} else {
+			node.accept(this);
+		}
+	}
+
+	public void visit(Text text) {
+		xml.append(text.getText());
+	}
+
+	public void write(Document document, File file) throws IOException {
+		FileOutputStream out = new FileOutputStream(file);
+		write(document, out);
+		out.close();
+	}
+
+	public void write(Document document, OutputStream out) throws IOException {
+		visit(document);
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+		writer.write(xml.toString());
+		writer.flush();
+		writer.close();
+	}
 
 	private DomWriter addAttribute(String name, String value) {
 		xml.append(' ').append(name).append("=\"").append(value).append("\"");
 		return this;
 	}
 
-	private DomWriter startElement(String name) {
-		xml.append('<').append(name);
-		return this;
-	}
 
 	private DomWriter closeElement() {
 		xml.append('>');
+		return this;
+	}
+
+	private DomWriter endElement(String name) {
+		xml.append("</").append(name).append('>');
 		return this;
 	}
 
@@ -97,9 +92,14 @@ public class DomWriter {
 		}
 	}
 
-	private DomWriter endElement(String name) {
-		xml.append("</").append(name).append('>');
+	private DomWriter startElement(String name) {
+		xml.append('<').append(name);
 		return this;
+	}
+
+	private void visit(Document document) {
+		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
+		document.accept(this);
 	}
 
 }

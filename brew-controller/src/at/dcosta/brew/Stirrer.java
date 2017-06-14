@@ -24,6 +24,39 @@ public class Stirrer implements Relay {
 
 	
 
+	@Override
+	public String getID() {
+		return stirrerMotor.getID();
+	}
+
+	@Override
+	public boolean isControlledAutomatically() {
+		return stirrerMotor.isControlledAutomatically();
+	}
+
+	@Override
+	public boolean isOn() {
+		return stirrerMotor.isOn();
+	}
+
+	@Override
+	public void off() {
+		if (delayedStopper != null && delayedStopper.isAlive()) {
+			delayedStopper.interrupt();
+		}
+		stirrerMotor.off();
+	}
+
+	@Override
+	public void on() {
+		stirrerMotor.on();
+	}
+
+	@Override
+	public void setControlManually(long manualControlTimeMillis) {
+		stirrerMotor.setControlManually(manualControlTimeMillis);
+	}
+
 	public void stopDelayed() {
 		if (stirrerMotor.isControlledAutomatically()) {
 			StoppableRunnable runnable = new StoppableRunnable() {
@@ -55,38 +88,5 @@ public class Stirrer implements Relay {
 			delayedStopper = ThreadManager.getInstance().newThread(runnable, "stirrer overtime");
 			delayedStopper.start();
 		}
-	}
-
-	@Override
-	public String getID() {
-		return stirrerMotor.getID();
-	}
-
-	@Override
-	public boolean isControlledAutomatically() {
-		return stirrerMotor.isControlledAutomatically();
-	}
-
-	@Override
-	public void setControlManually(long manualControlTimeMillis) {
-		stirrerMotor.setControlManually(manualControlTimeMillis);
-	}
-
-	@Override
-	public boolean isOn() {
-		return stirrerMotor.isOn();
-	}
-
-	@Override
-	public void off() {
-		if (delayedStopper != null && delayedStopper.isAlive()) {
-			delayedStopper.interrupt();
-		}
-		stirrerMotor.off();
-	}
-
-	@Override
-	public void on() {
-		stirrerMotor.on();
 	}
 }

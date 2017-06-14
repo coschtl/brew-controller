@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import at.dcosta.brew.BrewStatus;
-import at.dcosta.brew.db.BrewStep.StepName;
 
 public class Brew {
 

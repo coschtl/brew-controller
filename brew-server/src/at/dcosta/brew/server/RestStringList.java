@@ -9,6 +9,9 @@ public class RestStringList implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@XmlElement
+	private List<String> list;
+
 	public RestStringList() {
 		// jaxb
 	}
@@ -16,9 +19,6 @@ public class RestStringList implements Serializable {
 	public RestStringList(List<String> list) {
 		this.list = list;
 	}
-
-	@XmlElement
-	private List<String> list;
 
 	public List<String> getList() {
 		return list;

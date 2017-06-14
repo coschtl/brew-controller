@@ -38,13 +38,6 @@ public class GpioSubsystem {
 		relaysById = new HashMap<>();
 	}
 
-	public Relay getRelayByPi4JPin(int pi4jPinNumber) {
-		return relaysByPi4JPin.get(pi4jPinNumber);
-	}
-	public Relay getRelayById(String id) {
-		return relaysById.get(id);
-	}
-
 	public Relay getRelay(String name, int pi4jPinNumber) {
 		Relay relay = getRelayByPi4JPin(pi4jPinNumber);
 		if (relay == null) {
@@ -57,6 +50,13 @@ public class GpioSubsystem {
 			relaysById.put(relay.getID(), relay);
 		}
 		return relay;
+	}
+	public Relay getRelayById(String id) {
+		return relaysById.get(id);
+	}
+
+	public Relay getRelayByPi4JPin(int pi4jPinNumber) {
+		return relaysByPi4JPin.get(pi4jPinNumber);
 	}
 
 	public Sensor getRpmSensor(String name, int pi4jPinNumber) {

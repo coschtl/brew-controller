@@ -13,6 +13,29 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		OK, ERROR, UNKNOWN;
 	}
 
+	private static final Comparator<Sensor> VALUE_COMPARATOR = new Comparator<Sensor>() {
+		@Override
+		public int compare(Sensor s1, Sensor s2) {
+			if (s1 == null) {
+				if (s2 == null) {
+					return 0;
+				}
+				return 1;
+			}
+			if (s2 == null) {
+				return -1;
+			}
+			return (int) (s2.getValue() - s1.getValue());
+		}
+	};
+	private static double getMedian(List<Sensor> sensors) {
+		Collections.sort(sensors, VALUE_COMPARATOR);
+		int half = sensors.size() / 2;
+		if (sensors.size() % 2 == 0) {
+			return (sensors.get(half - 1).getValue() + sensors.get(half).getValue()) / 2d;
+		}
+		return sensors.get(half).getValue();
+	}
 	private ComponentType componentType;
 	private String scale;
 	private List<Sensor> sensors;
@@ -20,7 +43,9 @@ public class AvgCalculatingSensor extends AbstractSensor {
 	private String error;
 	private double lastValue = -1;
 	private double maxDiff;
+
 	private double correctionValue;
+
 	private boolean mayStartTemperatureCollection;
 
 	public AvgCalculatingSensor(double maxDiff, double correctionValue) {
@@ -43,33 +68,6 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		}
 		sensors.add(sensor);
 		mayStartTemperatureCollection = true;
-	}
-
-	protected boolean mayStartTemperatureCollection() {
-		return mayStartTemperatureCollection;
-	}
-
-	@Override
-	public ComponentType getComponentType() {
-		return componentType;
-	}
-
-	@Override
-	public String getID() {
-		return "Average";
-	}
-
-	public String getError() {
-		return error;
-	}
-
-	public SensorStatus getSensorStatus() {
-		return sensorStatus;
-	}
-
-	@Override
-	public String getScale() {
-		return scale;
 	}
 
 	@Override
@@ -111,21 +109,28 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		return average;
 	}
 
-	private static final Comparator<Sensor> VALUE_COMPARATOR = new Comparator<Sensor>() {
-		@Override
-		public int compare(Sensor s1, Sensor s2) {
-			if (s1 == null) {
-				if (s2 == null) {
-					return 0;
-				}
-				return 1;
-			}
-			if (s2 == null) {
-				return -1;
-			}
-			return (int) (s2.getValue() - s1.getValue());
-		}
-	};
+	@Override
+	public ComponentType getComponentType() {
+		return componentType;
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	@Override
+	public String getID() {
+		return "Average";
+	}
+
+	@Override
+	public String getScale() {
+		return scale;
+	}
+
+	public SensorStatus getSensorStatus() {
+		return sensorStatus;
+	}
 
 	private double getAverage(List<Sensor> sensors) {
 		double sum = 0;
@@ -135,12 +140,8 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		return (sum / sensors.size()) + correctionValue;
 	}
 
-	private static double getMedian(List<Sensor> sensors) {
-		Collections.sort(sensors, VALUE_COMPARATOR);
-		int half = sensors.size() / 2;
-		if (sensors.size() % 2 == 0) {
-			return (sensors.get(half - 1).getValue() + sensors.get(half).getValue()) / 2d;
-		}
-		return sensors.get(half).getValue();
+	@Override
+	protected boolean mayStartTemperatureCollection() {
+		return mayStartTemperatureCollection;
 	}
 }

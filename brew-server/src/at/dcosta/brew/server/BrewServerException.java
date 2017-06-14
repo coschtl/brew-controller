@@ -8,13 +8,13 @@ public class BrewServerException extends RuntimeException {
 
 	private final Status status;
 
-	public BrewServerException(String message, Throwable cause, Status status) {
-		super(message, cause);
+	public BrewServerException(String message, Status status) {
+		super(message);
 		this.status = status;
 	}
 
-	public BrewServerException(String message, Status status) {
-		super(message);
+	public BrewServerException(String message, Throwable cause, Status status) {
+		super(message, cause);
 		this.status = status;
 	}
 

@@ -7,8 +7,6 @@ import java.util.Map;
 
 public class ManualAction implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-
 	public static enum Type {
 		SWITCH_ON("switchOn"), SWITCH_OFF("switchOff"), SWITCH_TO_AUTOMATIC ("switchAuto"), ADD_TIME("addTime");
 
@@ -35,6 +33,8 @@ public class ManualAction implements Serializable {
 		}
 	}
 
+	private static final long serialVersionUID = 1L;
+
 	private Timestamp time, executionTime;
 	private Type type;
 	private String target, arguments;
@@ -44,60 +44,60 @@ public class ManualAction implements Serializable {
 		this.durationMinutes = -1;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public Timestamp getTime() {
-		return time;
-	}
-
-	public void setTime(Timestamp time) {
-		this.time = time;
-	}
-
-	public Timestamp getExecutionTime() {
-		return executionTime;
-	}
-
-	public void setExecutionTime(Timestamp executionTime) {
-		this.executionTime = executionTime;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public void setType(Type type) {
-		this.type = type;
-	}
-
-	public String getTarget() {
-		return target;
-	}
-
-	public void setTarget(String target) {
-		this.target = target;
-	}
-
 	public String getArguments() {
 		return arguments;
-	}
-
-	public void setArguments(String arguments) {
-		this.arguments = arguments;
 	}
 
 	public int getDurationMinutes() {
 		return durationMinutes;
 	}
 
+	public Timestamp getExecutionTime() {
+		return executionTime;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public String getTarget() {
+		return target;
+	}
+
+	public Timestamp getTime() {
+		return time;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setArguments(String arguments) {
+		this.arguments = arguments;
+	}
+
 	public void setDurationMinutes(int durationMinutes) {
 		this.durationMinutes = durationMinutes;
+	}
+
+	public void setExecutionTime(Timestamp executionTime) {
+		this.executionTime = executionTime;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public void setTime(Timestamp time) {
+		this.time = time;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	@Override

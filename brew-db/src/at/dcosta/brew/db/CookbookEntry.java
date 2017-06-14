@@ -22,6 +22,10 @@ public class CookbookEntry {
 		return name;
 	}
 
+	public String getRecipe() {
+		return recipe;
+	}
+
 	public String getRecipeSource() {
 		return recipeSource;
 	}
@@ -41,17 +45,13 @@ public class CookbookEntry {
 		return this;
 	}
 
+	public void setRecipe(String recipeString) {
+		this.recipe = recipeString;
+	}
+
 	public CookbookEntry setRecipeSource(String recipeSource) {
 		this.recipeSource = recipeSource;
 		return this;
-	}
-
-	public String getRecipe() {
-		return recipe;
-	}
-
-	public void setRecipe(String recipeString) {
-		this.recipe = recipeString;
 	}
 	
 	

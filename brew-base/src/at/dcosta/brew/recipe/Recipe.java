@@ -33,13 +33,9 @@ public abstract class Recipe {
 		this.hops = new ArrayList<>();
 	}
 
-	public FermentationType getFermentationType() {
-		return fermentationType;
-	}
 	public void addHop(Hop hop) {
 		hops.add(hop);
 	}
-
 	public void addMalt(Ingredient malt) {
 		malts.add(malt);
 	}
@@ -49,6 +45,10 @@ public abstract class Recipe {
 	}
 
 	public abstract String getBrewType();
+
+	public FermentationType getFermentationType() {
+		return fermentationType;
+	}
 
 	public List<Hop> getHops() {
 		return hops;

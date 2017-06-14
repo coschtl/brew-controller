@@ -135,23 +135,6 @@ function startOrContinueBrew() {
 	});
 }
 
-function abortBrew() {
-	if (!confirm("Brauvorgang wirklich abbrechen?")) {
-		return;
-	}
-	fetch(contextPath + "/v1/api/recipes/abortRunningBrew", {
-	  method: 'DELETE',
-	}).then((response) => {
-		if (response.status == 200) {
-			showSelectedRecipe();
-			return;
-		}
-		errorFromHeader(response);
-	}).catch((data) => {
-		error(data)
-	});
-}
-
 function showBrewDates() {
 	fetch(contextPath + "/v1/api/recipes/" + getSelectedRecipeId() + "/showBrews", {
 	  method: 'get',
@@ -186,7 +169,7 @@ function init() {
 </script>
 </head>
 <body onload="init();">
-	<h1>Kochbuch</h1>
+	<h1><a href="index.html">Brau-Steuerung</a> - Kochbuch</h1>
 	<div id="aktRecipe" style="display:none">
 		<p id="aktRecipeName"></p>
 	</div>

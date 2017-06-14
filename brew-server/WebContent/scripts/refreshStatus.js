@@ -1,8 +1,9 @@
+var brewIsFinished = false;
+
 function loadStatus() {
 	var r = new XMLHttpRequest();
-	r.open("GET", contextPath + "/v1/api/states/system", true);
+	r.open("GET", contextPath + "/v1/api/states/system?brew=" + getBrewId(), true);
 	r.onreadystatechange = function() {
-		console.log(r);
 		if (r.readyState != 4 || r.status != 200) {
 			return;
 		}
@@ -12,8 +13,25 @@ function loadStatus() {
 			hide("statusTable");
 			return;
 		}
+
 		hide("noStatusAvailable");
 		show("statusTable");
+		statusData["heaters"] = assureArraySize(statusData["heaters"], 2);
+		statusData["temperatures"] = assureArraySize(statusData["temperatures"], 2);
+		
+		if (statusData.brewFinished) {
+			brewIsFinished = true;
+			clearInterval(submenuReloadIntervalId);
+			clearInterval(statusReloadIntervalId);
+			statusData.temperatures[0].value = null;
+			statusData.temperatures[1].value = null;
+			statusData.avgTemp.value = null;
+			statusData.heaters[0].on = false;
+			statusData.heaters[1].on = false;
+			statusData.stirrer.on = false;
+			statusData.stirrerRunning = false;
+			statusData.timeString = null;
+		}
 		
 		setLinkedPngImage("icon_stirrer", statusData.stirrer, "motor_", "ON / OFF");
 		setLinkedPngImage("icon_heater_1", statusData.heaters[0], "heater_", "ON / OFF");
@@ -72,9 +90,7 @@ function setAction(id, component, labelString) {
 	actionComponent = component;
 	actionLabelString = labelString;
 	
-	console.log(component);
-	
-	if (component.on == null) {
+	if (brewIsFinished || component.on == null) {
 		performAction('showChart');
 		return;
 	} else if (component.on) {
@@ -99,7 +115,6 @@ function performAction(action, time) {
 		fetch (url, {
 			  method: 'PUT',
 			}).then((response) => {
-				console.log(response);
 				if (response.status != 204) {
 					error(response);
 				}

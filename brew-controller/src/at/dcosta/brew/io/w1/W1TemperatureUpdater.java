@@ -37,11 +37,6 @@ public class W1TemperatureUpdater implements StoppableRunnable {
 		return false;
 	}
 
-	private void readStoreAndLogValue() {
-		readAndStroreValue();
-		logValue();
-	}
-
 	public void readAndStroreValue() {
 		double temperature = pi4jSensor.getTemperature(TemperatureScale.CELSIUS);
 		w1Sensor.setValue(temperature);
@@ -59,5 +54,10 @@ public class W1TemperatureUpdater implements StoppableRunnable {
 			}
 			ThreadUtil.sleepDefaultMillis();
 		}
+	}
+
+	private void readStoreAndLogValue() {
+		readAndStroreValue();
+		logValue();
 	}
 }

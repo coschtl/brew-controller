@@ -28,6 +28,9 @@ public class SystemState implements Serializable {
 	@XmlElement
 	private String timeString;
 
+	@XmlElement
+	private boolean brewFinished;
+
 	public SystemState() {
 		heaters = new ArrayList<>();
 		temperatures = new ArrayList<>();
@@ -65,8 +68,16 @@ public class SystemState implements Serializable {
 		return timeString;
 	}
 
+	public boolean isBrewFinished() {
+		return brewFinished;
+	}
+
 	public void setAvgTemp(double avgTemp) {
 		this.avgTemp = new Sensor("Average", avgTemp);
+	}
+
+	public void setBrewFinished(boolean brewFinished) {
+		this.brewFinished = brewFinished;
 	}
 
 	public void setRotation(double rotation) {
@@ -80,5 +91,4 @@ public class SystemState implements Serializable {
 	public void setTimeString(String timeString) {
 		this.timeString = timeString;
 	}
-
 }

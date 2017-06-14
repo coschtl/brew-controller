@@ -10,6 +10,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import at.dcosta.brew.db.Brew;
+import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.server.ChartData;
@@ -19,21 +21,24 @@ import at.dcosta.brew.server.SystemState;
 
 @Path("states")
 public class States {
-	
+
 	private final IOLog ioLog;
-	
+	private final BrewDB brewDB;
+
 	public States() {
-		ioLog =  new IOLog();
+		ioLog = new IOLog();
+		brewDB = new BrewDB();
 	}
 
 	@GET
 	@Path("chartData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ChartData chartData(@QueryParam(value = "componentId") String componentId) {
+	public ChartData chartData(@QueryParam(value = "brew") int brewId,
+			@QueryParam(value = "componentId") String componentId) {
 		ChartData data = new ChartData();
 		DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 		String id = null;
-		List<IOData> entries = ioLog.getEntries(componentId);
+		List<IOData> entries = ioLog.getEntries(brewDB.getBrewById(brewId), componentId);
 		int modulo = entries.size() / 10;
 		if (modulo == 0) {
 			modulo = 1;
@@ -57,12 +62,27 @@ public class States {
 		return data;
 	}
 
+	@GET
+	@Path("system/runningBrew")
+	@Produces(MediaType.APPLICATION_JSON)
+	public at.dcosta.brew.server.Brew getRunningBrew() {
+		Brew runningBrew = brewDB.getRunningBrew();
+		at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
+		if (runningBrew == null) {
+			dto.setId(-1);
+		} else {
+			dto.setId(runningBrew.getId());
+		}
+		return dto;
+	}
+
 	@SuppressWarnings("incomplete-switch")
 	@GET
 	@Path("system")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SystemState getSystemState() {
-		List<IOData> entries = ioLog.getLatestEntries();
+	public SystemState getSystemState(@QueryParam("brew") int brewId) {
+		Brew brew = brewDB.getBrewById(brewId);
+		List<IOData> entries = ioLog.getLatestEntries(brew);
 		SystemState state = new SystemState();
 		state.setTimeString(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()));
 		for (IOData entry : entries) {
@@ -89,7 +109,8 @@ public class States {
 				break;
 			}
 		}
+		state.setBrewFinished(brew.getEndTime() != null);
 		return state;
 	}
-	
+
 }

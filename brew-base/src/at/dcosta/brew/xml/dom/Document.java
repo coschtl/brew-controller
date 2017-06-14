@@ -8,17 +8,17 @@ public class Document {
 		root = new Element(rootElementName);
 	}
 
+	public void accept(DomWriter visitor) {
+		visitor.visit(root);
+	}
+	
 	public Element addElement(Element element) {
 		root.addChild(element);
 		return element;
 	}
-	
+
 	public Element getRootElement() {
 		return root;
-	}
-
-	public void accept(DomWriter visitor) {
-		visitor.visit(root);
 	}
 
 }

@@ -21,11 +21,6 @@ public abstract class AbstractRelay implements Relay {
 	}
 
 	@Override
-	public void off() {
-		log(0);
-	}
-
-	@Override
 	public boolean isControlledAutomatically() {
 		if (controlledManually) {
 			if (manualControlTimeEnd < System.currentTimeMillis()) {
@@ -35,6 +30,16 @@ public abstract class AbstractRelay implements Relay {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public void off() {
+		log(0);
+	}
+
+	@Override
+	public void on() {
+		log(1);
 	}
 
 	@Override
@@ -49,11 +54,6 @@ public abstract class AbstractRelay implements Relay {
 			manualControlTimeEnd = System.currentTimeMillis() + manualControlTimeMillis;
 		}
 		controlledManually = true;
-	}
-
-	@Override
-	public void on() {
-		log(1);
 	}
 
 	private void log(int state) {
