@@ -51,6 +51,7 @@ public class Recipes extends AbstractResource {
 	public static enum ReturnType {
 		MINIMAL, FULL;
 	}
+
 	private final Cookbook cookbook;
 	private final BrewDB brewDB;
 	private final DateFormat timeFormat;
@@ -159,7 +160,7 @@ public class Recipes extends AbstractResource {
 		for (Brew brew : brews) {
 			at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
 			String formattedStart = brew.getStartTime() == null ? "" : dateAndTimeFormat.format(brew.getStartTime());
-			String formattedEnd =  brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
+			String formattedEnd = brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
 			String time = formattedStart;
 			if (!formattedEnd.isEmpty()) {
 				time += " - " + formattedEnd;
@@ -232,7 +233,7 @@ public class Recipes extends AbstractResource {
 
 		if (startTime != null) {
 			descr.append("<br/><br/>Start: ").append(timeFormat.format(startTime));
-			if (rest != null) {
+			if (rest != null && stepName.getName() != Name.HEAT_FOR_REST) {
 				endTime = new Date(startTime.getTime() + rest.getMinutes() * MINUTE);
 			}
 			if (endTime != null) {
