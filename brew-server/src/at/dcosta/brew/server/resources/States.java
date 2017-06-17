@@ -109,7 +109,7 @@ public class States {
 				break;
 			}
 		}
-		state.setBrewFinished(brew.getEndTime() != null);
+		state.setBrewFinished(brew != null && brew.getEndTime() != null);
 		return state;
 	}
 

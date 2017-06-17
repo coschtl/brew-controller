@@ -188,9 +188,9 @@ public class Recipes extends AbstractResource {
 					Status.BAD_REQUEST);
 		}
 		if (runningBrew == null) {
-			brewDB.startNewBrew(recipeId, new Timestamp(System.currentTimeMillis()));
+			runningBrew = brewDB.startNewBrew(recipeId, new Timestamp(System.currentTimeMillis()));
 		}
-		URI statusUri = URI.create(getAppBaseUri(uriInfo, request) + "/app/status.html");
+		URI statusUri = URI.create(getAppBaseUri(uriInfo, request) + "/app/status.html?brew=" + runningBrew.getId());
 		return Response.status(Status.CREATED).location(statusUri).build();
 	}
 
