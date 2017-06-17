@@ -1,8 +1,9 @@
 package at.dcosta.brew;
 
-import static at.dcosta.brew.Configuration.*;
+import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_PIN;
 import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_TIMEOUT_SECONDS;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
+import static at.dcosta.brew.Configuration.MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_PINS;
 import static at.dcosta.brew.Configuration.MASHING_THERMOMETER_ADRESSES;
 import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
@@ -75,7 +76,7 @@ public class MashingSystem extends HeatingSystem {
 				if (getTemperature() < minTemp) {
 					logTemperature();
 					heatToTemperature(rest.getTemperature(),
-							(restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE);
+							((restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE) - 1);
 				}
 			}
 		}
@@ -144,7 +145,7 @@ public class MashingSystem extends HeatingSystem {
 	protected double getHeatingMonitorStartupDelayMinutes() {
 		return Configuration.getInstance().getDouble(MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
 	}
-	
+
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {
 		return Configuration.getInstance().getDouble(MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE);
