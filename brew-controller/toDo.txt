@@ -39,13 +39,20 @@
  
  - ev wird in der rast zu lange geheizt
    --> fixed
-   
+ 
+ - zwei menüpunkte sind rot wenn man abbricht und neu startet 
+ 	--> fixed
    
    
  - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
    - tritt nur am raspberry auf?  --> verifizieren
    
  
+ -- umbau der aktualisierung von menü, chart, log auf websockets
+ -- maven
  
+ -- ntp server für raspberry pi
+ -- "pause" knopf
+ -- vom System "gesehene" Temperatur (vor allem während der Rast) loggen
  
   
