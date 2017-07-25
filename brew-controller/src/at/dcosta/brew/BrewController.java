@@ -78,9 +78,12 @@ public class BrewController implements StoppableRunnable {
 
 			// heat to the mashing temperature
 			stepName = stepnames.stepname(Name.HEAT_WATER);
-			if (!stepIsFinished(stepName)) {
+			currentBrewStep = getStepFromDb(stepName);
+			if (currentBrewStep == null) {
 				currentBrewStep = brewDb.addStep(brew.getId(), stepName,
 						"Heat water to " + recipe.getMashingTemperature() + "°C");
+			}
+			if (!currentBrewStep.isFinished()) {
 				System.out.println("start heating");
 				mashingSystem.heat(recipe.getMashingTemperature());
 				brewDb.complete(currentBrewStep);
@@ -88,8 +91,11 @@ public class BrewController implements StoppableRunnable {
 
 			// add malts
 			stepName = stepnames.stepname(Name.ADD_MALTS);
-			if (!stepIsFinished(stepName)) {
+			currentBrewStep = getStepFromDb(stepName);
+			if (currentBrewStep == null) {
 				currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Add malts");
+			}
+			if (!currentBrewStep.isFinished()) {
 				System.out.println("add malts");
 				mashingSystem.addMalts();
 				brewDb.complete(currentBrewStep);
@@ -99,18 +105,24 @@ public class BrewController implements StoppableRunnable {
 			int count = 0;
 			for (Rest rest : recipe.getRests()) {
 				stepName = stepnames.stepname(Name.HEAT_FOR_REST);
-				if (!stepIsFinished(stepName)) {
-					System.out.println("heating for rest " + count);
+				currentBrewStep = getStepFromDb(stepName);
+				if (currentBrewStep == null) {
 					currentBrewStep = brewDb.addStep(brew.getId(), stepName,
 							"Heat to " + rest.getTemperature() + "°C for rest " + count);
+				}
+				if (!currentBrewStep.isFinished()) {
+					System.out.println("heating for rest " + count);
 					mashingSystem.heat(rest.getTemperature());
 					brewDb.complete(currentBrewStep);
 				}
 
 				stepName = stepnames.stepname(Name.REST);
-				if (!stepIsFinished(stepName)) {
-					System.out.println("doing rest " + count);
+				currentBrewStep = getStepFromDb(stepName);
+				if (currentBrewStep == null) {
 					currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Rest " + count);
+				}
+				if (!currentBrewStep.isFinished()) {
+					System.out.println("doing rest " + count);
 					mashingSystem.doRest(rest);
 					brewDb.complete(currentBrewStep);
 				}
@@ -127,15 +139,15 @@ public class BrewController implements StoppableRunnable {
 		}
 	}
 
-	private boolean stepIsFinished(StepName stepName) {
+	private BrewStep getStepFromDb(StepName stepName) {
 		Iterator<BrewStep> it = brew.getSteps().iterator();
 		while (it.hasNext()) {
 			BrewStep step = it.next();
 			if (step.getStepName().equals(stepName)) {
-				return step.isFinished();
+				return step;
 			}
 		}
-		return false;
+		return null;
 	}
 
 }
