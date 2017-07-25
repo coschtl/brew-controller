@@ -78,4 +78,10 @@ public class Brew {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return String.valueOf(id);
+
+	}
+
 }

@@ -110,6 +110,7 @@ public class Main {
 		}
 		if (cmdLine.hasOption("brew")) {
 			Brew brew = brewDB.getRunningBrew();
+			System.out.println("got running brew: " + brew);
 			ThreadManager.getInstance()
 					.newThread(new BrewController(brew, new NotificationService(brew.getCookbookEntryId())),
 							"BrewController")
