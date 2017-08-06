@@ -31,6 +31,9 @@ public class SystemState implements Serializable {
 	@XmlElement
 	private boolean brewFinished;
 
+	@XmlElement
+	private boolean paused;
+
 	public SystemState() {
 		heaters = new ArrayList<>();
 		temperatures = new ArrayList<>();
@@ -72,12 +75,20 @@ public class SystemState implements Serializable {
 		return brewFinished;
 	}
 
+	public boolean isPaused() {
+		return paused;
+	}
+
 	public void setAvgTemp(double avgTemp) {
 		this.avgTemp = new Sensor("Average", avgTemp);
 	}
 
 	public void setBrewFinished(boolean brewFinished) {
 		this.brewFinished = brewFinished;
+	}
+
+	public void setPaused(boolean paused) {
+		this.paused = paused;
 	}
 
 	public void setRotation(double rotation) {
@@ -91,4 +102,5 @@ public class SystemState implements Serializable {
 	public void setTimeString(String timeString) {
 		this.timeString = timeString;
 	}
+
 }

@@ -8,7 +8,8 @@ import java.util.Map;
 public class ManualAction implements Serializable {
 
 	public static enum Type {
-		SWITCH_ON("switchOn"), SWITCH_OFF("switchOff"), SWITCH_TO_AUTOMATIC ("switchAuto"), ADD_TIME("addTime");
+		PAUSE("pause"), RESUME("resume"), SWITCH_ON("switchOn"), SWITCH_OFF("switchOff"), SWITCH_TO_AUTOMATIC(
+				"switchAuto");
 
 		private static final Map<String, Type> BY_ACTION;
 		static {
@@ -38,18 +39,10 @@ public class ManualAction implements Serializable {
 	private Timestamp time, executionTime;
 	private Type type;
 	private String target, arguments;
-	private int id, durationMinutes;
-
-	public ManualAction() {
-		this.durationMinutes = -1;
-	}
+	private int id;
 
 	public String getArguments() {
 		return arguments;
-	}
-
-	public int getDurationMinutes() {
-		return durationMinutes;
 	}
 
 	public Timestamp getExecutionTime() {
@@ -74,10 +67,6 @@ public class ManualAction implements Serializable {
 
 	public void setArguments(String arguments) {
 		this.arguments = arguments;
-	}
-
-	public void setDurationMinutes(int durationMinutes) {
-		this.durationMinutes = durationMinutes;
 	}
 
 	public void setExecutionTime(Timestamp executionTime) {
@@ -106,9 +95,6 @@ public class ManualAction implements Serializable {
 		b.append(type).append(" ").append(target);
 		if (arguments != null) {
 			b.append(" (").append(arguments).append(")");
-		}
-		if (durationMinutes > 0) {
-			b.append(", duration=").append(durationMinutes).append(" minutes");
 		}
 		return b.toString();
 	}

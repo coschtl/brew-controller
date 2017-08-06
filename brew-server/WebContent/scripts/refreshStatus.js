@@ -41,7 +41,24 @@ function loadStatus() {
 		setDecimalValue("temperature2", statusData.temperatures[1].value, "°C");
 		setLink("temperature2_icon", statusData.temperatures[1], "Temperature [°C]");
 		setDecimalValue("avgTemp", statusData.avgTemp.value, "°C");
-		setLink("temperatureAvg_icon", statusData.avgTemp, "Temperature [°C]");
+		
+		var avgTemp = document.getElementById("temperatureAvg_icon");
+		avgTemp.onclick = function() {
+			actionComponent = avgTemp;
+			actionLabelString = "Temperature [°C]";
+			if (statusData.paused) {
+				document.getElementById("resume").style.display = "block";
+				document.getElementById("pause").style.display = "none";
+			} else {
+				document.getElementById("resume").style.display = "none";
+				document.getElementById("pause").style.display = "block";
+			}
+			document.getElementById("switchOFF").style.display = "none";
+			document.getElementById("switchON").style.display = "none";
+			document.getElementById("switchAUTO").style.display = "none";
+			overlay('display');
+		};
+
 		setValue("time", statusData.timeString);
 		if (statusData.stirrerRunning) {
 			setDecimalValue("rotationSpeed", statusData.rotation, "U/min");
@@ -90,6 +107,8 @@ function setAction(id, component, labelString) {
 	actionComponent = component;
 	actionLabelString = labelString;
 	
+	document.getElementById("resume").style.display = "none";	
+	document.getElementById("pause").style.display = "none";	
 	if (brewIsFinished || component.on == null) {
 		performAction('showChart');
 		return;
@@ -103,14 +122,18 @@ function setAction(id, component, labelString) {
 	overlay('display');
 }
 
-function performAction(action, time) {
+function performAction(action) {
 	if ("showChart" == action) {
 		drawChart(actionComponent.id , actionLabelString, "chartCanvas", false);
 		document.getElementById("clickChartTab").click(); 
 	} else {
-		var url = contextPath + "/v1/api/devices/relay/" + actionComponent.id + "/"+ action;
-		if (time != null) {
-			url += "?duration=" + time;
+		var url;
+		if ("resume" == action) {
+			url = contextPath + "/v1/api/devices/system/" + action;
+		} else if ("pause" == action) {
+			url = contextPath + "/v1/api/devices/system/" + action;
+		} else {
+			url = contextPath + "/v1/api/devices/relay/" + actionComponent.id + "/"+ action;
 		}
 		fetch (url, {
 			  method: 'PUT',

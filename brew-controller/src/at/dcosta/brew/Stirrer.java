@@ -22,8 +22,6 @@ public class Stirrer implements Relay {
 		overtimeMillis = ThreadUtil.ONE_SECOND * config.getInt(STIRRER_OVERTIME_SECONDS);
 	}
 
-	
-
 	@Override
 	public String getID() {
 		return stirrerMotor.getID();
@@ -53,8 +51,8 @@ public class Stirrer implements Relay {
 	}
 
 	@Override
-	public void setControlManually(long manualControlTimeMillis) {
-		stirrerMotor.setControlManually(manualControlTimeMillis);
+	public void setControlManually(boolean controlledManually) {
+		stirrerMotor.setControlManually(controlledManually);
 	}
 
 	public void stopDelayed() {

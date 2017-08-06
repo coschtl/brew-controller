@@ -13,7 +13,7 @@ public class UserInteractionExecuter implements StoppableRunnable {
 	private boolean keepRunning;
 	private final InteractionDB interactionDB;
 
-	public UserInteractionExecuter( ) {
+	public UserInteractionExecuter() {
 		interactionDB = new InteractionDB();
 	}
 
@@ -39,22 +39,17 @@ public class UserInteractionExecuter implements StoppableRunnable {
 					System.out.println("No actor " + action.getTarget() + " found.");
 					continue;
 				}
-				
-				boolean processed = false;
+
 				if (action.getType() == Type.SWITCH_OFF) {
 					relay.off();
-					processed = true;
-				} else  if (action.getType() == Type.SWITCH_ON) {
+					relay.setControlManually(true);
+				} else if (action.getType() == Type.SWITCH_ON) {
 					relay.on();
-					processed = true;
-				} else  if (action.getType() == Type.SWITCH_TO_AUTOMATIC) {
-					relay.setControlManually(0);
-					interactionDB.setProcessed(action);
+					relay.setControlManually(true);
+				} else if (action.getType() == Type.SWITCH_TO_AUTOMATIC) {
+					relay.setControlManually(false);
 				}
-				if (processed) {
-					relay.setControlManually(action.getDurationMinutes() * ThreadUtil.ONE_MINUTE);
-					interactionDB.setProcessed(action);
-				}
+				interactionDB.setProcessed(action);
 			}
 			ThreadUtil.sleepMillis(100);
 		}
