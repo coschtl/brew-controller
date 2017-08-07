@@ -44,7 +44,7 @@
  	--> fixed
    
  - "pause" knopf
- 	--> GUI: implementiert, controller: ToDo
+ 	--> GUI: implementiert, controller implementiert, ToDo: in der GUI die "Verlängerung" anzeigen
     
  - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
    - tritt nur am raspberry auf?  --> verifizieren

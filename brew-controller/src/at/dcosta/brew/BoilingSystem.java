@@ -17,7 +17,6 @@ public class BoilingSystem extends HeatingSystem {
 	private final double cookingTemperature;
 	private final double cookingTemperatureMin;
 
-
 	public BoilingSystem(NotificationService notificationService) {
 		super(notificationService);
 		Configuration config = Configuration.getInstance();
@@ -37,7 +36,10 @@ public class BoilingSystem extends HeatingSystem {
 					System.out.println("re-heating");
 					heatUntilBoiling();
 				}
-				ThreadUtil.sleepSeconds(10);
+				for (int i = 0; i < 10; i++) {
+					cookingEnd += pauseHandler.handlePause();
+					ThreadUtil.sleepSeconds(1);
+				}
 			}
 			System.out.println("End cooking");
 		} finally {
@@ -56,12 +58,11 @@ public class BoilingSystem extends HeatingSystem {
 		return Configuration.getInstance().getIntArray(COOKING_HEATER_PINS);
 	}
 
-
 	@Override
 	protected double getHeatingMonitorStartupDelayMinutes() {
 		return Configuration.getInstance().getDouble(COOKING_HEATER_MONITOR_STARTUP_DELAY_MINUTES);
 	}
-	
+
 	@Override
 	protected double getMinTemperatureIncreasePerMinute() {
 		return Configuration.getInstance().getDouble(COOKING_HEATER_MINIMUM_INCREASE_PER_MINUTE);

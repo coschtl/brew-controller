@@ -13,6 +13,12 @@ function loadStatus() {
 			hide("statusTable");
 			return;
 		}
+		
+		if (statusData.paused) {
+			document.getElementById("pausedText").style.display = "block";
+		} else {
+			document.getElementById("pausedText").style.display = "none";
+		}
 
 		hide("noStatusAvailable");
 		show("statusTable");

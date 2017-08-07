@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class InteractionDB extends Database {
 
 	private static final String SQL_FIND_UNPROCESSED = "SELECT " + SELECT_COLS + " FROM " + TABLE_NAME
 			+ " WHERE EXECUTION_TIME is null";
+	private static final String SQL_FIND_SYSTEM_ACTIONS = "SELECT " + SELECT_COLS + " FROM " + TABLE_NAME
+			+ " WHERE target='system' and TIME > ? order by TIME ASC";
 	private static final String SQL_SET_PROCESSED = "UPDATE " + TABLE_NAME + " SET EXECUTION_TIME=? WHERE ROWID=?";
 
 	public void addEntry(ManualAction manualAction) {
@@ -46,6 +49,28 @@ public class InteractionDB extends Database {
 			close(st);
 			close(con);
 		}
+	}
+
+	public List<ManualAction> getSystemActions(Timestamp brewStart) {
+		List<ManualAction> actions = new ArrayList<>();
+		Connection con = getConnection();
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = con.prepareStatement(SQL_FIND_SYSTEM_ACTIONS);
+			st.setTimestamp(1, brewStart);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				actions.add(create(rs));
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("can not receive system actions: " + e.getMessage(), e);
+		} finally {
+			close(rs);
+			close(st);
+			close(con);
+		}
+		return actions;
 	}
 
 	public List<ManualAction> getUnprocessedActions() {
