@@ -53,6 +53,7 @@ public class MashingSystem extends HeatingSystem {
 		maltStoreOpener.on();
 		try {
 			ThreadUtil.sleepSeconds(maltStoreOpenerTimeoutSeconds);
+			pauseHandler.handlePause();
 		} finally {
 			maltStoreOpener.off();
 		}
@@ -66,8 +67,17 @@ public class MashingSystem extends HeatingSystem {
 		double minTemp = rest.getTemperature()
 				- Configuration.getInstance().getDouble(Configuration.MASHING_TEMPERATURE_MAX_DROP);
 		while (System.currentTimeMillis() < restEnd) {
-			ThreadUtil.sleepMinutes(1);
-			aktRestTimeMinutes++;
+			long totalPauseTime = 0;
+			for (int i = 0; i < 60; i++) {
+				totalPauseTime += pauseHandler.handlePause();
+				ThreadUtil.sleepSeconds(1);
+			}
+			restEnd += totalPauseTime;
+			if (totalPauseTime > ThreadUtil.ONE_MINUTE && aktRestTimeMinutes != 5) {
+				aktRestTimeMinutes = 5;
+			} else {
+				aktRestTimeMinutes++;
+			}
 			if (aktRestTimeMinutes == 5) {
 				startStirrer(false);
 			} else if (aktRestTimeMinutes == 6) {

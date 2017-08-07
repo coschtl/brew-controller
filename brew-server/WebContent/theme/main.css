@@ -68,3 +68,7 @@ input {
    text-align:center;
 }
 
+@keyframes blinker {  
+  50% { opacity: 0; }
+}
+

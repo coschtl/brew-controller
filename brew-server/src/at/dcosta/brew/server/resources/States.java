@@ -14,6 +14,9 @@ import at.dcosta.brew.db.Brew;
 import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
+import at.dcosta.brew.db.InteractionDB;
+import at.dcosta.brew.db.ManualAction;
+import at.dcosta.brew.db.ManualAction.Type;
 import at.dcosta.brew.server.ChartData;
 import at.dcosta.brew.server.Relay;
 import at.dcosta.brew.server.Sensor;
@@ -24,10 +27,12 @@ public class States {
 
 	private final IOLog ioLog;
 	private final BrewDB brewDB;
+	private final InteractionDB interactionDB;
 
 	public States() {
 		ioLog = new IOLog();
 		brewDB = new BrewDB();
+		interactionDB = new InteractionDB();
 	}
 
 	@GET
@@ -107,6 +112,13 @@ public class States {
 				}
 			}
 				break;
+			}
+		}
+		if (brew.getEndTime() == null) {
+			List<ManualAction> systemActions = interactionDB.getSystemActions(brew.getStartTime());
+			if (systemActions.size() > 0) {
+				ManualAction lastAction = systemActions.get(systemActions.size() - 1);
+				state.setPaused(lastAction.getType() == Type.PAUSE);
 			}
 		}
 		state.setBrewFinished(brew != null && brew.getEndTime() != null);

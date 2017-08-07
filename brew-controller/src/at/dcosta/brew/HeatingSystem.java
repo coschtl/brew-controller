@@ -18,7 +18,7 @@ import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 
-public abstract class HeatingSystem  {
+public abstract class HeatingSystem {
 
 	private static final long SWITCHING_INTERVAL = 1000l * 10l;
 
@@ -28,11 +28,11 @@ public abstract class HeatingSystem  {
 	private final AvgCalculatingSensor averageTemperature;
 	private final List<Relay> heaters;
 	protected final HeatingMonitor heatingMonitor;
+	protected final PauseHandler pauseHandler;
 
 	private long lastSwitchingTime;
 	private SensorStatus sensorStatus = SensorStatus.OK;
 	private String errorStatus;
-
 
 	public HeatingSystem(NotificationService notificationService) {
 		this.notificationService = notificationService;
@@ -41,7 +41,9 @@ public abstract class HeatingSystem  {
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF), config.getDouble(THERMOMETER_CORRECTION_VALUE));
+		this.pauseHandler = new PauseHandler();
+		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF),
+				config.getDouble(THERMOMETER_CORRECTION_VALUE));
 		W1Bus w1Bus = new W1Bus();
 		for (String address : getTemperatureSensorAddresses()) {
 			Sensor sensor = w1Bus.getTemperatureSensor(address);
@@ -65,8 +67,9 @@ public abstract class HeatingSystem  {
 		if (heaters.size() < 1) {
 			throw new ConfigurationException("No valid " + getClass().getSimpleName() + " heater(s) configured!)");
 		}
-		
-		ThreadManager.getInstance().newThread(new UserInteractionExecuter(), "UserInteractionExecuter").start();
+
+		ThreadManager.getInstance().newThread(new UserInteractionExecuter(pauseHandler), "UserInteractionExecuter")
+				.start();
 	}
 
 	public NotificationService getNotificationService() {
@@ -78,7 +81,6 @@ public abstract class HeatingSystem  {
 		handleSensorStatus();
 		return temp;
 	}
-	
 
 	public boolean isInErrorStatus() {
 		return errorStatus != null;
@@ -90,6 +92,7 @@ public abstract class HeatingSystem  {
 
 	public void switchOff() {
 		switchOffTemperatureSensors();
+		pauseHandler.stopPause();
 	}
 
 	private void handleSensorStatus() {
@@ -127,7 +130,7 @@ public abstract class HeatingSystem  {
 	protected abstract int[] getHeaterPins();
 
 	protected abstract double getHeatingMonitorStartupDelayMinutes();
-	
+
 	protected abstract double getMinTemperatureIncreasePerMinute();
 
 	protected abstract String[] getTemperatureSensorAddresses();
@@ -154,7 +157,10 @@ public abstract class HeatingSystem  {
 			}
 			adjustHeaters(targetTemperature);
 			heatToTemperatureWaiting();
-			ThreadUtil.sleepSeconds(10);
+			for (int i = 0; i < 10; i++) {
+				heatingEnd += pauseHandler.handlePause();
+				ThreadUtil.sleepSeconds(1);
+			}
 		}
 	}
 
