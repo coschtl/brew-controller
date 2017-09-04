@@ -6,6 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +21,9 @@ import at.dcosta.brew.recipe.Recipe.FermentationType;
 import at.dcosta.brew.util.IOUtils;
 
 public class RecipeReader {
+
+	private static final Integer NOT_PRESENT = Integer.valueOf(-1);
+	private static final List<Hop> NO_COLD_HOPS = Collections.emptyList();
 
 	public static Recipe loadSampleRecipe() {
 		ClassLoader c = RecipeReader.class.getClassLoader();
@@ -64,8 +70,13 @@ public class RecipeReader {
 				case "whirlpool":
 					addWhirlpool(recipe, child);
 					break;
-				case "yeast":
-					addYeast(recipe, child);
+				case "fermentation":
+					addFermentation(recipe, child);
+					break;
+				case "yeast": // to be able to read old recipes without
+								// coldHopping capabilities
+					recipe.setFermentation(new Ingredient(child.getAttribute("name"), getIntAttribute("amount", child)),
+							NO_COLD_HOPS);
 					break;
 				}
 			}
@@ -94,10 +105,20 @@ public class RecipeReader {
 		recipe.setBoilingTime(getIntAttribute("time", boiling));
 		NodeList childs = boiling.getElementsByTagName("hop");
 		for (int i = 0; i < childs.getLength(); i++) {
-			Element hop = (Element) childs.item(i);
-			recipe.addHop(new Hop(hop.getAttribute("name"), getIntAttribute("amount", hop),
-					getFloatAttribute("alpha", hop), getIntAttribute("boilingTime", hop)));
+			recipe.addHop(createHop((Element) childs.item(i)));
 		}
+	}
+
+	private static void addFermentation(Recipe recipe, Element fermentation) {
+		Element yeastElement = (Element) fermentation.getElementsByTagName("yeast").item(0);
+		Ingredient yeast = new Ingredient(yeastElement.getAttribute("name"), getIntAttribute("amount", yeastElement));
+
+		NodeList childs = fermentation.getElementsByTagName("hop");
+		List<Hop> coldHops = new ArrayList<>();
+		for (int i = 0; i < childs.getLength(); i++) {
+			coldHops.add(createHop((Element) childs.item(i)));
+		}
+		recipe.setFermentation(yeast, coldHops);
 	}
 
 	private static void addLautering(Recipe recipe, Element lautering) {
@@ -127,8 +148,9 @@ public class RecipeReader {
 		recipe.setWhirlpoolTime(getIntAttribute("time", whirlpool));
 	}
 
-	private static void addYeast(Recipe recipe, Element yeast) {
-		recipe.setYeast(new Ingredient(yeast.getAttribute("name"), getIntAttribute("amount", yeast)));
+	private static Hop createHop(Element hopElement) {
+		return new Hop(hopElement.getAttribute("name"), getIntAttribute("amount", hopElement),
+				getFloatAttribute("alpha", hopElement), getIntAttribute("boilingTime", hopElement, NOT_PRESENT));
 	}
 
 	private static float getFloatAttribute(String name, Element element) {
@@ -147,15 +169,22 @@ public class RecipeReader {
 	}
 
 	private static int getIntAttribute(String name, Element element) {
+		return getIntAttribute(name, element, null);
+	}
+
+	private static int getIntAttribute(String name, Element element, Integer defaultValue) {
 		String stringValue = element.getAttribute(name);
 		String err = null;
-		if (stringValue == null) {
+		if (stringValue == null || stringValue.isEmpty()) {
+			if (defaultValue != null) {
+				return defaultValue.intValue();
+			}
 			err = "is not present";
 		} else {
 			try {
 				return Integer.parseInt(stringValue);
 			} catch (Exception e) {
-				err = "can't does not have a integer value: " + e.toString();
+				err = "does not have a integer value: " + e.toString();
 			}
 		}
 		throw new RecipeException("Error in element '" + element.getTagName() + "': attribute '" + name + "': " + err);
@@ -163,7 +192,8 @@ public class RecipeReader {
 
 	private static Recipe getRecipe(Element root) {
 		if ("infusion".equals(root.getAttribute("type"))) {
-			return new InfusionRecipe(root.getAttribute("name"), FermentationType.valueOf(root.getAttribute("fermentationType")), getFloatAttribute("wort", root));
+			return new InfusionRecipe(root.getAttribute("name"),
+					FermentationType.valueOf(root.getAttribute("fermentationType")), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
 	}

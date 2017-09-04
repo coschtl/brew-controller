@@ -54,19 +54,7 @@
 				<xs:element name="boiling">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="hop" maxOccurs="unbounded"
-								minOccurs="1">
-								<xs:complexType>
-									<xs:simpleContent>
-										<xs:extension base="xs:string">
-											<xs:attribute type="xs:string" name="name" />
-											<xs:attribute type="xs:float" name="alpha" />
-											<xs:attribute type="xs:int" name="amount" />
-											<xs:attribute type="xs:int" name="boilingTime" />
-										</xs:extension>
-									</xs:simpleContent>
-								</xs:complexType>
-							</xs:element>
+							<xs:element ref="hop" maxOccurs="unbounded"	minOccurs="1"/>
 						</xs:sequence>
 						<xs:attribute type="xs:int" name="time" />
 					</xs:complexType>
@@ -80,18 +68,25 @@
 						</xs:simpleContent>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="yeast">
+				
+				<xs:element name="fermentation">
 					<xs:complexType>
-						<xs:simpleContent>
-							<xs:extension base="xs:string">
-								<xs:attribute type="xs:string" name="name" />
-								<xs:attribute type="xs:int" name="amount" />
-							</xs:extension>
-						</xs:simpleContent>
+						<xs:sequence>
+							<xs:element name="yeast">
+								<xs:complexType>
+									<xs:simpleContent>
+										<xs:extension base="xs:string">
+											<xs:attribute type="xs:string" name="name" />
+											<xs:attribute type="xs:int" name="amount" />
+										</xs:extension>
+									</xs:simpleContent>
+								</xs:complexType>
+							</xs:element>
+							<xs:element ref="hop" maxOccurs="unbounded" minOccurs="1"/>
+						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-
 			<xs:attribute type="xs:float" name="version" />
 			<xs:attribute type="xs:string" name="name" use="required" />
 			<xs:attribute type="xs:string" name="type" />
@@ -100,6 +95,19 @@
 			<xs:attribute type="xs:float" name="wort" use="required" />
 		</xs:complexType>
 
+	</xs:element>
+	
+	<xs:element name="hop">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="name" />
+					<xs:attribute type="xs:float" name="alpha" />
+					<xs:attribute type="xs:int" name="amount" />
+					<xs:attribute type="xs:int" name="boilingTime" use="optional" />
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
 	</xs:element>
 	<xs:simpleType name="fermentationType">
 		<xs:restriction base="xs:string">

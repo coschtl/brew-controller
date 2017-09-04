@@ -26,5 +26,8 @@
 		<hop name="Hopfen 4" alpha="14" amount="5" boilingTime="0" />
 	</boiling>
 	<whirlpool time="20" />
-	<yeast name="Pilsener Hefe" amount="15" />
+	<fermentation>
+		<yeast name="Pilsener Hefe" amount="15" />
+		<hop name="Hopfen 1" alpha="5.3" amount="15"/>
+	</fermentation>
 </recipe>

@@ -156,9 +156,15 @@ public class RecipeWriter {
 		}
 		endElement("boiling");
 		startElement("whirlpool").attribute("time", recipe.getWhirlpoolTime()).endEmptyElement();
+		startElement("fermentation");
 		Ingredient yeast = recipe.getYeast();
 		startElement("yeast").attribute("name", yeast.getName()).attribute("amount", yeast.getAmount())
 				.endEmptyElement();
+		for (Hop hop : recipe.getColdHops()) {
+			startElement("hop").attribute("name", hop.getName()).attribute("alpha", hop.getAlpha())
+					.attribute("amount", hop.getAmount()).endEmptyElement();
+		}
+		endElement("fermentation");
 		endElement("recipe");
 	}
 

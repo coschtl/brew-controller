@@ -56,4 +56,14 @@
 
  -- vom System "gesehene" Temperatur (vor allem während der Rast) loggen
  
+ -- Brau-Zähler == 0 -> Termine anzeigen verbergen
+ 
+ -- chart geht nicht mehr beim topf
+ 
+ -- heizen sollte 2°C vor der Ziel-Temperatur beendet werden
+ 
+ -- hopfenstopfen ins xml file
+    --> implementiert
+ 
+ -- name im rezept und in der db <--> verwirrung
   
