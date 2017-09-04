@@ -63,8 +63,6 @@ function addRecipe() {
 	clearMessages();
 	var formData = new FormData();
 	var file = new FileReader().readAsDataURL(byId("beerRecipe").files[0]);
-	formData.append('recipeName', byId("recipeName").value);
-	formData.append('recipeSource', byId("recipeSource").value);
 	formData.append('recipe', byId("beerRecipe").files[0]);
 	
 	fetch(contextPath + "/v1/api/recipes", {
