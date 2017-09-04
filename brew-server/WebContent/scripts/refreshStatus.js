@@ -48,7 +48,7 @@ function loadStatus() {
 		setLink("temperature2_icon", statusData.temperatures[1], "Temperature [°C]");
 		setDecimalValue("avgTemp", statusData.avgTemp.value, "°C");
 		
-		var avgTemp = document.getElementById("temperatureAvg_icon");
+		var avgTemp = document.getElementById("Average");
 		avgTemp.onclick = function() {
 			actionComponent = avgTemp;
 			actionLabelString = "Temperature [°C]";

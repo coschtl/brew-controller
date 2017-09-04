@@ -59,12 +59,15 @@
  -- Brau-Zähler == 0 -> Termine anzeigen verbergen
  
  -- chart geht nicht mehr beim topf
+    --> fixed
  
  -- heizen sollte 2°C vor der Ziel-Temperatur beendet werden
     --> implementiert (mashing.heater.postheating.temperatureIncrease)
  
  -- hopfenstopfen ins xml file
     --> implementiert
+    
+ -- eingabe für jodnormal
  
  -- name im rezept und in der db <--> verwirrung
     --> fixed. Name und Source werden nun ausschließlich aus dem XML genommen
