@@ -73,5 +73,5 @@
 
  - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
  
- - eingabe für jodnormal
+ - eingabe für jodnormal ermöglichen
   
