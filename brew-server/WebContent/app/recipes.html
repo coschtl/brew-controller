@@ -105,7 +105,10 @@ function showRecipe(recipe) {
 				byId("showRecipeName").innerHTML = recipe.name;
 				byId("showRecipeSource").innerHTML = recipe.source;
 				byId("showRecipeAddedOn").innerHTML = maskXml(recipe.addedOn);
-				byId("showBrewCount").innerHTML = recipe.brewCount + "<span id='showBrews' class='sub_menu' style='width:80px;'><a href='javascript:showBrewDates()'>Termine anzeigen</a></span>";
+				byId("showBrewCount").innerHTML = recipe.brewCount;
+				if (recipe.brewCount > 0) {
+					byId("showBrewCount").innerHTML += "<span id='showBrews' class='sub_menu' style='width:80px;'><a href='javascript:showBrewDates()'>Termine anzeigen</a></span>";
+				}
 				byId("showRecipeDetail").innerHTML = maskXml(recipe.recipe);
 				byId("startOrContinue").innerHTML = recipe.brewRunning ? "fortsetzen" : "starten";
 				recipe.brewRunning ? show("abortBrew") : hide("abortBrew");
