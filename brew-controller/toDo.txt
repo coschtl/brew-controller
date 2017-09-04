@@ -61,6 +61,7 @@
  -- chart geht nicht mehr beim topf
  
  -- heizen sollte 2°C vor der Ziel-Temperatur beendet werden
+    --> implementiert (mashing.heater.postheating.temperatureIncrease)
  
  -- hopfenstopfen ins xml file
     --> implementiert

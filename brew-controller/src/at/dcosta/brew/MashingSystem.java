@@ -5,6 +5,7 @@ import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_TIMEOUT_SECONDS;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_PINS;
+import static at.dcosta.brew.Configuration.MASHING_HEATER_POSTHEAT_INCREASE;
 import static at.dcosta.brew.Configuration.MASHING_THERMOMETER_ADRESSES;
 import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
 
@@ -22,6 +23,7 @@ public class MashingSystem extends HeatingSystem {
 
 	private final Relay maltStoreOpener;
 	private final int maltStoreOpenerTimeoutSeconds;
+	private final double postHeatingTempIncrease;
 	private final Sensor rpmSensor;
 	private final Stirrer stirrer;
 
@@ -31,6 +33,7 @@ public class MashingSystem extends HeatingSystem {
 		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
 		maltStoreOpener = gpioSubsystem.getRelay("Malt Store Opener", config.getInt(MALT_STORE_OPENER_PIN));
 		maltStoreOpenerTimeoutSeconds = config.getInt(MALT_STORE_OPENER_TIMEOUT_SECONDS);
+		postHeatingTempIncrease = config.getDouble(MASHING_HEATER_POSTHEAT_INCREASE);
 		int rpmPin;
 		try {
 			rpmPin = config.getInt(STIRRER_RPM_PIN);
@@ -85,7 +88,7 @@ public class MashingSystem extends HeatingSystem {
 				stoptStirrer(false);
 				if (getTemperature() < minTemp) {
 					logTemperature();
-					heatToTemperature(rest.getTemperature(),
+					heatToTemperature(rest.getTemperature() - postHeatingTempIncrease,
 							((restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE) - 1);
 				}
 			}
@@ -102,7 +105,7 @@ public class MashingSystem extends HeatingSystem {
 			if (!isStirrerRunning(10)) {
 				throw new BrewException("Stirrer does not start!");
 			}
-			heatToTemperature(targetTemperature);
+			heatToTemperature(targetTemperature - postHeatingTempIncrease);
 		} finally {
 			stoptStirrerDelayed();
 			heatingMonitor.stop();
