@@ -67,4 +67,5 @@
     --> implementiert
  
  -- name im rezept und in der db <--> verwirrung
+    --> fixed. Name und Source werden nun ausschlieﬂlich aus dem XML genommen
   

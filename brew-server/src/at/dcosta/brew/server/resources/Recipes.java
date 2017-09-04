@@ -76,20 +76,17 @@ public class Recipes extends AbstractResource {
 	@POST
 	@Path("recipes")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response addRecipe(@FormDataParam("recipeName") String recipeName,
-			@FormDataParam("recipeSource") String recipeSource, @FormDataParam("recipe") String recipe) {
-		assertNotEmpty("recipeName", recipeName);
-		assertNotEmpty("recipeSource", recipeSource);
-		assertNotEmpty("recipe", recipe);
-
+	public Response addRecipe(@FormDataParam("recipe") String recipeString) {
+		assertNotEmpty("recipe", recipeString);
+		at.dcosta.brew.recipe.Recipe recipe;
 		try {
-			RecipeReader.read(recipe);
+			recipe = RecipeReader.read(recipeString);
 		} catch (Exception e) {
 			throw new BrewServerException("Recipe is not valid: " + e.getMessage(), Status.BAD_REQUEST);
 		}
-		int id = cookbook.addRecipe(recipeName, recipeSource, recipe);
+		int id = cookbook.addRecipe(recipe.getName(), recipe.getSource(), recipeString);
 		return Response.status(Status.CREATED)
-				.header("x-server-message", "Rezept '" + recipeName + "' erfolgreich hinzugefügt.")
+				.header("x-server-message", "Rezept '" + recipe.getName() + "' erfolgreich hinzugefügt.")
 				.entity(Integer.valueOf(id)).build();
 	}
 

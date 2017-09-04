@@ -9,7 +9,7 @@ public abstract class Recipe {
 		TOP, BOTTOM;
 	}
 
-	private final String name;
+	private final String name, source;
 	private final FermentationType fermentationType;
 	private final float wort;
 
@@ -25,8 +25,9 @@ public abstract class Recipe {
 	private int mashingTemperature;
 	private int lauteringRest;
 
-	public Recipe(String name, FermentationType fermentationType, float wort) {
+	public Recipe(String name, String source, FermentationType fermentationType, float wort) {
 		this.name = name;
+		this.source = source;
 		this.fermentationType = fermentationType;
 		this.wort = wort;
 		this.malts = new ArrayList<>();
@@ -141,6 +142,10 @@ public abstract class Recipe {
 
 	public int getSecondaryWater() {
 		return secondaryWater;
+	}
+
+	public String getSource() {
+		return source;
 	}
 
 	public int getWhirlpoolTime() {

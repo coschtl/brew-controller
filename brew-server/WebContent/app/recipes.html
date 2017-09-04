@@ -57,7 +57,7 @@ function loadRecipes() {
 }
 
 function addRecipe() {
-	if (alertEmpty("recipeName", "Bier-Name") || alertEmpty("recipeSource", "Rezept-Quelle") || alertEmpty("beerRecipe", "Rezept")) {
+	if (alertEmpty("beerRecipe", "Rezept")) {
 		return false;
 	}
 	clearMessages();
@@ -188,14 +188,8 @@ function init() {
 		<form name="recipeForm" onSubmit="return false;" method="post" enctype="multipart/form-data">
 		<fieldset>
 	    	<legend>Neues Rezept</legend>
-	    	<table>
-	    	<tr>
-	    	<td><input type="text" size="50" placeholder="Bier-Name" id="recipeName" name="recipeName"/></td>
-	    	<td rowspan="3"><img src="../theme/add.png" onclick="addRecipe()" height="100px"/></td>
-	    	</tr>
-	    	<tr><td><input type="text" size="50" placeholder="Rezept-Quelle" id="recipeSource" name="recipeSource"/></td></tr>
-	        <tr><td><input type="file" dropzone="true" name="recipe" id="beerRecipe" /></td></tr>
-	    	</table>
+	    	<input type="file" dropzone="true" name="recipe" id="beerRecipe" /><br/><br/>
+	    	<img src="../theme/add.png" onclick="addRecipe()" height="100px"/>
 		</fieldset>
 		</form>
 		</td>

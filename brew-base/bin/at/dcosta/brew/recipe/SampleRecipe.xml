@@ -5,7 +5,7 @@
 <!-- all volumes are given in liters -->
 <!-- all temperatures are given in °C -->
 <!-- wort is given in °P -->
-<recipe version="1.0" name="SampleBeer" type="infusion" fermentationType="TOP" wort="12.3"
+<recipe version="1.0" name="SampleBeer" source="http://beers.sample.com/recipe1" type="infusion" fermentationType="TOP" wort="12.3"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="InfusionRecipe.xsd">
 	<malts>

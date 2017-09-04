@@ -192,7 +192,7 @@ public class RecipeReader {
 
 	private static Recipe getRecipe(Element root) {
 		if ("infusion".equals(root.getAttribute("type"))) {
-			return new InfusionRecipe(root.getAttribute("name"),
+			return new InfusionRecipe(root.getAttribute("name"), root.getAttribute("source"),
 					FermentationType.valueOf(root.getAttribute("fermentationType")), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
