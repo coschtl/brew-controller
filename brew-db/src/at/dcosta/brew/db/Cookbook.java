@@ -42,7 +42,7 @@ public class Cookbook extends Database {
 			if (rows != 1) {
 				throw new DatabaseException("can not add Cookbook (no row created)!");
 			}
-			return getLastInsertedRowId( con);
+			return getLastInsertedRowId(con);
 		} catch (SQLException e) {
 			throw new DatabaseException("can not add Cookbook: " + e.getMessage(), e);
 		} finally {
@@ -105,6 +105,10 @@ public class Cookbook extends Database {
 			close(con);
 		}
 		return entries;
+	}
+
+	@Override
+	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
 	}
 
 	@Override

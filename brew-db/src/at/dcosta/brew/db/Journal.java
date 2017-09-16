@@ -90,6 +90,10 @@ public class Journal extends Database {
 	}
 
 	@Override
+	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
+	}
+
+	@Override
 	protected String[] getCreateIndexStatements() {
 		return CREATE_INDEX_STATEMENTS;
 	}

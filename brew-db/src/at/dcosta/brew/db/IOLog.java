@@ -162,6 +162,10 @@ public class IOLog extends Database {
 		return entry;
 	}
 
+	@Override
+	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
+	}
+
 	protected int addBrewRestriction(Brew brew, PreparedStatement st, int argPos) throws SQLException {
 		if (brew == null) {
 			st.setTimestamp(argPos++, today());

@@ -8,8 +8,8 @@ public class NotificationService {
 	private final Notifier[] notifiers;
 	private final Map<String, Long> subject2SendTime;
 
-	public NotificationService(int cookbookEntryId) {
-		notifiers = new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(cookbookEntryId),
+	public NotificationService(int brewId) {
+		notifiers = new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(brewId),
 				new MailNotificationService() };
 		subject2SendTime = new HashMap<>();
 	}

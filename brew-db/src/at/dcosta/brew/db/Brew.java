@@ -6,6 +6,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import at.dcosta.brew.BrewStatus;
+import at.dcosta.brew.recipe.Recipe;
+import at.dcosta.brew.recipe.RecipeReader;
+import at.dcosta.brew.recipe.RecipeWriter;
 
 public class Brew {
 
@@ -14,6 +17,7 @@ public class Brew {
 	private Timestamp startTime, endTime;
 	private BrewStatus brewStatus;
 	private Set<BrewStep> steps;
+	private Recipe recipe;
 
 	public Brew(int cookbookEntryId) {
 		this.cookbookEntryId = cookbookEntryId;
@@ -50,6 +54,17 @@ public class Brew {
 		return id;
 	}
 
+	public Recipe getRecipe() {
+		return recipe;
+	}
+
+	public String getRecipeAsXml() {
+		if (recipe == null) {
+			return null;
+		}
+		return new RecipeWriter(recipe, false).getRecipeAsXmlString();
+	}
+
 	public Timestamp getStartTime() {
 		return startTime;
 	}
@@ -70,6 +85,15 @@ public class Brew {
 
 	public Brew setId(int id) {
 		this.id = id;
+		return this;
+	}
+
+	public Brew setRecipe(String recipeAsXml) {
+		if (recipeAsXml == null) {
+			recipe = null;
+		} else {
+			recipe = RecipeReader.read(recipeAsXml);
+		}
 		return this;
 	}
 

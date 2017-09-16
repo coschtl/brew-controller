@@ -122,15 +122,17 @@ public class Recipes extends AbstractResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Step> getSubsteps(@PathParam("recipeId") int recipeId, @PathParam("brewStatus") BrewStatus brewStatus) {
 		Brew runningBrew = null;
+		InfusionRecipe recipe;
 		if (recipeId == -1) {
 			// current brew!
 			runningBrew = brewDB.getRunningBrew();
 			if (runningBrew == null) {
 				return Collections.emptyList();
 			}
-			recipeId = runningBrew.getCookbookEntryId();
+			recipe = (InfusionRecipe) runningBrew.getRecipe();
+		} else {
+			recipe = (InfusionRecipe) RecipeReader.read(cookbook.getEntryById(recipeId).getRecipe());
 		}
-		InfusionRecipe recipe = (InfusionRecipe) RecipeReader.read(cookbook.getEntryById(recipeId).getRecipe());
 		BrewStepNameFactory stepnames = new BrewStepNameFactory();
 		List<Step> l = new ArrayList<>();
 		switch (brewStatus) {

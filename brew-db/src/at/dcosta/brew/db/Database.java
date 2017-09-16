@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import at.dcosta.brew.Configuration;
+import at.dcosta.brew.CurrentProgramVersion;
 import at.dcosta.brew.xml.dom.Document;
 import at.dcosta.brew.xml.dom.DomReader;
 import at.dcosta.brew.xml.dom.DomWriter;
@@ -190,7 +191,10 @@ public abstract class Database {
 
 	protected Database() {
 		jdbcUrl = getJdbcUrl();
-		createTablesIfNecessary();
+		if (createTablesIfNecessary()) {
+			return;
+		}
+		alterTablesAndUpdateDataIfNecessary();
 	}
 
 	public void dumpToXml(File outputFile) throws IOException {
@@ -234,13 +238,55 @@ public abstract class Database {
 		}
 	}
 
-	private void createTablesIfNecessary() {
+	private void alterTablesAndUpdateDataIfNecessary() {
+		ConfigurationDB cdb;
+		if (this instanceof ConfigurationDB) {
+			cdb = (ConfigurationDB) this;
+		} else {
+			cdb = new ConfigurationDB();
+		}
+		int dbVersion = cdb.getProgramVersion(getClass().getSimpleName());
+		int codeVersion = CurrentProgramVersion.getVersion();
+		System.out.println("code version: " + codeVersion + ", databaseVersion: " + dbVersion);
+
+		if (codeVersion > dbVersion) {
+			List<String> alterTableStatements = new ArrayList<>();
+			addAlterTablesStatements(dbVersion, alterTableStatements);
+			if (alterTableStatements.size() == 0) {
+				return;
+			}
+			System.out.println("upgrading database tables for " + getClass().getSimpleName());
+			Connection con = getConnection();
+			PreparedStatement st = null;
+			ResultSet rs = null;
+			String sql = "";
+			try {
+				for (int i = 0; i < alterTableStatements.size(); i++) {
+					sql = alterTableStatements.get(i);
+					st = con.prepareStatement(sql);
+					st.executeUpdate();
+					st.close();
+				}
+
+			} catch (SQLException e) {
+				throw new DatabaseException("Can not upgrade using sql=" + sql + ": " + e.toString());
+			} finally {
+				close(rs);
+				close(st);
+				close(con);
+			}
+			datamodelUpdated(dbVersion);
+			cdb.updateProgramVersion(getClass().getSimpleName(), codeVersion);
+		}
+	}
+
+	private boolean createTablesIfNecessary() {
 		String err = "Can not check if table exists: ";
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			boolean createIndex = false;
+			boolean created = false;
 			String[] createStatements = getCreateTableStatements();
 			String[] tableNames = getTableNames();
 			if (createStatements.length != tableNames.length) {
@@ -259,10 +305,10 @@ public abstract class Database {
 				err = "Can not create non existing table: ";
 				st = con.prepareStatement(createStatements[i]);
 				st.executeUpdate();
-				createIndex = true;
+				created = true;
 				close(st);
 			}
-			if (createIndex) {
+			if (created) {
 				createStatements = getCreateIndexStatements();
 				for (int i = 0; i < createStatements.length; i++) {
 					err = "Can not create index: ";
@@ -271,6 +317,7 @@ public abstract class Database {
 					close(st);
 				}
 			}
+			return created;
 		} catch (SQLException e) {
 			throw new DatabaseException(getClass().getSimpleName() + ": " + err + e.getMessage(), e);
 		} finally {
@@ -278,6 +325,12 @@ public abstract class Database {
 			close(st);
 			close(con);
 		}
+	}
+
+	protected abstract void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements);
+
+	protected void datamodelUpdated(int oldVersion) {
+		// overwrite if the data has to get updated after a datamodel update
 	}
 
 	protected Connection getConnection() {

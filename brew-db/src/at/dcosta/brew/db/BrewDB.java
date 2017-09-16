@@ -19,15 +19,15 @@ public class BrewDB extends Database {
 	private static final String[] TABLE_NAMES = new String[] { TABLE_BREW, TABLE_BREW_STEPS };
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] {
 			"CREATE TABLE " + TABLE_NAMES[0]
-					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), BREW_END timestamp)",
+					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, RECIPE BREW_STATUS varchar(16), RECIPE varchar(65000), BREW_END timestamp)",
 			"CREATE TABLE " + TABLE_NAMES[1]
 					+ " (BREW_ID int, NAME varchar(255), DESCRIPTION varchar(255), STEP_START timestamp, STEP_END timestamp)" };
 	private static final String[] CREATE_INDEX_STATEMENTS = new String[] {};
 	private static final String SQL_UPDATE_BREW = "UPDATE " + TABLE_BREW
-			+ " SET BREW_STATUS=?, BREW_END=? WHERE ROWID=?";
+			+ " SET BREW_STATUS=?, BREW_END=? , RECIPE=? WHERE ROWID=?";
 	private static final String SQL_COMPLETE_STEP = "UPDATE " + TABLE_BREW_STEPS + " SET STEP_END=? WHERE ROWID=?";
 	private static final String SQL_INSERT_BREW = "INSERT INTO " + TABLE_BREW
-			+ " (COOKBOOK_ENTRY_ID, BREW_START, BREW_STATUS) VALUES (?, ?, ?)";
+			+ " (COOKBOOK_ENTRY_ID, BREW_START, BREW_STATUS, RECIPE) VALUES (?, ?, ?, ?)";
 	private static final String SQL_INSERT_STEP = "INSERT INTO " + TABLE_BREW_STEPS
 			+ " (BREW_ID, NAME, DESCRIPTION, STEP_START) VALUES (?,?, ?, ?)";
 	private static final String SQL_BREW_BY_ID = "SELECT ROWID, * FROM " + TABLE_BREW + " WHERE ROWID=?";
@@ -36,8 +36,11 @@ public class BrewDB extends Database {
 	private static final String SQL_BREWS_BY_RECIPE = "SELECT ROWID, * FROM " + TABLE_BREW
 			+ " where COOKBOOK_ENTRY_ID=?";
 
+	private Cookbook cookbook;
+
 	public BrewDB() {
 		super();
+		this.cookbook = new Cookbook();
 	}
 
 	public void abortRunningBrew() {
@@ -178,7 +181,8 @@ public class BrewDB extends Database {
 			st = con.prepareStatement(SQL_UPDATE_BREW);
 			st.setString(1, brew.getBrewStatus().toString());
 			st.setTimestamp(2, brew.getEndTime());
-			st.setInt(3, brew.getId());
+			st.setString(3, brew.getRecipeAsXml());
+			st.setInt(4, brew.getId());
 			int rows = st.executeUpdate();
 			if (rows != 1) {
 				throw new DatabaseException("can not update brew (no row updated)!");
@@ -192,16 +196,19 @@ public class BrewDB extends Database {
 	}
 
 	public Brew startNewBrew(int cookbookEntryId, Timestamp startTime) {
+		String recipeAsXml = cookbook.getEntryById(cookbookEntryId).getRecipe();
 		Brew brew = new Brew(cookbookEntryId);
 		brew.setBrewStatus(BrewStatus.SCHEDULED);
 		brew.setStartTime(startTime);
+		brew.setRecipe(recipeAsXml);
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		try {
 			st = con.prepareStatement(SQL_INSERT_BREW);
-			st.setInt(1, brew.getCookbookEntryId());
+			st.setInt(1, cookbookEntryId);
 			st.setTimestamp(2, brew.getStartTime());
 			st.setString(3, brew.getBrewStatus().toString());
+			st.setString(4, recipeAsXml);
 			int rows = st.executeUpdate();
 			if (rows != 1) {
 				throw new DatabaseException("can not add brew (no row created)!");
@@ -222,6 +229,7 @@ public class BrewDB extends Database {
 		brew.setBrewStatus(BrewStatus.valueOf(rs.getString("BREW_STATUS")));
 		brew.setStartTime(rs.getTimestamp("BREW_START"));
 		brew.setEndTime(rs.getTimestamp("BREW_END"));
+		brew.setRecipe(rs.getString("RECIPE"));
 
 		if (includeSteps) {
 			PreparedStatement stSteps = null;
@@ -245,6 +253,49 @@ public class BrewDB extends Database {
 			}
 		}
 		return brew;
+	}
+
+	@Override
+	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
+		if (oldVersion < 2) {
+			alterTableStatements.add("ALTER TABLE " + TABLE_NAMES[0] + " ADD RECIPE varchar(65000)");
+		}
+	}
+
+	@Override
+	protected void datamodelUpdated(int oldVersion) {
+		if (oldVersion < 2) {
+			Connection con = getConnection();
+			PreparedStatement stBrew = null;
+			ResultSet rs = null;
+			try {
+				stBrew = con.prepareStatement("SELECT ROWID, * FROM " + TABLE_BREW + " WHERE RECIPE IS NULL");
+				rs = stBrew.executeQuery();
+				while (rs.next()) {
+					int id = rs.getInt("ROWID");
+					int cookbookEntryId = rs.getInt("COOKBOOK_ENTRY_ID");
+					String recipeAsXml = cookbook.getEntryById(cookbookEntryId).getRecipe();
+					PreparedStatement stUpdate = null;
+					try {
+						stUpdate = con.prepareStatement("UPDATE " + TABLE_BREW + " SET RECIPE=? WHERE ROWID=?");
+						stUpdate.setString(1, recipeAsXml);
+						stUpdate.setInt(2, id);
+						int rows = stUpdate.executeUpdate();
+						if (rows != 1) {
+							throw new RuntimeException("Can not update RECIPE of brew with id=" + id);
+						}
+					} finally {
+						close(stUpdate);
+					}
+				}
+			} catch (SQLException e) {
+				throw new DatabaseException("can not update brews: " + e.getMessage(), e);
+			} finally {
+				close(rs);
+				close(stBrew);
+				close(con);
+			}
+		}
 	}
 
 	@Override

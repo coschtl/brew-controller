@@ -125,6 +125,10 @@ public class InteractionDB extends Database {
 	}
 
 	@Override
+	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
+	}
+
+	@Override
 	protected String[] getCreateIndexStatements() {
 		return CREATE_INDEX_STATEMENTS;
 	}

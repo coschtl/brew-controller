@@ -4,11 +4,11 @@ import at.dcosta.brew.db.Journal;
 
 public class JournalNotificationService implements Notifier {
 
-	private int cookbookEntryId;
+	private int brewId;
 	private Journal journal = new Journal();
 
-	public JournalNotificationService(int cookbookEntryId) {
-		this.cookbookEntryId = cookbookEntryId;
+	public JournalNotificationService(int brewId) {
+		this.brewId = brewId;
 	}
 
 	@Override
@@ -20,7 +20,7 @@ public class JournalNotificationService implements Notifier {
 	public void sendNotification(Notification notification) {
 		if (notification.getNotificationType() == NotificationType.WARNING
 				|| notification.getNotificationType() == NotificationType.ERROR) {
-			journal.addEntry(cookbookEntryId, notification.getNotificationType().toString(), notification.getMessage());
+			journal.addEntry(brewId, notification.getNotificationType().toString(), notification.getMessage());
 		}
 	}
 

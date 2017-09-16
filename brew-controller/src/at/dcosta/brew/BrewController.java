@@ -10,11 +10,9 @@ import at.dcosta.brew.db.BrewStep;
 import at.dcosta.brew.db.BrewStep.Name;
 import at.dcosta.brew.db.BrewStep.StepName;
 import at.dcosta.brew.db.BrewStepNameFactory;
-import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.recipe.InfusionRecipe;
-import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.StoppableRunnable;
 
@@ -46,8 +44,7 @@ public class BrewController implements StoppableRunnable {
 	@Override
 	public void run() {
 		try {
-			InfusionRecipe recipe = (InfusionRecipe) RecipeReader
-					.read(new Cookbook().getEntryById(brew.getCookbookEntryId()).getRecipe());
+			InfusionRecipe recipe = (InfusionRecipe) brew.getRecipe();
 			System.out.println("starting recipe: " + recipe.getName());
 			switch (brew.getBrewStatus()) {
 			case SCHEDULED:

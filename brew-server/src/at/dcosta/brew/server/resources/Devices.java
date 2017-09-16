@@ -49,18 +49,10 @@ public class Devices {
 			guid = UUID.randomUUID().toString();
 		} else {
 			ManualAction lastAction = systemActions.get(systemActions.size() - 1);
-<<<<<<< HEAD
-			System.out.println("lastAction: " + lastAction);
 			if (lastAction.getType() == type) {
 				return;
 			}
 			guid = lastAction.getType() == Type.PAUSE ? lastAction.getArguments() : UUID.randomUUID().toString();
-=======
-			if (lastAction.getType() == type) {
-				return;
-			}
-			guid = lastAction.getArguments();
->>>>>>> refs/remotes/origin/master
 		}
 		manualAction.setArguments(guid);
 		System.out.println(manualAction);
