@@ -185,7 +185,7 @@ public class Main {
 		NotificationService notificationService = new NotificationService(0);
 		if (cmdLine.hasOption("boil")) {
 			int boilingTime = Integer.valueOf(cmdLine.getOptionValue("boil"));
-			BoilingSystem boilingSystem = new BoilingSystem(notificationService);
+			BoilingSystem boilingSystem = new BoilingSystem(1, notificationService);
 			boilingSystem.cook(boilingTime);
 			return;
 		}
@@ -287,7 +287,7 @@ public class Main {
 				return;
 			}
 
-			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
 			mashingSystem.heat(temperature);
 			mashingSystem.switchOff();
 			String msg = "Finished heating to " + temperature + "°C";
@@ -301,7 +301,7 @@ public class Main {
 				return;
 			}
 			int restTime = Integer.valueOf(cmdLine.getOptionValue("rest"));
-			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
 			mashingSystem.doRest(new Rest(temperature, restTime));
 			mashingSystem.switchOff();
 			String msg = "Finished a " + restTime + " minutes rest at " + temperature + "°C";

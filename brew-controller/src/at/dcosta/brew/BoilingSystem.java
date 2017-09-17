@@ -17,8 +17,8 @@ public class BoilingSystem extends HeatingSystem {
 	private final double cookingTemperature;
 	private final double cookingTemperatureMin;
 
-	public BoilingSystem(NotificationService notificationService) {
-		super(notificationService);
+	public BoilingSystem(int brewId, NotificationService notificationService) {
+		super(brewId, notificationService);
 		Configuration config = Configuration.getInstance();
 		cookingTemperature = config.getDouble(COOKING_COOKING_TEMPERATURE);
 		cookingTemperatureMin = config.getDouble(COOKING_COOKING_TEMPERATURE_MIN);

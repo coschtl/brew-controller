@@ -71,7 +71,7 @@ public class BrewController implements StoppableRunnable {
 			BrewStepNameFactory stepnames = new BrewStepNameFactory();
 			StepName stepName;
 			BrewStep currentBrewStep;
-			MashingSystem mashingSystem = new MashingSystem(notificationService);
+			MashingSystem mashingSystem = new MashingSystem(brew.getId(), notificationService);
 
 			// heat to the mashing temperature
 			stepName = stepnames.stepname(Name.HEAT_WATER);
@@ -145,6 +145,10 @@ public class BrewController implements StoppableRunnable {
 			}
 		}
 		return null;
+	}
+
+	protected Brew getBrew() {
+		return brew;
 	}
 
 }

@@ -34,14 +34,14 @@ public abstract class HeatingSystem {
 	private SensorStatus sensorStatus = SensorStatus.OK;
 	private String errorStatus;
 
-	public HeatingSystem(NotificationService notificationService) {
+	public HeatingSystem(int brewId, NotificationService notificationService) {
 		this.notificationService = notificationService;
 		Configuration config = Configuration.getInstance();
 		this.multipleHeaterTempDiff = config.getDouble(MULTIPLE_HEATER_TEMPDIFF);
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-		this.pauseHandler = new PauseHandler();
+		this.pauseHandler = new PauseHandler(brewId);
 		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF),
 				config.getDouble(THERMOMETER_CORRECTION_VALUE));
 		W1Bus w1Bus = new W1Bus();

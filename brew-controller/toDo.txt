@@ -58,10 +58,10 @@
  - name im rezept und in der db <--> verwirrung
    --> fixed. Name und Source werden nun ausschließlich aus dem XML genommen
     
-
-
  - "pause" knopf
- 	--> GUI: implementiert, controller implementiert, ToDo: in der GUI die "Verlängerung" anzeigen
+ 	--> GUI: implementiert, controller implementiert, in der GUI die "Verlängerung" anzeigen: implementiert
+ 	
+ 	
     
  - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
    - tritt nur am raspberry auf?  --> verifizieren

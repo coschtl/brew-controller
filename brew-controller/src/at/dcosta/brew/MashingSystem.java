@@ -27,8 +27,8 @@ public class MashingSystem extends HeatingSystem {
 	private final Sensor rpmSensor;
 	private final Stirrer stirrer;
 
-	public MashingSystem(NotificationService notificationService) {
-		super(notificationService);
+	public MashingSystem(int brewId, NotificationService notificationService) {
+		super(brewId, notificationService);
 		Configuration config = Configuration.getInstance();
 		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
 		maltStoreOpener = gpioSubsystem.getRelay("Malt Store Opener", config.getInt(MALT_STORE_OPENER_PIN));
@@ -75,7 +75,10 @@ public class MashingSystem extends HeatingSystem {
 				totalPauseTime += pauseHandler.handlePause();
 				ThreadUtil.sleepSeconds(1);
 			}
-			restEnd += totalPauseTime;
+			if (totalPauseTime > 0) {
+				restEnd += totalPauseTime;
+				rest.addMinutes((int) (totalPauseTime / ThreadUtil.ONE_MINUTE));
+			}
 			if (totalPauseTime > ThreadUtil.ONE_MINUTE && aktRestTimeMinutes != 5) {
 				aktRestTimeMinutes = 5;
 			} else {
