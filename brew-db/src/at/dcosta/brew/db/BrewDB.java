@@ -258,7 +258,7 @@ public class BrewDB extends Database {
 	@Override
 	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
 		if (oldVersion < 2) {
-			alterTableStatements.add("ALTER TABLE " + TABLE_NAMES[0] + " ADD RECIPE varchar(65000)");
+			alterTableStatements.add("ALTER TABLE " + TABLE_BREW + " ADD RECIPE varchar(65000)");
 		}
 	}
 
@@ -274,7 +274,7 @@ public class BrewDB extends Database {
 				while (rs.next()) {
 					int id = rs.getInt("ROWID");
 					int cookbookEntryId = rs.getInt("COOKBOOK_ENTRY_ID");
-					String recipeAsXml = cookbook.getEntryById(cookbookEntryId).getRecipe();
+					String recipeAsXml = new Cookbook().getEntryById(cookbookEntryId).getRecipe();
 					PreparedStatement stUpdate = null;
 					try {
 						stUpdate = con.prepareStatement("UPDATE " + TABLE_BREW + " SET RECIPE=? WHERE ROWID=?");

@@ -15,10 +15,11 @@ public class ConfigurationDB extends Database {
 
 	private static final String TABLE_NAME = "CONFIGURATION";
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] {
-			"CREATE TABLE " + TABLE_NAME + " (NAMESPACE varchar(255), KEY varchar(255), VALUE varchar(65000)", };
+			"CREATE TABLE " + TABLE_NAME + " (NAMESPACE varchar(255), KEY varchar(255), VALUE varchar(65000))", };
 	private static final String[] CREATE_INDEX_STATEMENTS = new String[] {
-			"CREATE UNIQUE INDEX I_NAMESPACE, KEY ON " + TABLE_NAME + " (NAMESPACE, KEY ASC)" };
-	private static final String SQL_ADD_ENTRY = "INSERT INTO " + TABLE_NAME + " (NAMESPACE, KEY, VALUE) VALUES (?, ?)";
+			"CREATE UNIQUE INDEX I_NAMESPACE_KEY ON " + TABLE_NAME + " (NAMESPACE, KEY ASC)" };
+	private static final String SQL_ADD_ENTRY = "INSERT INTO " + TABLE_NAME
+			+ " (NAMESPACE, KEY, VALUE) VALUES (?, ?, ?)";
 	private static final String SQL_UPDATE_ENTRY = "UPDATE " + TABLE_NAME + " SET VALUE=? where NAMESPACE=? AND KEY=?";
 	private static final String SQL_GET_ALL = "SELECT ROWID, * FROM " + TABLE_NAME;
 	private static final String SQL_GET_BY_ID = SQL_GET_ALL + " WHERE ROWID=?";

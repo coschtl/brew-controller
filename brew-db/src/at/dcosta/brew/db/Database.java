@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -85,6 +87,9 @@ public abstract class Database {
 	private static final String SQL_CHECK_TABLE_EXISTS = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?";
 	private static final String SQL_LAST_ROW_ID = "SELECT last_insert_rowid()";
 	private static final String JDBC_URL_PREFIX = "jdbc:sqlite:";
+
+	private static String jdbcUrl;
+	private static final Set<Class<?>> ACTUAL_TABLES = new HashSet<>();
 
 	public static void importFromXml(File xmlFile) throws IOException, ParserConfigurationException, SAXException {
 		DomReader reader = new DomReader();
@@ -187,14 +192,17 @@ public abstract class Database {
 		}
 	}
 
-	private final String jdbcUrl;
-
 	protected Database() {
-		jdbcUrl = getJdbcUrl();
-		if (createTablesIfNecessary()) {
-			return;
+		if (jdbcUrl == null) {
+			jdbcUrl = getJdbcUrl();
 		}
-		alterTablesAndUpdateDataIfNecessary();
+		if (!ACTUAL_TABLES.contains(getClass())) {
+			ACTUAL_TABLES.add(getClass());
+			if (createTablesIfNecessary()) {
+				return;
+			}
+			alterTablesAndUpdateDataIfNecessary();
+		}
 	}
 
 	public void dumpToXml(File outputFile) throws IOException {
@@ -247,37 +255,34 @@ public abstract class Database {
 		}
 		int dbVersion = cdb.getProgramVersion(getClass().getSimpleName());
 		int codeVersion = CurrentProgramVersion.getVersion();
-		System.out.println("code version: " + codeVersion + ", databaseVersion: " + dbVersion);
-
 		if (codeVersion > dbVersion) {
 			List<String> alterTableStatements = new ArrayList<>();
 			addAlterTablesStatements(dbVersion, alterTableStatements);
-			if (alterTableStatements.size() == 0) {
-				return;
-			}
-			System.out.println("upgrading database tables for " + getClass().getSimpleName());
-			Connection con = getConnection();
-			PreparedStatement st = null;
-			ResultSet rs = null;
-			String sql = "";
-			try {
-				for (int i = 0; i < alterTableStatements.size(); i++) {
-					sql = alterTableStatements.get(i);
-					st = con.prepareStatement(sql);
-					st.executeUpdate();
-					st.close();
-				}
+			if (alterTableStatements.size() > 0) {
+				System.out.println("upgrading database tables for " + getClass().getSimpleName());
+				Connection con = getConnection();
+				PreparedStatement st = null;
+				ResultSet rs = null;
+				String sql = "";
+				try {
+					for (int i = 0; i < alterTableStatements.size(); i++) {
+						sql = alterTableStatements.get(i);
+						st = con.prepareStatement(sql);
+						st.executeUpdate();
+						st.close();
+					}
 
-			} catch (SQLException e) {
-				throw new DatabaseException("Can not upgrade using sql=" + sql + ": " + e.toString());
-			} finally {
-				close(rs);
-				close(st);
-				close(con);
+				} catch (SQLException e) {
+					throw new DatabaseException("Can not upgrade using sql=" + sql + ": " + e.toString());
+				} finally {
+					close(rs);
+					close(st);
+					close(con);
+				}
+				datamodelUpdated(dbVersion);
 			}
-			datamodelUpdated(dbVersion);
-			cdb.updateProgramVersion(getClass().getSimpleName(), codeVersion);
 		}
+		cdb.updateProgramVersion(getClass().getSimpleName(), codeVersion);
 	}
 
 	private boolean createTablesIfNecessary() {
