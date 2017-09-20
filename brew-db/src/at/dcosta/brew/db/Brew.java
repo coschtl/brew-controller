@@ -1,7 +1,6 @@
 package at.dcosta.brew.db;
 
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -17,6 +16,7 @@ public class Brew {
 	private Timestamp startTime, endTime;
 	private BrewStatus brewStatus;
 	private Set<BrewStep> steps;
+	private BrewStep currentStep;
 	private Recipe recipe;
 
 	public Brew(int cookbookEntryId) {
@@ -27,6 +27,7 @@ public class Brew {
 	public void addStep(BrewStep step) {
 		step.setBrew(this);
 		steps.add(step);
+		currentStep = step;
 	}
 
 	public BrewStatus getBrewStatus() {
@@ -38,12 +39,7 @@ public class Brew {
 	}
 
 	public BrewStep getCurrentStep() {
-		BrewStep step = null;
-		Iterator<BrewStep> it = steps.iterator();
-		while (it.hasNext()) {
-			step = it.next();
-		}
-		return step;
+		return currentStep;
 	}
 
 	public Timestamp getEndTime() {

@@ -38,12 +38,11 @@ public class HeatingMonitor {
 		@Override
 		public void run() {
 			active = true;
-			delayedMonitorStartTime = System.currentTimeMillis() + (long) ( startupDelayMinutes * ThreadUtil.ONE_MINUTE);
+			delayedMonitorStartTime = System.currentTimeMillis() + (long) (startupDelayMinutes * ThreadUtil.ONE_MINUTE);
 			while (active) {
 				if (isHeatingPowerTooLow()) {
 					heatingSystem.getNotificationService().sendNotification(NotificationType.WARNING,
-							"Heating power too low", "The temperature did not increase by " + minIncreasePerMinute
-									+ "°C during the last minute!");
+							"heatingPowerTooLow", minIncreasePerMinute);
 				}
 				lastTemperature = heatingSystem.getTemperature();
 				for (int i = 0; i < 60; i++) {
@@ -87,8 +86,7 @@ public class HeatingMonitor {
 
 	private void createMonitorThread() {
 		HeatingMonitorMonitor heatingMonitorMonitor = new HeatingMonitorMonitor(heatingSystem);
-		monitorThread = ThreadManager.getInstance().newThread(heatingMonitorMonitor,
-				"Heating Monitor");
+		monitorThread = ThreadManager.getInstance().newThread(heatingMonitorMonitor, "Heating Monitor");
 	}
 
 }

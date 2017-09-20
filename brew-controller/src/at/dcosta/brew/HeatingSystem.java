@@ -9,6 +9,7 @@ import java.util.List;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.AvgCalculatingSensor;
 import at.dcosta.brew.io.AvgCalculatingSensor.SensorStatus;
 import at.dcosta.brew.io.Relay;
@@ -29,12 +30,15 @@ public abstract class HeatingSystem {
 	private final List<Relay> heaters;
 	protected final HeatingMonitor heatingMonitor;
 	protected final PauseHandler pauseHandler;
+	protected final Journal journal;
 
 	private long lastSwitchingTime;
 	private SensorStatus sensorStatus = SensorStatus.OK;
 	private String errorStatus;
+	private int brewId;
 
 	public HeatingSystem(int brewId, NotificationService notificationService) {
+		this.brewId = brewId;
 		this.notificationService = notificationService;
 		Configuration config = Configuration.getInstance();
 		this.multipleHeaterTempDiff = config.getDouble(MULTIPLE_HEATER_TEMPDIFF);
@@ -42,6 +46,7 @@ public abstract class HeatingSystem {
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
 		this.pauseHandler = new PauseHandler(brewId);
+		this.journal = new Journal();
 		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF),
 				config.getDouble(THERMOMETER_CORRECTION_VALUE));
 		W1Bus w1Bus = new W1Bus();
@@ -99,8 +104,8 @@ public abstract class HeatingSystem {
 		if (averageTemperature.getSensorStatus() == sensorStatus) {
 			return;
 		}
-		notificationService.sendNotification(NotificationType.WARNING,
-				"Sensor status " + averageTemperature.getSensorStatus(), averageTemperature.getError());
+		notificationService.sendNotification(NotificationType.WARNING, "sensorStatus", averageTemperature.getID(),
+				averageTemperature.getSensorStatus(), averageTemperature.getError());
 		sensorStatus = averageTemperature.getSensorStatus();
 	}
 
@@ -125,6 +130,10 @@ public abstract class HeatingSystem {
 				}
 			}
 		}
+	}
+
+	protected int getBrewId() {
+		return brewId;
 	}
 
 	protected abstract int[] getHeaterPins();

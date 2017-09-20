@@ -14,6 +14,10 @@ public class NotificationService {
 		subject2SendTime = new HashMap<>();
 	}
 
+	public void sendNotification(Exception e) {
+		sendNotification(new Notification(e));
+	}
+
 	public void sendNotification(Notification notification) {
 		Long lastNotification = subject2SendTime.get(notification.getSubject());
 		long now = System.currentTimeMillis();
@@ -27,8 +31,8 @@ public class NotificationService {
 		subject2SendTime.put(notification.getSubject(), now);
 	}
 
-	public void sendNotification(NotificationType notificationType, String subject, String message) {
-		sendNotification(new Notification(notificationType, subject, message));
+	public void sendNotification(NotificationType notificationType, String id, Object... variables) {
+		sendNotification(new Notification(notificationType, id, variables));
 	}
 
 }

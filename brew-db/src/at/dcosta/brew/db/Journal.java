@@ -8,17 +8,22 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import at.dcosta.brew.db.BrewStep.Name;
+import at.dcosta.brew.msg.I18NTexts.BundleMessage;
+import at.dcosta.brew.msg.IdBasedMessage;
+import at.dcosta.brew.msg.JournalTexts;
+
 public class Journal extends Database {
 
 	private static final String TABLE_NAME = "JOURNAL";
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] { "CREATE TABLE " + TABLE_NAME
-			+ " (BREW_ID int, STEP varchar(255), JOURNAL_TEXT varchar(65000), JOURNAL_DATE timestamp)" };
+			+ " (BREW_ID int, STEP varchar(255), JOURNAL_ID varchar(8), JOURNAL_TEXT varchar(65000), JOURNAL_DATE timestamp)" };
 	private static final String[] CREATE_INDEX_STATEMENTS = new String[] {
 			"CREATE INDEX I_BREWID_STEP ON " + TABLE_NAME + " (BREW_ID ASC, STEP ASC)" };
 
 	private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
-			+ " (BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE) values (?, ?, ?, ?)";
-	private static final String SQL_FIND_BY_BREW_ID = "SELECT BREW_ID, STEP, JOURNAL_TEXT, JOURNAL_DATE from "
+			+ " (BREW_ID, STEP, JOURNAL_ID, JOURNAL_TEXT, JOURNAL_DATE) values (?, ?, ?, ?, ?)";
+	private static final String SQL_FIND_BY_BREW_ID = "SELECT BREW_ID, STEP, JOURNAL_ID, JOURNAL_TEXT, JOURNAL_DATE from "
 			+ TABLE_NAME + " where BREW_ID=?";
 	private static final String SQL_FIND_BY_BREW_ID_AND_STEP = SQL_FIND_BY_BREW_ID + " and STEP=?";
 
@@ -26,14 +31,20 @@ public class Journal extends Database {
 		super();
 	}
 
-	public void addEntry(int brewId, String step, String text) {
+	public void addEntry(int brewId, Name stepName, String textKey, Object... textArguments) {
+		BundleMessage message = JournalTexts.getMessage(textKey, textArguments);
+		addEntry(brewId, stepName.toString(), message);
+	}
+
+	public void addEntry(int brewId, String step, IdBasedMessage message) {
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		try {
 			st = con.prepareStatement(SQL_INSERT);
 			st.setInt(1, brewId);
 			st.setString(2, step);
-			st.setString(3, text);
+			st.setString(3, message.getId());
+			st.setString(4, message.getMessage());
 			st.setTimestamp(4, now());
 			int rows = st.executeUpdate();
 			if (rows != 1) {
@@ -51,16 +62,16 @@ public class Journal extends Database {
 		return getEntries(brewId, null);
 	}
 
-	public List<JournalEntry> getEntries(int brewId, String step) {
+	public List<JournalEntry> getEntries(int brewId, Name stepName) {
 		List<JournalEntry> entries = new ArrayList<>();
 		Connection con = getConnection();
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = con.prepareStatement(step == null ? SQL_FIND_BY_BREW_ID : SQL_FIND_BY_BREW_ID_AND_STEP);
+			st = con.prepareStatement(stepName == null ? SQL_FIND_BY_BREW_ID : SQL_FIND_BY_BREW_ID_AND_STEP);
 			st.setInt(1, brewId);
-			if (step != null) {
-				st.setString(2, step);
+			if (stepName != null) {
+				st.setString(2, stepName.toString());
 			}
 			rs = st.executeQuery();
 			while (rs.next()) {
@@ -68,8 +79,8 @@ public class Journal extends Database {
 			}
 		} catch (SQLException e) {
 			String message = "can not receive journal entries for brewId=" + brewId;
-			if (step != null) {
-				message += ", step=" + step;
+			if (stepName != null) {
+				message += ", step=" + stepName;
 			}
 			throw new DatabaseException(message + ": " + e.getMessage(), e);
 		} finally {
@@ -84,13 +95,17 @@ public class Journal extends Database {
 		JournalEntry entry = new JournalEntry();
 		entry.setBrewId(rs.getInt(1));
 		entry.setStep(rs.getString(2));
-		entry.setText(rs.getString(3));
-		entry.setTimestamp(rs.getTimestamp(4));
+		entry.setTextId(rs.getString(3));
+		entry.setText(rs.getString(4));
+		entry.setTimestamp(rs.getTimestamp(5));
 		return entry;
 	}
 
 	@Override
 	protected void addAlterTablesStatements(int oldVersion, List<String> alterTableStatements) {
+		if (oldVersion < 2) {
+			alterTableStatements.add("ALTER TABLE " + TABLE_NAME + " ADD JOURNAL_ID varchar(8)");
+		}
 	}
 
 	@Override

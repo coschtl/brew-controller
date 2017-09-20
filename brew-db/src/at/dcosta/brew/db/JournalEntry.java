@@ -6,7 +6,7 @@ public class JournalEntry {
 
 	private int brewId;
 	private String step;
-	private String type;
+	private String textId;
 	private String text;
 	private Timestamp timestamp;
 
@@ -22,12 +22,12 @@ public class JournalEntry {
 		return text;
 	}
 
-	public Timestamp getTimestamp() {
-		return timestamp;
+	public String getTextId() {
+		return textId;
 	}
 
-	public String getType() {
-		return type;
+	public Timestamp getTimestamp() {
+		return timestamp;
 	}
 
 	public void setBrewId(int brewId) {
@@ -42,12 +42,12 @@ public class JournalEntry {
 		this.text = text;
 	}
 
-	public void setTimestamp(Timestamp timestamp) {
-		this.timestamp = timestamp;
+	public void setTextId(String textId) {
+		this.textId = textId;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }

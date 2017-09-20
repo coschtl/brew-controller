@@ -290,9 +290,8 @@ public class Main {
 			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
 			mashingSystem.heat(temperature);
 			mashingSystem.switchOff();
-			String msg = "Finished heating to " + temperature + "°C";
-			notificationService.sendNotification(NotificationType.INFO, "Heating finished", msg);
-			System.out.println(msg);
+			notificationService.sendNotification(NotificationType.INFO, "heatingFinished", temperature);
+			System.out.println("Finished heating to " + temperature + "°C");
 			return;
 		}
 		if (cmdLine.hasOption("rest")) {
@@ -304,9 +303,8 @@ public class Main {
 			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
 			mashingSystem.doRest(new Rest(temperature, restTime));
 			mashingSystem.switchOff();
-			String msg = "Finished a " + restTime + " minutes rest at " + temperature + "°C";
-			notificationService.sendNotification(NotificationType.INFO, "Rest finished", msg);
-			System.out.println(msg);
+			notificationService.sendNotification(NotificationType.INFO, "restFinished", restTime, temperature);
+			System.out.println("Finished a " + restTime + " minutes rest at " + temperature + "°C");
 			return;
 		}
 	}

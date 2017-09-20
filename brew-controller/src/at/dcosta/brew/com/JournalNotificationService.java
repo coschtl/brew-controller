@@ -20,7 +20,7 @@ public class JournalNotificationService implements Notifier {
 	public void sendNotification(Notification notification) {
 		if (notification.getNotificationType() == NotificationType.WARNING
 				|| notification.getNotificationType() == NotificationType.ERROR) {
-			journal.addEntry(brewId, notification.getNotificationType().toString(), notification.getMessage());
+			journal.addEntry(brewId, notification.getNotificationType().toString(), notification);
 		}
 	}
 

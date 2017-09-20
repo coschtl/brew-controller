@@ -20,6 +20,8 @@ public class Configuration {
 
 	private static final String SYSTEM_MOCK_PI = "system.mockPi";
 
+	public static final String MESSAGE_LANGUAGE = "messageLanguage";
+
 	public static final String DATABASE_LOCATION = "databaseLocation";
 	public static final String THERMOMETER_MAXDIFF = "thermometer.maxDiff";
 	public static final String THERMOMETER_CORRECTION_VALUE = "thermometer.correctionValue";

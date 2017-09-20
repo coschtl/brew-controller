@@ -45,14 +45,17 @@ public class BrewController implements StoppableRunnable {
 	public void run() {
 		try {
 			InfusionRecipe recipe = (InfusionRecipe) brew.getRecipe();
-			System.out.println("starting recipe: " + recipe.getName());
+			journal.addEntry(brew.getId(), (Name) null, "brewStarting", recipe.getName());
+
 			switch (brew.getBrewStatus()) {
 			case SCHEDULED:
-				System.out.println("start mashing");
+				journal.addEntry(brew.getId(), (Name) null, "startMashing");
 				brew.setBrewStatus(BrewStatus.MASHING);
 				brewDb.persist(brew);
-				// fall thru!
+				doMashing(recipe);
+				break;
 			case MASHING:
+				journal.addEntry(brew.getId(), (Name) null, "continueMashing");
 				System.out.println("continue mashing");
 				doMashing(recipe);
 				break;
@@ -72,16 +75,20 @@ public class BrewController implements StoppableRunnable {
 			StepName stepName;
 			BrewStep currentBrewStep;
 			MashingSystem mashingSystem = new MashingSystem(brew.getId(), notificationService);
+			boolean isNewStep;
 
 			// heat to the mashing temperature
 			stepName = stepnames.stepname(Name.HEAT_WATER);
 			currentBrewStep = getStepFromDb(stepName);
+			isNewStep = false;
 			if (currentBrewStep == null) {
+				isNewStep = true;
 				currentBrewStep = brewDb.addStep(brew.getId(), stepName,
 						"Heat water to " + recipe.getMashingTemperature() + "°C");
 			}
 			if (!currentBrewStep.isFinished()) {
-				System.out.println("start heating");
+				journal.addEntry(brew.getId(), Name.HEAT_WATER,
+						isNewStep ? "startHeatingWater" : "continueHeatingWater");
 				mashingSystem.heat(recipe.getMashingTemperature());
 				brewDb.complete(currentBrewStep);
 			}
@@ -93,46 +100,50 @@ public class BrewController implements StoppableRunnable {
 				currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Add malts");
 			}
 			if (!currentBrewStep.isFinished()) {
-				System.out.println("add malts");
+				journal.addEntry(brew.getId(), Name.HEAT_WATER, "addMalts");
 				mashingSystem.addMalts();
 				brewDb.complete(currentBrewStep);
 			}
 
 			// do the rests
-			int count = 0;
+			int count = 1;
 			for (Rest rest : recipe.getRests()) {
 				stepName = stepnames.stepname(Name.HEAT_FOR_REST);
 				currentBrewStep = getStepFromDb(stepName);
+				isNewStep = false;
 				if (currentBrewStep == null) {
+					isNewStep = true;
 					currentBrewStep = brewDb.addStep(brew.getId(), stepName,
 							"Heat to " + rest.getTemperature() + "°C for rest " + count);
 				}
 				if (!currentBrewStep.isFinished()) {
-					System.out.println("heating for rest " + count);
+					journal.addEntry(brew.getId(), Name.HEAT_WATER,
+							isNewStep ? "startHeatingForRest" : "continueHeatingForRest", rest.getTemperature(), count);
 					mashingSystem.heat(rest.getTemperature());
 					brewDb.complete(currentBrewStep);
 				}
 
 				stepName = stepnames.stepname(Name.REST);
 				currentBrewStep = getStepFromDb(stepName);
+				isNewStep = false;
 				if (currentBrewStep == null) {
+					isNewStep = true;
 					currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Rest " + count);
 				}
 				if (!currentBrewStep.isFinished()) {
-					System.out.println("doing rest " + count);
+					journal.addEntry(brew.getId(), Name.HEAT_WATER, isNewStep ? "startDoingRest" : "continueDoingRest",
+							count);
 					mashingSystem.doRest(rest);
 					brewDb.complete(currentBrewStep);
 				}
 				count++;
 			}
-			notificationService.sendNotification(NotificationType.INFO, "Malting finised",
-					"The malting has finished. Please start lauthering and do not forget to heat the secundary water!");
+			notificationService.sendNotification(NotificationType.INFO, "maltingFinished");
 		} catch (ClassCastException e) {
-			notificationService.sendNotification(NotificationType.ERROR, "FATAL Brewing system error",
-					"This implementation can only handle InfusionRecipes!");
+			notificationService.sendNotification(NotificationType.ERROR, "recipeImplementationMissing");
 		} catch (BrewException e) {
 			e.printStackTrace();
-			notificationService.sendNotification(NotificationType.ERROR, "FATAL Brewing system error", e.getMessage());
+			notificationService.sendNotification(e);
 		}
 	}
 

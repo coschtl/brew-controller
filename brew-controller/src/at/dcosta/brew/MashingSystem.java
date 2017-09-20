@@ -11,6 +11,7 @@ import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.BrewStep.Name;
 import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
@@ -38,8 +39,7 @@ public class MashingSystem extends HeatingSystem {
 		try {
 			rpmPin = config.getInt(STIRRER_RPM_PIN);
 		} catch (ConfigurationException e) {
-			notificationService.sendNotification(NotificationType.WARNING, "Possible configuration error",
-					"No RPM sensor configured!");
+			notificationService.sendNotification(NotificationType.WARNING, "noRpmConfigured");
 			rpmPin = -1;
 		}
 		if (rpmPin > 0) {
@@ -91,6 +91,7 @@ public class MashingSystem extends HeatingSystem {
 				stoptStirrer(false);
 				if (getTemperature() < minTemp) {
 					logTemperature();
+					journal.addEntry(getBrewId(), Name.HEAT_WATER, "restTemperatuerTooLow", minTemp);
 					heatToTemperature(rest.getTemperature() - postHeatingTempIncrease,
 							((restEnd - System.currentTimeMillis()) / ThreadUtil.ONE_MINUTE) - 1);
 				}
