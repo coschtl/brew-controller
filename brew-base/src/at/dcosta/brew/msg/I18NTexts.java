@@ -1,5 +1,6 @@
 package at.dcosta.brew.msg;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -64,6 +65,18 @@ public abstract class I18NTexts {
 			locale = new Locale("DE");
 		}
 		LOCALE = locale;
+	}
+
+	public static DateFormat getDateFormat(int format) {
+		return DateFormat.getDateInstance(format, LOCALE);
+	}
+
+	public static DateFormat getDateTimeFormat(int format) {
+		return DateFormat.getDateTimeInstance(format, format, LOCALE);
+	}
+
+	public static DateFormat getTimeFormat(int format) {
+		return DateFormat.getTimeInstance(format, LOCALE);
 	}
 
 	private final ResourceBundle messages;

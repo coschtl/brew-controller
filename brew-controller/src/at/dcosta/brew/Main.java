@@ -34,6 +34,7 @@ import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.msg.I18NTexts;
 import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.recipe.RecipeReader;
 import at.dcosta.brew.recipe.RecipeWriter;
@@ -142,7 +143,7 @@ public class Main {
 
 		if (cmdLine.hasOption("listRecipes")) {
 			System.out.println("ID\tRecipe\t\taddedOn\t\tbrew count\trecipe source");
-			DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
+			DateFormat df = I18NTexts.getDateFormat(DateFormat.MEDIUM);
 			for (CookbookEntry entry : new Cookbook().listRecipes(FetchType.FULL)) {
 				System.out.println(entry.getId() + "\t" + entry.getName() + "\t" + df.format(entry.getAddedOn())
 						+ "\t\t" + entry.getRecipeSource());

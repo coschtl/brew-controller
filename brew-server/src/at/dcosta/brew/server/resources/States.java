@@ -15,8 +15,13 @@ import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.IOData;
 import at.dcosta.brew.db.IOLog;
 import at.dcosta.brew.db.InteractionDB;
+import at.dcosta.brew.db.Journal;
+import at.dcosta.brew.db.JournalEntry;
 import at.dcosta.brew.db.ManualAction;
 import at.dcosta.brew.db.ManualAction.Type;
+import at.dcosta.brew.msg.I18NTexts;
+import at.dcosta.brew.server.BrewJournal;
+import at.dcosta.brew.server.BrewJournalEntry;
 import at.dcosta.brew.server.ChartData;
 import at.dcosta.brew.server.Relay;
 import at.dcosta.brew.server.Sensor;
@@ -28,11 +33,25 @@ public class States {
 	private final IOLog ioLog;
 	private final BrewDB brewDB;
 	private final InteractionDB interactionDB;
+	private final Journal journalDB;
 
 	public States() {
 		ioLog = new IOLog();
 		brewDB = new BrewDB();
 		interactionDB = new InteractionDB();
+		journalDB = new Journal();
+	}
+
+	@GET
+	@Path("brewJournal")
+	@Produces(MediaType.APPLICATION_JSON)
+	public BrewJournal brewJournal(@QueryParam(value = "brew") int brewId) {
+		BrewJournal journal = new BrewJournal();
+		DateFormat df = I18NTexts.getTimeFormat(DateFormat.MEDIUM);
+		for (JournalEntry entry : journalDB.getEntries(brewId)) {
+			journal.addBrewJournalEntry(new BrewJournalEntry(df.format(entry.getTimestamp()), entry.getText()));
+		}
+		return journal;
 	}
 
 	@GET
@@ -41,7 +60,7 @@ public class States {
 	public ChartData chartData(@QueryParam(value = "brew") int brewId,
 			@QueryParam(value = "componentId") String componentId) {
 		ChartData data = new ChartData();
-		DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+		DateFormat df = I18NTexts.getTimeFormat(DateFormat.MEDIUM);
 		String id = null;
 		List<IOData> entries = ioLog.getEntries(brewDB.getBrewById(brewId), componentId);
 		int modulo = entries.size() / 10;

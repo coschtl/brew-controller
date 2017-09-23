@@ -33,7 +33,7 @@ public class Journal extends Database {
 
 	public void addEntry(int brewId, Name stepName, String textKey, Object... textArguments) {
 		BundleMessage message = JournalTexts.getMessage(textKey, textArguments);
-		addEntry(brewId, stepName.toString(), message);
+		addEntry(brewId, stepName == null ? null : stepName.toString(), message);
 	}
 
 	public void addEntry(int brewId, String step, IdBasedMessage message) {
@@ -45,7 +45,7 @@ public class Journal extends Database {
 			st.setString(2, step);
 			st.setString(3, message.getId());
 			st.setString(4, message.getMessage());
-			st.setTimestamp(4, now());
+			st.setTimestamp(5, now());
 			int rows = st.executeUpdate();
 			if (rows != 1) {
 				throw new DatabaseException("can not add journal entry (no row created)!");

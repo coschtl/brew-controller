@@ -39,6 +39,11 @@ input {
 	border-color: green;
 }
 
+.logtable td, .logtable td * {
+    vertical-align: top;
+    border: 0; 
+}
+
 #overlay {
    position: fixed;
    z-index:199;

@@ -5,6 +5,7 @@ import static at.dcosta.brew.Configuration.MAIL_PASSWORD;
 import static at.dcosta.brew.Configuration.MAIL_RECIPIENTS;
 import static at.dcosta.brew.Configuration.MAIL_USER;
 
+import java.text.DateFormat;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import javax.mail.internet.MimeMessage;
 
 import at.dcosta.brew.Configuration;
 import at.dcosta.brew.ConfigurationException;
+import at.dcosta.brew.msg.I18NTexts;
 import at.dcosta.brew.util.ThreadManager;
 
 public class MailNotificationService implements Notifier {
@@ -55,8 +57,8 @@ public class MailNotificationService implements Notifier {
 
 					msg.setSubject(notification.getNotificationType().toString() + ": " + notification.getSubject());
 					msg.setContent(
-							notification.getMessage() + "\n\nNotificationTime: "
-									+ Notification.DATE_FORMAT.format(notification.getNotificationTime()),
+							notification.getMessage() + "\n\nNotificationTime: " + I18NTexts
+									.getDateTimeFormat(DateFormat.MEDIUM).format(notification.getNotificationTime()),
 							"text/plain");
 					Transport.send(msg);
 				} catch (Exception e) {

@@ -3,6 +3,7 @@ package at.dcosta.brew.com;
 import java.text.DateFormat;
 import java.util.Date;
 
+import at.dcosta.brew.msg.I18NTexts;
 import at.dcosta.brew.msg.I18NTexts.BundleMessage;
 import at.dcosta.brew.msg.IdBasedMessage;
 import at.dcosta.brew.msg.NotificationTexts;
@@ -11,8 +12,6 @@ import at.dcosta.brew.util.ExceptionUtil;
 public class Notification implements IdBasedMessage {
 
 	private static final long serialVersionUID = 1L;
-
-	public static DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 
 	private final NotificationType notificationType;
 	private final Date notificationTime;
@@ -77,7 +76,8 @@ public class Notification implements IdBasedMessage {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(DATE_FORMAT.format(getNotificationTime())).append(": ")
+		DateFormat df = I18NTexts.getDateTimeFormat(DateFormat.MEDIUM);
+		return new StringBuilder().append(df.format(getNotificationTime())).append(": ")
 				.append(getNotificationType().toString()).append(": ").append(getSubject()).append(": ")
 				.append(getMessage()).toString();
 	}

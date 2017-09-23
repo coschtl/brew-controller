@@ -73,3 +73,7 @@ a:hover {
 a:active {
     color: grey;
 }
+
+.logtable td, .logtable td * {
+    vertical-align: top;
+}

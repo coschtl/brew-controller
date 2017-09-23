@@ -115,6 +115,25 @@ function overlay(mode) {
    }
 }
 
+function reloadJounal() {
+	var r = new XMLHttpRequest();
+	r.open("GET", contextPath + "/v1/api/states/brewJournal?brew=" + getBrewId(), true);
+	r.onreadystatechange = function() {
+		if (r.readyState != 4 || r.status != 200) {
+			return;
+		}
+		var journal = JSON.parse(r.responseText);
+		var table = "<table class='logtable'>";
+		for (var i=0; i<journal.entries.length; i++) {
+			var entry = journal.entries[i];
+			table += "<tr><td>" + entry.timestamp + "</td><td>" + entry.text + "</td></tr>"
+		}
+		table +="</table>";
+		document.getElementById("logTable").innerHTML = table;
+	}
+	r.send();
+}
+
 function loadMashingSubmenu() {
 	loadSubmenu("MASHING");
 }
@@ -206,7 +225,7 @@ function init() {
 		<td>
 			<div class="tab">
 			  <button class="tablinks" onclick="showTab(event, 'chartTab', 'tabcontent', 'tablinks')" id="clickChartTab">Chart</button>
-			  <button class="tablinks" onclick="showTab(event, 'logTab', 'tabcontent', 'tablinks')" id="clickLogTab">Log</button>
+			  <button class="tablinks" onclick="showTab(event, 'logTab', 'tabcontent', 'tablinks');reloadJounal();" id="clickLogTab">Log</button>
 			</div>
 			
 			<div id="chartTab" class="tabcontent">
@@ -216,7 +235,7 @@ function init() {
 			<div id="logTab" class="tabcontent">
 				<div  style="width:500px;height:500px">
 			  		<h3>Brau-Log:</h3>
-			  		<p>Was bisher geschah</p>
+			  		<div id="logTable"></div>
 			  	</div> 
 			</div>
 			

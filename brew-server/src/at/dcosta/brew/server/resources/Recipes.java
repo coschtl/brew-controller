@@ -36,6 +36,7 @@ import at.dcosta.brew.db.BrewStepNameFactory;
 import at.dcosta.brew.db.Cookbook;
 import at.dcosta.brew.db.CookbookEntry;
 import at.dcosta.brew.db.FetchType;
+import at.dcosta.brew.msg.I18NTexts;
 import at.dcosta.brew.recipe.InfusionRecipe;
 import at.dcosta.brew.recipe.Ingredient;
 import at.dcosta.brew.recipe.RecipeReader;
@@ -54,15 +55,10 @@ public class Recipes extends AbstractResource {
 
 	private final Cookbook cookbook;
 	private final BrewDB brewDB;
-	private final DateFormat timeFormat;
-
-	private final DateFormat dateAndTimeFormat;
 
 	public Recipes() {
 		cookbook = new Cookbook();
 		brewDB = new BrewDB();
-		timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM);
-		dateAndTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	}
 
 	@DELETE
@@ -98,8 +94,7 @@ public class Recipes extends AbstractResource {
 			fetchType = FetchType.MINIMAL;
 		}
 		CookbookEntry entry = getCookbookEntry(recipeId);
-		DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
-		return createDto(entry, fetchType, df, brewDB.isBrewRunning(recipeId));
+		return createDto(entry, fetchType, I18NTexts.getDateFormat(DateFormat.MEDIUM), brewDB.isBrewRunning(recipeId));
 	}
 
 	@GET
@@ -109,8 +104,8 @@ public class Recipes extends AbstractResource {
 		if (fetchType == null) {
 			fetchType = FetchType.MINIMAL;
 		}
-		DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
 		List<Recipe> recipes = new ArrayList<>();
+		DateFormat df = I18NTexts.getDateFormat(DateFormat.MEDIUM);
 		for (CookbookEntry recipe : cookbook.listRecipes(fetchType)) {
 			recipes.add(createDto(recipe, fetchType, df, false));
 		}
@@ -156,10 +151,11 @@ public class Recipes extends AbstractResource {
 	public List<at.dcosta.brew.server.Brew> showBrews(@PathParam("recipeId") int recipeId) {
 		List<Brew> brews = brewDB.getBrewsByRecipe(recipeId);
 		List<at.dcosta.brew.server.Brew> dtos = new ArrayList<>(brews.size());
+		DateFormat dateTimeFormat = I18NTexts.getDateTimeFormat(DateFormat.MEDIUM);
 		for (Brew brew : brews) {
 			at.dcosta.brew.server.Brew dto = new at.dcosta.brew.server.Brew();
-			String formattedStart = brew.getStartTime() == null ? "" : dateAndTimeFormat.format(brew.getStartTime());
-			String formattedEnd = brew.getEndTime() == null ? "" : dateAndTimeFormat.format(brew.getEndTime());
+			String formattedStart = brew.getStartTime() == null ? "" : dateTimeFormat.format(brew.getStartTime());
+			String formattedEnd = brew.getEndTime() == null ? "" : dateTimeFormat.format(brew.getEndTime());
 			String time = formattedStart;
 			if (!formattedEnd.isEmpty()) {
 				time += " - " + formattedEnd;
@@ -230,6 +226,7 @@ public class Recipes extends AbstractResource {
 			break;
 		}
 
+		DateFormat timeFormat = I18NTexts.getTimeFormat(DateFormat.MEDIUM);
 		if (startTime != null) {
 			descr.append("<br/><br/>Start: ").append(timeFormat.format(startTime));
 			if (rest != null && stepName.getName() != Name.HEAT_FOR_REST) {
