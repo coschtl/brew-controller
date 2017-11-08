@@ -36,7 +36,7 @@ public class UserInteractionExecuter implements StoppableRunnable {
 		while (keepRunning) {
 			for (ManualAction action : interactionDB.getUnprocessedActions()) {
 				System.out.println(action);
-				if (action.getTarget() == "system") {
+				if ("system".equals(action.getTarget())) {
 					if (action.getType() == Type.PAUSE) {
 						pauseHandler.startPause();
 					} else if (action.getType() == Type.RESUME) {
@@ -47,7 +47,7 @@ public class UserInteractionExecuter implements StoppableRunnable {
 				}
 				Relay relay = gpioSubsystem.getRelayById(action.getTarget());
 				if (relay == null) {
-					System.out.println("No actor " + action.getTarget() + " found.");
+					System.out.println("No actor '" + action.getTarget() + "' found.");
 					continue;
 				}
 

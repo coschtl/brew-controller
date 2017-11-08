@@ -112,8 +112,8 @@ public class Main {
 		if (cmdLine.hasOption("brew")) {
 			Brew brew;
 			while ((brew = brewDB.getRunningBrew()) == null) {
-				System.out.println("no brew startet yet. Pausing 30 seconds.");
-				ThreadUtil.sleepSeconds(30);
+				System.out.println("No brew startet yet. Pausing 10 seconds.");
+				ThreadUtil.sleepSeconds(10);
 			}
 			System.out.println("got running brew: " + brew);
 			ThreadManager.getInstance()
@@ -190,7 +190,7 @@ public class Main {
 		NotificationService notificationService = new NotificationService(0);
 		if (cmdLine.hasOption("boil")) {
 			int boilingTime = Integer.valueOf(cmdLine.getOptionValue("boil"));
-			BoilingSystem boilingSystem = new BoilingSystem(1, notificationService);
+			BoilingSystem boilingSystem = new BoilingSystem(1, brewDB, notificationService);
 			boilingSystem.cook(boilingTime);
 			return;
 		}
@@ -292,7 +292,7 @@ public class Main {
 				return;
 			}
 
-			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
+			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService);
 			mashingSystem.heat(temperature);
 			mashingSystem.switchOff();
 			notificationService.sendNotification(NotificationType.INFO, "heatingFinished", temperature);
@@ -305,8 +305,8 @@ public class Main {
 				return;
 			}
 			int restTime = Integer.valueOf(cmdLine.getOptionValue("rest"));
-			MashingSystem mashingSystem = new MashingSystem(-1, notificationService);
-			mashingSystem.doRest(new Rest(temperature, restTime));
+			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService);
+			mashingSystem.doRest(new Rest(0, temperature, restTime));
 			mashingSystem.switchOff();
 			notificationService.sendNotification(NotificationType.INFO, "restFinished", restTime, temperature);
 			System.out.println("Finished a " + restTime + " minutes rest at " + temperature + "°C");

@@ -9,6 +9,8 @@ import java.util.List;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.Brew;
+import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.io.AvgCalculatingSensor;
 import at.dcosta.brew.io.AvgCalculatingSensor.SensorStatus;
@@ -16,6 +18,8 @@ import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.w1.W1Bus;
+import at.dcosta.brew.recipe.Recipe;
+import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 
@@ -25,6 +29,7 @@ public abstract class HeatingSystem {
 
 	private final double multipleHeaterTempDiff;
 	private final NotificationService notificationService;
+	private final BrewDB brewDb;
 	private final List<Sensor> temperatureSensors;
 	private final AvgCalculatingSensor averageTemperature;
 	private final List<Relay> heaters;
@@ -37,16 +42,17 @@ public abstract class HeatingSystem {
 	private String errorStatus;
 	private int brewId;
 
-	public HeatingSystem(int brewId, NotificationService notificationService) {
+	public HeatingSystem(int brewId, BrewDB brewDb, NotificationService notificationService) {
 		this.brewId = brewId;
+		this.brewDb = brewDb;
 		this.notificationService = notificationService;
 		Configuration config = Configuration.getInstance();
 		this.multipleHeaterTempDiff = config.getDouble(MULTIPLE_HEATER_TEMPDIFF);
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-		this.pauseHandler = new PauseHandler(brewId);
 		this.journal = new Journal();
+		this.pauseHandler = new PauseHandler(brewId, journal, this);
 		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF),
 				config.getDouble(THERMOMETER_CORRECTION_VALUE));
 		W1Bus w1Bus = new W1Bus();
@@ -142,6 +148,11 @@ public abstract class HeatingSystem {
 
 	protected abstract double getMinTemperatureIncreasePerMinute();
 
+	protected Recipe getRecipe() {
+		Brew brew = brewDb.getBrewById(brewId);
+		return brew.getRecipe();
+	}
+
 	protected abstract String[] getTemperatureSensorAddresses();
 
 	protected List<Sensor> getTemperatureSensors() {
@@ -187,6 +198,13 @@ public abstract class HeatingSystem {
 		for (Relay heater : heaters) {
 			heater.off();
 		}
+	}
+
+	protected void update(Recipe recipe) {
+		RecipeWriter writer = new RecipeWriter(recipe, false);
+		Brew brew = brewDb.getBrewById(brewId);
+		brew.setRecipe(writer.getRecipeAsXmlString());
+		brewDb.persist(brew);
 	}
 
 }

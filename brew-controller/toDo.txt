@@ -1,3 +1,31 @@
+ - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
+   - tritt nur am raspberry auf?  --> verifizieren
+   
+   
+ - umbau der aktualisierung von menü, chart, log auf websockets
+
+
+ - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
+ 
+ - eingabe für jodnormal ermöglichen
+ 
+ - manuelle eingriffe (interaction) sollten sich nur auf den aktuellen brauvorgang beziehen (brewid)
+ 
+ - ev. chart automatisch aktualisieren?
+ 
+ - warum ist die avg-temperatur immer höher als die beiden anderen?
+ 
+ ---- DONE -----
+ 
+ - braulog sollte scrollbalken bekommen
+   --> implementiert
+ 
+ - ntp client für raspberry pi
+   --> korrekt konfiguriert
+ 
+ - fixe ip für raspberry
+   --> 192.168.1.50/24 gw:192.168.1.1 
+ 
  - heiz-warnung erst nach ein paar minuten heizen aktivieren (heizen ist zu träge)
    --> verspäteter Start via Config
    
@@ -61,25 +89,6 @@
  - "pause" knopf
  	--> GUI: implementiert, controller implementiert, in der GUI die "Verlängerung" anzeigen: implementiert
  	
- 	
- 	NPE beim start des cotrollers wenn noch kein rezept gestartet wurde --> besser warten
- 	fixed
- 	
- 	
- 	
- 	
-    
- - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
-   - tritt nur am raspberry auf?  --> verifizieren
-   
- 
- - umbau der aktualisierung von menü, chart, log auf websockets
-
- - ntp server für raspberry pi
-
- - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
- 
- - eingabe für jodnormal ermöglichen
- 
- - manuelle eingriffe (interaction) sollten sich nur auf den aktuellen brauvorgang beziehen (brewid)
+ - NPE beim start des cotrollers wenn noch kein rezept gestartet wurde --> besser warten
+	--> fixed
   

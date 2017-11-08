@@ -140,7 +140,7 @@ public class RecipeReader {
 		NodeList childs = mashing.getElementsByTagName("rest");
 		for (int i = 0; i < childs.getLength(); i++) {
 			Element rest = (Element) childs.item(i);
-			recipe.addRest((new Rest(getIntAttribute("temperature", rest), getIntAttribute("time", rest))));
+			recipe.addRest((new Rest(i, getIntAttribute("temperature", rest), getIntAttribute("time", rest))));
 		}
 	}
 

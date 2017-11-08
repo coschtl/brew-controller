@@ -10,6 +10,8 @@ import static at.dcosta.brew.Configuration.COOKING_THERMOMETER_ADRESSES;
 import java.util.Date;
 
 import at.dcosta.brew.com.NotificationService;
+import at.dcosta.brew.db.BrewDB;
+import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.util.ThreadUtil;
 
 public class BoilingSystem extends HeatingSystem {
@@ -17,8 +19,8 @@ public class BoilingSystem extends HeatingSystem {
 	private final double cookingTemperature;
 	private final double cookingTemperatureMin;
 
-	public BoilingSystem(int brewId, NotificationService notificationService) {
-		super(brewId, notificationService);
+	public BoilingSystem(int brewId, BrewDB brewDb, NotificationService notificationService) {
+		super(brewId, brewDb, notificationService);
 		Configuration config = Configuration.getInstance();
 		cookingTemperature = config.getDouble(COOKING_COOKING_TEMPERATURE);
 		cookingTemperatureMin = config.getDouble(COOKING_COOKING_TEMPERATURE_MIN);
@@ -37,7 +39,13 @@ public class BoilingSystem extends HeatingSystem {
 					heatUntilBoiling();
 				}
 				for (int i = 0; i < 10; i++) {
-					cookingEnd += pauseHandler.handlePause();
+					long pauseTime = pauseHandler.handlePause();
+					if (pauseTime > 0) {
+						cookingEnd += pauseTime;
+						Recipe recipe = getRecipe();
+						recipe.setBoilingTime(recipe.getBoilingTime() + (int) (pauseTime / ThreadUtil.ONE_MINUTE));
+						update(recipe);
+					}
 					ThreadUtil.sleepSeconds(1);
 				}
 			}

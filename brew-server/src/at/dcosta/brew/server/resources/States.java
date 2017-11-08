@@ -133,7 +133,7 @@ public class States {
 				break;
 			}
 		}
-		if (brew.getEndTime() == null) {
+		if (brew != null && brew.getEndTime() == null) {
 			List<ManualAction> systemActions = interactionDB.getSystemActions(brew.getStartTime());
 			if (systemActions.size() > 0) {
 				ManualAction lastAction = systemActions.get(systemActions.size() - 1);

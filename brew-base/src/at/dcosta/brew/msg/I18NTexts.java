@@ -95,8 +95,8 @@ public abstract class I18NTexts {
 			s = messages.getString(key);
 		} catch (MissingResourceException e) {
 			throw new MissingResourceException(
-					"Can't locate key inside message file of class " + getClass().getSimpleName(), getClass().getName(),
-					key);
+					"Can't locate key '" + key + "' inside message file of class " + getClass().getSimpleName(),
+					getClass().getName(), key);
 		}
 		return new BundleMessage(new StringBuilder().append(getIdPrefix()).append('.').append(key).toString(), s,
 				variables);

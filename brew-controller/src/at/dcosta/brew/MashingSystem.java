@@ -11,12 +11,14 @@ import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.com.NotificationType;
+import at.dcosta.brew.db.BrewDB;
 import at.dcosta.brew.db.BrewStep.Name;
 import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.MockSensor;
+import at.dcosta.brew.recipe.InfusionRecipe;
 import at.dcosta.brew.recipe.Rest;
 import at.dcosta.brew.util.ThreadUtil;
 
@@ -28,8 +30,8 @@ public class MashingSystem extends HeatingSystem {
 	private final Sensor rpmSensor;
 	private final Stirrer stirrer;
 
-	public MashingSystem(int brewId, NotificationService notificationService) {
-		super(brewId, notificationService);
+	public MashingSystem(int brewId, BrewDB brewDb, NotificationService notificationService) {
+		super(brewId, brewDb, notificationService);
 		Configuration config = Configuration.getInstance();
 		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
 		maltStoreOpener = gpioSubsystem.getRelay("Malt Store Opener", config.getInt(MALT_STORE_OPENER_PIN));
@@ -77,7 +79,12 @@ public class MashingSystem extends HeatingSystem {
 			}
 			if (totalPauseTime > 0) {
 				restEnd += totalPauseTime;
-				rest.addMinutes((int) (totalPauseTime / ThreadUtil.ONE_MINUTE));
+				int pauseMinutes = (int) (totalPauseTime / ThreadUtil.ONE_MINUTE);
+				rest.addMinutes(pauseMinutes);
+				InfusionRecipe recipe = (InfusionRecipe) getRecipe();
+				recipe.getRests().get(rest.getRestNumber()).addMinutes(pauseMinutes);
+				recipe.setBoilingTime(recipe.getBoilingTime() + pauseMinutes);
+				update(recipe);
 			}
 			if (totalPauseTime > ThreadUtil.ONE_MINUTE && aktRestTimeMinutes != 5) {
 				aktRestTimeMinutes = 5;

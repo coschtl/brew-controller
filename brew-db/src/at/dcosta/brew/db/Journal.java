@@ -26,6 +26,7 @@ public class Journal extends Database {
 	private static final String SQL_FIND_BY_BREW_ID = "SELECT BREW_ID, STEP, JOURNAL_ID, JOURNAL_TEXT, JOURNAL_DATE from "
 			+ TABLE_NAME + " where BREW_ID=?";
 	private static final String SQL_FIND_BY_BREW_ID_AND_STEP = SQL_FIND_BY_BREW_ID + " and STEP=?";
+	private static final String SQL_ORDER_BY_JOURNAL_DATE = " order by JOURNAL_DATE";
 
 	public Journal() {
 		super();
@@ -68,7 +69,8 @@ public class Journal extends Database {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = con.prepareStatement(stepName == null ? SQL_FIND_BY_BREW_ID : SQL_FIND_BY_BREW_ID_AND_STEP);
+			String sql = stepName == null ? SQL_FIND_BY_BREW_ID : SQL_FIND_BY_BREW_ID_AND_STEP;
+			st = con.prepareStatement(sql + SQL_ORDER_BY_JOURNAL_DATE);
 			st.setInt(1, brewId);
 			if (stepName != null) {
 				st.setString(2, stepName.toString());

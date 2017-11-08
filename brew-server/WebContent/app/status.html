@@ -23,6 +23,7 @@ if (contextPath.substring(0,4) == "/app") {
 var aktSubmenu;
 var submenuReloadIntervalId;
 var statusReloadIntervalId;
+var journalReloadIntervalId;
 
 function loadSubmenu(step) {
 	var r = new XMLHttpRequest();
@@ -74,6 +75,7 @@ function showStepDetails(details) {
 	alert(details);
 }
 
+
 ///// tabs /////
 function showTab(evt, tabName, tabClassName, tabmenuClassName) {
     // Declare all variables
@@ -94,6 +96,13 @@ function showTab(evt, tabName, tabClassName, tabmenuClassName) {
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+    
+    if ("logTab" == tabName) {
+    	journalReloadIntervalId = setInterval(reloadJounal, 5000);
+    } else {
+    	clearInterval(reloadJounal);
+    }
+    activeTab = tabName;
 }
 
 function overlay(mode) {
@@ -111,6 +120,7 @@ function overlay(mode) {
 	   	if (overlay != null) {
        		document.getElementsByTagName("body")[0].removeChild(overlay);
        		document.getElementById("lightBox").style.display="none";
+       		document.onkeydown = null;
 	   	}
    }
 }
@@ -123,6 +133,12 @@ function reloadJounal() {
 			return;
 		}
 		var journal = JSON.parse(r.responseText);
+		var before = 0;
+		try {
+			before = document.getElementById("logTable").firstChild.firstChild.childElementCount;
+		} catch (e) {
+			// ignore
+		}
 		var table = "<table class='logtable'>";
 		for (var i=0; i<journal.entries.length; i++) {
 			var entry = journal.entries[i];
@@ -130,6 +146,17 @@ function reloadJounal() {
 		}
 		table +="</table>";
 		document.getElementById("logTable").innerHTML = table;
+		
+		var after = 0;
+		try {
+			after = document.getElementById("logTable").firstChild.firstChild.childElementCount;
+		} catch (e) {
+			// ignore
+		}
+		if (after > before) {
+			var scrollDiv = document.getElementById("logTab");
+			scrollDiv.scrollTop = scrollDiv.scrollHeight;
+		}
 	}
 	r.send();
 }
@@ -172,7 +199,7 @@ function init() {
 		</td>
 		<td align="center">
 			<div id="noStatusAvailable">Für den ausgewählten Brauvorgang sind noch keine Daten verfügbar.</div>
-			<div id="pausedText" class="errorMessage" style="animation: blinker 2s linear infinite;">Brauvorgang ist momentan angehalten.</div>
+			<div id="pausedText" class="errorMessage" style="animation: blinker 3s linear infinite;">Der Brauvorgang ist momentan angehalten.</div>
 			<table class="status" id="statusTable">
 				<tr>
 					<td></td>
@@ -225,15 +252,15 @@ function init() {
 		<td>
 			<div class="tab">
 			  <button class="tablinks" onclick="showTab(event, 'chartTab', 'tabcontent', 'tablinks')" id="clickChartTab">Chart</button>
-			  <button class="tablinks" onclick="showTab(event, 'logTab', 'tabcontent', 'tablinks');reloadJounal();" id="clickLogTab">Log</button>
+			  <button class="tablinks" onclick="showTab(event, 'logTab', 'tabcontent', 'tablinks'); reloadJounal();" id="clickLogTab">Log</button>
 			</div>
 			
 			<div id="chartTab" class="tabcontent">
 				<canvas id="chartCanvas" width="500px" height="500px"></canvas>
 			</div>
 			
-			<div id="logTab" class="tabcontent">
-				<div  style="width:500px;height:500px">
+			<div id="logTab" class="tabcontent" style="overflow:auto">
+				<div  style="width:500px;height:500px;">
 			  		<h3>Brau-Log:</h3>
 			  		<div id="logTable"></div>
 			  	</div> 
