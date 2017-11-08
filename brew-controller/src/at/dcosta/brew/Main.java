@@ -110,7 +110,11 @@ public class Main {
 			return;
 		}
 		if (cmdLine.hasOption("brew")) {
-			Brew brew = brewDB.getRunningBrew();
+			Brew brew;
+			while ((brew = brewDB.getRunningBrew()) == null) {
+				System.out.println("no brew startet yet. Pausing 30 seconds.");
+				ThreadUtil.sleepSeconds(30);
+			}
 			System.out.println("got running brew: " + brew);
 			ThreadManager.getInstance()
 					.newThread(new BrewController(brew, new NotificationService(brew.getId())), "BrewController")

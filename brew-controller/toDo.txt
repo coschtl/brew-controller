@@ -62,6 +62,12 @@
  	--> GUI: implementiert, controller implementiert, in der GUI die "Verlängerung" anzeigen: implementiert
  	
  	
+ 	NPE beim start des cotrollers wenn noch kein rezept gestartet wurde --> besser warten
+ 	fixed
+ 	
+ 	
+ 	
+ 	
     
  - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
    - tritt nur am raspberry auf?  --> verifizieren
@@ -74,4 +80,6 @@
  - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
  
  - eingabe für jodnormal ermöglichen
+ 
+ - manuelle eingriffe (interaction) sollten sich nur auf den aktuellen brauvorgang beziehen (brewid)
   
