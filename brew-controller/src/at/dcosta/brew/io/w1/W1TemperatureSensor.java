@@ -1,6 +1,5 @@
 package at.dcosta.brew.io.w1;
 
-
 import com.pi4j.component.temperature.TemperatureSensor;
 
 import at.dcosta.brew.io.ComponentType;
@@ -12,6 +11,7 @@ public class W1TemperatureSensor implements Sensor {
 	private final TemperatureSensor sensor;
 	private ManagedThread<W1TemperatureUpdater> temperatureUpdater;
 	private double sensorValue;
+	private double correctionValue;
 
 	public W1TemperatureSensor(TemperatureSensor sensor) {
 		this.sensor = sensor;
@@ -38,7 +38,7 @@ public class W1TemperatureSensor implements Sensor {
 		if (!temperatureUpdaterIsRunning()) {
 			startTemperatureUpdater();
 		}
-		return sensorValue;
+		return sensorValue + correctionValue;
 	}
 
 	@Override
@@ -46,6 +46,11 @@ public class W1TemperatureSensor implements Sensor {
 		if (temperatureUpdater != null) {
 			temperatureUpdater.getRunnable().logValue();
 		}
+	}
+
+	@Override
+	public void setCorrectionValue(double correctionValue) {
+		this.correctionValue = correctionValue;
 	}
 
 	@Override
@@ -57,8 +62,7 @@ public class W1TemperatureSensor implements Sensor {
 		synchronized (this) {
 			if (!temperatureUpdaterIsRunning()) {
 				String sensorName = sensor.getName();
-				temperatureUpdater = new ManagedThread<W1TemperatureUpdater>(new W1TemperatureUpdater(this, sensor),
-						sensorName);
+				temperatureUpdater = new ManagedThread<>(new W1TemperatureUpdater(this, sensor), sensorName);
 				temperatureUpdater.start();
 			}
 		}

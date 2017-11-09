@@ -28,6 +28,7 @@ public class AvgCalculatingSensor extends AbstractSensor {
 			return (int) (s2.getValue() - s1.getValue());
 		}
 	};
+
 	private static double getMedian(List<Sensor> sensors) {
 		Collections.sort(sensors, VALUE_COMPARATOR);
 		int half = sensors.size() / 2;
@@ -36,6 +37,7 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		}
 		return sensors.get(half).getValue();
 	}
+
 	private ComponentType componentType;
 	private String scale;
 	private List<Sensor> sensors;
@@ -44,14 +46,12 @@ public class AvgCalculatingSensor extends AbstractSensor {
 	private double lastValue = -1;
 	private double maxDiff;
 
-	private double correctionValue;
-
 	private boolean mayStartTemperatureCollection;
 
-	public AvgCalculatingSensor(double maxDiff, double correctionValue) {
+	public AvgCalculatingSensor(double maxDiff) {
 		sensors = new ArrayList<>();
 		this.maxDiff = maxDiff;
-		this.correctionValue = correctionValue;
+
 	}
 
 	public void addSensor(Sensor sensor) {
@@ -83,7 +83,8 @@ public class AvgCalculatingSensor extends AbstractSensor {
 
 		if (sensors.size() == 1) {
 			Sensor sensor = sensors.get(0);
-			System.out.println(sensor.getID() + ": " + sensor.getValue() + sensor.getScale());
+			// System.out.println(sensor.getID() + ": " + sensor.getValue() +
+			// sensor.getScale());
 			sensorStatus = SensorStatus.OK;
 			return sensor.getValue();
 		}
@@ -132,12 +133,17 @@ public class AvgCalculatingSensor extends AbstractSensor {
 		return sensorStatus;
 	}
 
+	@Override
+	public void setCorrectionValue(double correctionValue) {
+		// not needed, the sensor already adds the correctionValue individually
+	}
+
 	private double getAverage(List<Sensor> sensors) {
 		double sum = 0;
 		for (Sensor sensor : sensors) {
 			sum += sensor.getValue();
 		}
-		return (sum / sensors.size()) + correctionValue;
+		return (sum / sensors.size());
 	}
 
 	@Override

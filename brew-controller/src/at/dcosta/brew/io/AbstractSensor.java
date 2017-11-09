@@ -7,14 +7,14 @@ public abstract class AbstractSensor implements Sensor {
 
 	private ManagedThread<SensorDataCollector> sensorDataCollectorThread;
 	private long switchOffTime;
-
+	private double correctionValue;
 
 	@Override
 	public final double getValue() {
 		if (!sensorDataCollectorIsRunning()) {
 			startCollectingSensorData();
 		}
-		return doGetValue();
+		return doGetValue() + correctionValue;
 	}
 
 	@Override
@@ -25,6 +25,11 @@ public abstract class AbstractSensor implements Sensor {
 	}
 
 	@Override
+	public void setCorrectionValue(double correctionValue) {
+		this.correctionValue = correctionValue;
+	}
+
+	@Override
 	public void switchOff() {
 		switchOffTime = System.currentTimeMillis();
 		System.out.println("switching off sensor " + getID());
@@ -32,7 +37,7 @@ public abstract class AbstractSensor implements Sensor {
 			sensorDataCollectorThread.abort();
 		}
 	}
-	
+
 	private boolean sensorDataCollectorIsRunning() {
 		return sensorDataCollectorThread != null && sensorDataCollectorThread.isAlive();
 	}
@@ -55,7 +60,7 @@ public abstract class AbstractSensor implements Sensor {
 		}
 		synchronized (this) {
 			if (!sensorDataCollectorIsRunning()) {
-				sensorDataCollectorThread = new ManagedThread<SensorDataCollector>(new SensorDataCollector(this),
+				sensorDataCollectorThread = new ManagedThread<>(new SensorDataCollector(this),
 						"SensorDataCollector_" + getID());
 				sensorDataCollectorThread.start();
 			}

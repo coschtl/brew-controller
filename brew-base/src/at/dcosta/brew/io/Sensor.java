@@ -12,6 +12,8 @@ public interface Sensor {
 
 	void logValue();
 
+	void setCorrectionValue(double correctionValue);
+
 	void switchOff();
 
 }

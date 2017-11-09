@@ -53,8 +53,8 @@ public abstract class HeatingSystem {
 		this.heatingMonitor = new HeatingMonitor(this);
 		this.journal = new Journal();
 		this.pauseHandler = new PauseHandler(brewId, journal, this);
-		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF),
-				config.getDouble(THERMOMETER_CORRECTION_VALUE));
+		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF));
+		double temperatureCorrectionValue = config.getDouble(THERMOMETER_CORRECTION_VALUE);
 		W1Bus w1Bus = new W1Bus();
 		for (String address : getTemperatureSensorAddresses()) {
 			Sensor sensor = w1Bus.getTemperatureSensor(address);
@@ -62,6 +62,7 @@ public abstract class HeatingSystem {
 				throw new ConfigurationException(
 						"Sensor with address '" + address + "' not found! Check configuration/installation!");
 			}
+			sensor.setCorrectionValue(temperatureCorrectionValue);
 			temperatureSensors.add(sensor);
 			averageTemperature.addSensor(sensor);
 		}
