@@ -29,6 +29,7 @@ function loadStatus() {
 			brewIsFinished = true;
 			clearInterval(submenuReloadIntervalId);
 			clearInterval(statusReloadIntervalId);
+			clearInterval(journalReloadIntervalId);
 			statusData.temperatures[0].value = null;
 			statusData.temperatures[1].value = null;
 			statusData.avgTemp.value = null;
@@ -49,20 +50,26 @@ function loadStatus() {
 		setDecimalValue("avgTemp", statusData.avgTemp.value, "°C");
 		
 		var avgTemp = document.getElementById("Average");
+		
 		avgTemp.onclick = function() {
 			actionComponent = avgTemp;
 			actionLabelString = "Temperature [°C]";
-			if (statusData.paused) {
-				document.getElementById("resume").style.display = "block";
-				document.getElementById("pause").style.display = "none";
+			if (statusData.brewFinished) {
+				performAction('showChart');
 			} else {
-				document.getElementById("resume").style.display = "none";
-				document.getElementById("pause").style.display = "block";
+				var visibility = statusData.brewFinished ? "none" : "block";
+				if (statusData.paused) {
+					document.getElementById("resume").style.display = visibility;
+					document.getElementById("pause").style.display = "none";
+				} else {
+					document.getElementById("resume").style.display = "none";
+					document.getElementById("pause").style.display = visibility;
+				}
+				document.getElementById("switchOFF").style.display = "none";
+				document.getElementById("switchON").style.display = "none";
+				document.getElementById("switchAUTO").style.display = "none";
+				overlay('display');
 			}
-			document.getElementById("switchOFF").style.display = "none";
-			document.getElementById("switchON").style.display = "none";
-			document.getElementById("switchAUTO").style.display = "none";
-			overlay('display');
 		};
 
 		setValue("time", statusData.timeString);
