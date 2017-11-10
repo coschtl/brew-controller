@@ -1,12 +1,6 @@
- - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
-   - tritt nur am raspberry auf?  --> verifizieren
-   
-   
+
  - umbau der aktualisierung von menü, chart, log auf websockets
 
-
- - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
- 
  - eingabe für jodnormal ermöglichen
  
  - ev. chart automatisch aktualisieren?
@@ -14,6 +8,13 @@
 
  
  ---- DONE -----
+
+ - nach dem hinzufügen eines rezept werden die rezepte nicht neu geladen
+   - nicht (mehr) nachstellbar
+   
+ - vom System "gesehene" Temperatur (vor allem während der Rast) loggen
+   --> implementiert
+    
  - warum ist die avg-temperatur immer höher als die beiden anderen?
    --> fixed
    

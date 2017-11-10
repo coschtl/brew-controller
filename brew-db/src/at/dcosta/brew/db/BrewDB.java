@@ -19,7 +19,7 @@ public class BrewDB extends Database {
 	private static final String[] TABLE_NAMES = new String[] { TABLE_BREW, TABLE_BREW_STEPS };
 	private static final String[] CREATE_TABLE_STATEMENTS = new String[] {
 			"CREATE TABLE " + TABLE_NAMES[0]
-					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, RECIPE BREW_STATUS varchar(16), RECIPE varchar(65000), BREW_END timestamp)",
+					+ " (COOKBOOK_ENTRY_ID int, BREW_START timestamp, BREW_STATUS varchar(16), RECIPE varchar(65000), BREW_END timestamp)",
 			"CREATE TABLE " + TABLE_NAMES[1]
 					+ " (BREW_ID int, NAME varchar(255), DESCRIPTION varchar(255), STEP_START timestamp, STEP_END timestamp)" };
 	private static final String[] CREATE_INDEX_STATEMENTS = new String[] {};

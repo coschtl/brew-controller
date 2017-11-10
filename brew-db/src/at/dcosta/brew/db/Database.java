@@ -197,11 +197,18 @@ public abstract class Database {
 			jdbcUrl = getJdbcUrl();
 		}
 		if (!ACTUAL_TABLES.contains(getClass())) {
+			ConfigurationDB cdb;
+			if (this instanceof ConfigurationDB) {
+				cdb = (ConfigurationDB) this;
+			} else {
+				cdb = new ConfigurationDB();
+			}
 			ACTUAL_TABLES.add(getClass());
 			if (createTablesIfNecessary()) {
+				cdb.updateProgramVersion(getClass().getSimpleName(), CurrentProgramVersion.getVersion());
 				return;
 			}
-			alterTablesAndUpdateDataIfNecessary();
+			alterTablesAndUpdateDataIfNecessary(cdb);
 		}
 	}
 
@@ -246,13 +253,7 @@ public abstract class Database {
 		}
 	}
 
-	private void alterTablesAndUpdateDataIfNecessary() {
-		ConfigurationDB cdb;
-		if (this instanceof ConfigurationDB) {
-			cdb = (ConfigurationDB) this;
-		} else {
-			cdb = new ConfigurationDB();
-		}
+	private void alterTablesAndUpdateDataIfNecessary(ConfigurationDB cdb) {
 		int dbVersion = cdb.getProgramVersion(getClass().getSimpleName());
 		int codeVersion = CurrentProgramVersion.getVersion();
 		if (codeVersion > dbVersion) {
