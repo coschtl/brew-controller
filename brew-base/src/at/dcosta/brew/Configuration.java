@@ -45,6 +45,7 @@ public class Configuration {
 	public static final String STIRRER_OVERTIME_SECONDS = "stirrer.overtime.seconds";
 	public static final String STIRRER_RPM_PIN = "stirrer.rpm.pi4jPinNumber";
 	public static final String MALT_STORE_OPENER_PIN = "maltStoreOpener.pi4jPinNumber";
+	public static final String MALT_STORE_TIMEOUT_SECONDS = "maltStore.timeoutSeconds";
 	public static final String MALT_STORE_OPENER_TIMEOUT_SECONDS = "maltStoreOpener.timeoutSeconds";
 
 	public static final String MAIL_USER = "mail.user";
@@ -98,6 +99,14 @@ public class Configuration {
 			return Integer.parseInt(stringValue);
 		} catch (NumberFormatException e) {
 			throw ConfigurationException.createIllegalValueException(key, stringValue);
+		}
+	}
+
+	public int getInt(String key, int defaultValue) {
+		try {
+			return getInt(key);
+		} catch (Exception e) {
+			return defaultValue;
 		}
 	}
 

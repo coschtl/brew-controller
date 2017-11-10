@@ -2,6 +2,7 @@ package at.dcosta.brew;
 
 import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_PIN;
 import static at.dcosta.brew.Configuration.MALT_STORE_OPENER_TIMEOUT_SECONDS;
+import static at.dcosta.brew.Configuration.MALT_STORE_TIMEOUT_SECONDS;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_PINS;
@@ -20,11 +21,13 @@ import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.gpio.MockSensor;
 import at.dcosta.brew.recipe.InfusionRecipe;
 import at.dcosta.brew.recipe.Rest;
+import at.dcosta.brew.util.MockUtil;
 import at.dcosta.brew.util.ThreadUtil;
 
 public class MashingSystem extends HeatingSystem {
 
 	private final Relay maltStoreOpener;
+	private final int maltStoreTimeoutSeconds;
 	private final int maltStoreOpenerTimeoutSeconds;
 	private final double postHeatingTempIncrease;
 	private final Sensor rpmSensor;
@@ -35,6 +38,7 @@ public class MashingSystem extends HeatingSystem {
 		Configuration config = Configuration.getInstance();
 		GpioSubsystem gpioSubsystem = GpioSubsystem.getInstance();
 		maltStoreOpener = gpioSubsystem.getRelay("Malt Store Opener", config.getInt(MALT_STORE_OPENER_PIN));
+		maltStoreTimeoutSeconds = config.getInt(MALT_STORE_TIMEOUT_SECONDS, 60);
 		maltStoreOpenerTimeoutSeconds = config.getInt(MALT_STORE_OPENER_TIMEOUT_SECONDS);
 		postHeatingTempIncrease = config.getDouble(MASHING_HEATER_POSTHEAT_INCREASE);
 		int rpmPin;
@@ -62,10 +66,12 @@ public class MashingSystem extends HeatingSystem {
 		} finally {
 			maltStoreOpener.off();
 		}
-		ThreadUtil.sleepMinutes(1);
+		ThreadUtil.sleepSeconds(maltStoreTimeoutSeconds);
 	}
 
 	public void doRest(Rest rest) {
+		MockUtil.instance().setIncrementValuePerSecond(-0.01);
+		getAverageTemperatureSensor().setAutoLoggingActive(false);
 		long restEnd = System.currentTimeMillis() + rest.getMinutes() * ThreadUtil.ONE_MINUTE;
 		long aktRestTimeMinutes = 0;
 		getTemperature();
@@ -74,7 +80,11 @@ public class MashingSystem extends HeatingSystem {
 		while (System.currentTimeMillis() < restEnd) {
 			long totalPauseTime = 0;
 			for (int i = 0; i < 60; i++) {
-				totalPauseTime += pauseHandler.handlePause();
+				long pauseTime = pauseHandler.handlePause();
+				totalPauseTime += pauseTime;
+				if (pauseTime > 0) {
+					break;
+				}
 				ThreadUtil.sleepSeconds(1);
 			}
 			if (totalPauseTime > 0) {
@@ -93,9 +103,12 @@ public class MashingSystem extends HeatingSystem {
 			}
 			if (aktRestTimeMinutes == 5) {
 				startStirrer(false);
+				MockUtil.instance().setIncrementValuePerSecond(0.1);
 			} else if (aktRestTimeMinutes == 6) {
+				MockUtil.instance().setIncrementValuePerSecond(-0.02);
 				aktRestTimeMinutes = 0;
 				stoptStirrer(false);
+				logTemperature();
 				if (getTemperature() < minTemp) {
 					logTemperature();
 					journal.addEntry(getBrewId(), Name.HEAT_WATER, "restTemperatuerTooLow", minTemp);
@@ -104,6 +117,8 @@ public class MashingSystem extends HeatingSystem {
 				}
 			}
 		}
+		getAverageTemperatureSensor().setAutoLoggingActive(true);
+		MockUtil.instance().setIncrementValuePerSecond(0.5);
 		logTemperature();
 	}
 
