@@ -7,27 +7,39 @@ function drawChart(componentId, labelString, canvasId, responsiveRendering) {
 			if (r.readyState != 4 || r.status != 200) {
 				return;
 			}
-			var chartData = JSON.parse(r.responseText);
-			
-			 var ctx = document.getElementById(canvasId);
-			 var config = {
-			            type: 'line',
-			            data: {
-			                labels: chartData.labels,
-			                datasets: [{
-			                    label: labelString,
-			                    data: chartData.data,
-			                    fill: false,
-			                }]
-			            },
-			            options: {
-			                responsive: responsiveRendering,
-			            }
-			        }; 
+			var dateTimeReviver = function (key, value) {
+			    var a;
+			    if (typeof value === 'string') {
+			        a = /.+T.+/.exec(value);
+			        if (a) {
+			            return new Date(value);
+			        }
+			    }
+			    return value;
+			}
+			var chartData = JSON.parse(r.responseText,dateTimeReviver);
+			var ctx = document.getElementById(canvasId).getContext("2d");
+			var data = [
+			    {
+			       label: 'Temperature',
+			       strokeColor: '#A31515',
+			       data: chartData,
+			    },
+			  ];
+			var  options = {
+                responsive: responsiveRendering,
+                bezierCurve: false,
+				showTooltips: true,
+				scaleShowHorizontalLines: true,
+				scaleShowLabels: true,
+				scaleType: "date",
+				scaleLabel: "<%=value%>°C",
+				scaleDateTimeFormat: "dd.mm.yyyy, hh:MM:ss"
+            };
 			if (myChart != null) {
 				myChart.destroy();
 			} 
-			myChart = new Chart(ctx,config);
+			myChart = new Chart(ctx).Scatter(data, options);
 		};
 		r.send();
  }
