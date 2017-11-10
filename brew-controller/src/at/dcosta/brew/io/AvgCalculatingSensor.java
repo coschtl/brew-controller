@@ -51,7 +51,6 @@ public class AvgCalculatingSensor extends AbstractSensor {
 	public AvgCalculatingSensor(double maxDiff) {
 		sensors = new ArrayList<>();
 		this.maxDiff = maxDiff;
-
 	}
 
 	public void addSensor(Sensor sensor) {
@@ -131,11 +130,6 @@ public class AvgCalculatingSensor extends AbstractSensor {
 
 	public SensorStatus getSensorStatus() {
 		return sensorStatus;
-	}
-
-	@Override
-	public void setCorrectionValue(double correctionValue) {
-		// not needed, the sensor already adds the correctionValue individually
 	}
 
 	private double getAverage(List<Sensor> sensors) {

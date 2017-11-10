@@ -139,6 +139,10 @@ public abstract class HeatingSystem {
 		}
 	}
 
+	protected AvgCalculatingSensor getAverageTemperatureSensor() {
+		return averageTemperature;
+	}
+
 	protected int getBrewId() {
 		return brewId;
 	}
@@ -193,6 +197,7 @@ public abstract class HeatingSystem {
 		for (Sensor temperatureSensor : temperatureSensors) {
 			temperatureSensor.logValue();
 		}
+		getAverageTemperatureSensor().logValue();
 	}
 
 	protected void switchHeatersOff() {

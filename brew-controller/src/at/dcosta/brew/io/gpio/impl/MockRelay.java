@@ -1,5 +1,7 @@
 package at.dcosta.brew.io.gpio.impl;
 
+import java.util.Date;
+
 import at.dcosta.brew.io.AbstractRelay;
 
 public class MockRelay extends AbstractRelay {
@@ -19,7 +21,7 @@ public class MockRelay extends AbstractRelay {
 	public void off() {
 		if (isOn()) {
 			super.off();
-			System.out.println("Setting relay " + getID() + " to state OFF");
+			System.out.println(new Date() + "Setting relay " + getID() + " to state OFF");
 			on = false;
 		}
 	}
@@ -30,7 +32,7 @@ public class MockRelay extends AbstractRelay {
 			return;
 		}
 		super.on();
-		System.out.println("Setting relay " + getID() + " to state ON");
+		System.out.println(new Date() + "Setting relay " + getID() + " to state ON");
 		on = true;
 	}
 }

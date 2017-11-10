@@ -29,6 +29,12 @@ public abstract class AbstractSensor implements Sensor {
 		this.correctionValue = correctionValue;
 	}
 
+	public synchronized void setAutoLoggingActive(boolean loggingActive) {
+		if (sensorDataCollectorIsRunning()) {
+			sensorDataCollectorThread.getRunnable().setAutoLoggingActive(loggingActive);
+		}
+	}
+
 	@Override
 	public void switchOff() {
 		switchOffTime = System.currentTimeMillis();

@@ -6,13 +6,13 @@ import java.util.Map;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 
-import at.dcosta.brew.Configuration;
 import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Relay;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.impl.GpioRelay;
 import at.dcosta.brew.io.gpio.impl.GpioRpmSensor;
 import at.dcosta.brew.io.gpio.impl.MockRelay;
+import at.dcosta.brew.util.MockUtil;
 
 public class GpioSubsystem {
 
@@ -25,11 +25,9 @@ public class GpioSubsystem {
 	private final GpioController gpio;
 	private final Map<Integer, Relay> relaysByPi4JPin;
 	private final Map<String, Relay> relaysById;
-	private final boolean isMockPi;
 
 	private GpioSubsystem() {
-		isMockPi = Configuration.getInstance().isMockPi();
-		if (isMockPi) {
+		if (MockUtil.instance().isMockPi()) {
 			gpio = null;
 		} else {
 			gpio = GpioFactory.getInstance();
@@ -41,7 +39,7 @@ public class GpioSubsystem {
 	public Relay getRelay(String name, int pi4jPinNumber) {
 		Relay relay = getRelayByPi4JPin(pi4jPinNumber);
 		if (relay == null) {
-			if (isMockPi) {
+			if (MockUtil.instance().isMockPi()) {
 				relay = new MockRelay(name, pi4jPinNumber);
 			} else {
 				relay = new GpioRelay(name, pi4jPinNumber, gpio);
@@ -51,6 +49,7 @@ public class GpioSubsystem {
 		}
 		return relay;
 	}
+
 	public Relay getRelayById(String id) {
 		return relaysById.get(id);
 	}
@@ -60,7 +59,7 @@ public class GpioSubsystem {
 	}
 
 	public Sensor getRpmSensor(String name, int pi4jPinNumber) {
-		if (isMockPi) {
+		if (MockUtil.instance().isMockPi()) {
 			return new MockSensor(ComponentType.ROTATION_SPEED_SENSOR, "GPIO_" + pi4jPinNumber, "rpm");
 		}
 		return new GpioRpmSensor(name, pi4jPinNumber, gpio);
@@ -71,7 +70,7 @@ public class GpioSubsystem {
 			relay.off();
 		}
 		relaysByPi4JPin.clear();
-		if (!isMockPi) {
+		if (!MockUtil.instance().isMockPi()) {
 			gpio.shutdown();
 		}
 	}

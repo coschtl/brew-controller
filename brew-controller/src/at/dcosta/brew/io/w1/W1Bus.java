@@ -14,6 +14,7 @@ import at.dcosta.brew.Configuration;
 import at.dcosta.brew.io.ComponentType;
 import at.dcosta.brew.io.Sensor;
 import at.dcosta.brew.io.gpio.MockSensor;
+import at.dcosta.brew.util.MockUtil;
 
 public class W1Bus {
 
@@ -21,10 +22,7 @@ public class W1Bus {
 
 	public W1Bus() {
 		sensors = new HashMap<>();
-		if (Configuration.getInstance().isMockPi()) {
-			MockSensor sensor = new MockSensor(ComponentType.TEMPERATURE_SENSOR, "mockSensor 1", "°C");
-			sensors.put(sensor.getID(), sensor);
-		} else {
+		if (!MockUtil.instance().isMockPi()) {
 			W1Master w1Master = new W1Master();
 			System.out.println("got W1Master");
 			for (TemperatureSensor device : w1Master.getDevices(TemperatureSensor.class)) {
@@ -44,7 +42,9 @@ public class W1Bus {
 
 	public Sensor getTemperatureSensor(String address) {
 		if (Configuration.getInstance().isMockPi()) {
-			return new MockSensor(ComponentType.TEMPERATURE_SENSOR, address, "°C");
+			MockSensor mockSensor = new MockSensor(ComponentType.TEMPERATURE_SENSOR, address, "°C");
+			MockUtil.instance().addSensor(mockSensor);
+			return mockSensor;
 		}
 		return sensors.get(address);
 	}

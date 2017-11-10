@@ -7,16 +7,15 @@ import at.dcosta.brew.util.ThreadUtil;
 
 class SensorDataCollector implements StoppableRunnable {
 
-	/**
-	 * 
-	 */
 	private final Sensor sensor;
 	private final IOLog ioLog;
 	private boolean aborted;
+	private boolean autoLoggingActive;
 
 	public SensorDataCollector(Sensor sensor) {
 		this.sensor = sensor;
 		ioLog = new IOLog();
+		autoLoggingActive = true;
 	}
 
 	@Override
@@ -25,8 +24,8 @@ class SensorDataCollector implements StoppableRunnable {
 	}
 
 	public void logValue() {
-		ioLog.addEntry(
-				new IOData().setComponentId(sensor.getID()).setComponentType(sensor.getComponentType()).setValue(sensor.getValue()));
+		ioLog.addEntry(new IOData().setComponentId(sensor.getID()).setComponentType(sensor.getComponentType())
+				.setValue(sensor.getValue()));
 	}
 
 	@Override
@@ -41,9 +40,15 @@ class SensorDataCollector implements StoppableRunnable {
 		while (!aborted) {
 			if (count++ >= maxCount) {
 				count = 0;
-				logValue();
+				if (autoLoggingActive) {
+					logValue();
+				}
 			}
 			ThreadUtil.sleepDefaultMillis();
 		}
+	}
+
+	public void setAutoLoggingActive(boolean autoLoggingActive) {
+		this.autoLoggingActive = autoLoggingActive;
 	}
 }

@@ -9,14 +9,14 @@
  
  - eingabe für jodnormal ermöglichen
  
- - manuelle eingriffe (interaction) sollten sich nur auf den aktuellen brauvorgang beziehen (brewid)
- 
  - ev. chart automatisch aktualisieren?
  
- - warum ist die avg-temperatur immer höher als die beiden anderen?
+
  
  ---- DONE -----
- 
+ - warum ist die avg-temperatur immer höher als die beiden anderen?
+   --> fixed
+   
  - braulog sollte scrollbalken bekommen
    --> implementiert
  

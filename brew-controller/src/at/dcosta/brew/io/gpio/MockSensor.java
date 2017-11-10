@@ -9,24 +9,23 @@ public class MockSensor extends AbstractSensor {
 	private final String id;
 	private final String scale;
 	private double value = 20.1d;
-	private long startTime;
+	private long lastMeasureTime;
+	private double incrementPerSecond;
 
 	public MockSensor(ComponentType componentType, String id, String scale) {
 		this.componentType = componentType;
 		this.id = id;
 		this.scale = scale;
+		this.incrementPerSecond = 0.5;
+		this.lastMeasureTime = System.currentTimeMillis();
 	}
 
 	@Override
 	public double doGetValue() {
-		if (startTime == 0) {
-			startTime = System.currentTimeMillis();
-		}
-		// add 0.5 per Second
-		double aktValue = value + (System.currentTimeMillis() - startTime) / 2000;
-		// System.out.println(Thread.currentThread().getName() + ": " +
-		// aktValue);
-		return aktValue;
+		// add <incrementPerSecond> per Second
+		value = value + (System.currentTimeMillis() - lastMeasureTime) / 1000 * incrementPerSecond;
+		lastMeasureTime = System.currentTimeMillis();
+		return value;
 	}
 
 	@Override
@@ -42,6 +41,10 @@ public class MockSensor extends AbstractSensor {
 	@Override
 	public String getScale() {
 		return scale;
+	}
+
+	public void setIncrementValuePerSecond(double incrementPerSecond) {
+		this.incrementPerSecond = incrementPerSecond;
 	}
 
 	public MockSensor setValue(double value) {
