@@ -1,6 +1,7 @@
 package at.dcosta.brew.server.resources;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import at.dcosta.brew.db.ManualAction.Type;
 import at.dcosta.brew.msg.I18NTexts;
 import at.dcosta.brew.server.BrewJournal;
 import at.dcosta.brew.server.BrewJournalEntry;
-import at.dcosta.brew.server.ChartData;
+import at.dcosta.brew.server.ChartPoint;
 import at.dcosta.brew.server.Relay;
 import at.dcosta.brew.server.Sensor;
 import at.dcosta.brew.server.SystemState;
@@ -57,33 +58,17 @@ public class States {
 	@GET
 	@Path("chartData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ChartData chartData(@QueryParam(value = "brew") int brewId,
+	public List<ChartPoint> chartData2(@QueryParam(value = "brew") int brewId,
 			@QueryParam(value = "componentId") String componentId) {
-		ChartData data = new ChartData();
-		DateFormat df = I18NTexts.getTimeFormat(DateFormat.MEDIUM);
-		String id = null;
+		List<ChartPoint> points = new ArrayList<>();
 		List<IOData> entries = ioLog.getEntries(brewDB.getBrewById(brewId), componentId);
-		int modulo = entries.size() / 10;
-		if (modulo == 0) {
-			modulo = 1;
-		}
-		int i = 0;
-		int max = entries.size() - 1;
 		for (IOData ioData : entries) {
-			if (id == null) {
-				id = ioData.getComponentId();
-			} else if (!id.equals(ioData.getComponentId())) {
-				continue;
-			}
-			if (i == 0 || i == max || i % modulo == 0) {
-				data.addLabel(df.format(ioData.getMeasureTime()));
-			} else {
-				data.addLabel("");
-			}
-			data.addDataValue(Double.toString(ioData.getValue()));
-			i++;
+			ChartPoint chartPoint = new ChartPoint();
+			chartPoint.setX(ioData.getMeasureTime());
+			chartPoint.setY(Double.toString(ioData.getValue()));
+			points.add(chartPoint);
 		}
-		return data;
+		return points;
 	}
 
 	@GET
