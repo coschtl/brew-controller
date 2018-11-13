@@ -9,8 +9,12 @@ public class NotificationService {
 	private final Map<String, Long> subject2SendTime;
 
 	public NotificationService(int brewId) {
-		notifiers = new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(brewId),
-				new MailNotificationService() };
+		this(new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(brewId),
+				new MailNotificationService() });
+	}
+
+	protected NotificationService(Notifier... notifiers) {
+		this.notifiers = notifiers;
 		subject2SendTime = new HashMap<>();
 	}
 

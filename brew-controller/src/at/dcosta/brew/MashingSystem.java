@@ -109,7 +109,7 @@ public class MashingSystem extends HeatingSystem {
 				aktRestTimeMinutes = 0;
 				stoptStirrer(false);
 				logTemperature();
-				if (getTemperature() < minTemp) {
+				if (getTemperature() < minTemp && rest.isKeepTemperature()) {
 					logTemperature();
 					journal.addEntry(getBrewId(), Name.HEAT_WATER, "restTemperatuerTooLow", minTemp);
 					heatToTemperature(rest.getTemperature() - postHeatingTempIncrease,

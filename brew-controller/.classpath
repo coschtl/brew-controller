@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="lib/pi4j-core.jar" sourcepath="C:/development/localLibs/pi4j-1.1/lib/pi4j-core-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:/development/localLibs/pi4j-1.1/lib/pi4j-core-javadoc.jar!/"/>
@@ -35,5 +36,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
