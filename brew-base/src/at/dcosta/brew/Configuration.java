@@ -39,6 +39,7 @@ public class Configuration {
 	public static final String MASHING_HEATER_MINIMUM_INCREASE_PER_MINUTE = "mashing.heater.minimumIncreasePerMinute";
 	public static final String MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES = "mashing.heater.heatingMonitorStartupDelayMinutes";
 	public static final String MASHING_HEATER_POSTHEAT_INCREASE = "mashing.heater.postheating.temperatureIncrease";
+	public static final String MASHING_HEATER_POSTHEAT_SECONDS = "mashing.heater.postheating.seconds";
 	public static final String MASHING_THERMOMETER_ADRESSES = "mashing.thermometer.addresses";
 	public static final String MASHING_TEMPERATURE_MAX_DROP = "mashing.temperature.maxDrop";
 	public static final String STIRRER_MOTOR_PIN = "stirrer.motor.pi4jPinNumber";

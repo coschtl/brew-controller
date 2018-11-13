@@ -7,6 +7,7 @@ import static at.dcosta.brew.Configuration.MASHING_HEATER_MINIMUM_INCREASE_PER_M
 import static at.dcosta.brew.Configuration.MASHING_HEATER_MONITOR_STARTUP_DELAY_MINUTES;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_PINS;
 import static at.dcosta.brew.Configuration.MASHING_HEATER_POSTHEAT_INCREASE;
+import static at.dcosta.brew.Configuration.MASHING_HEATER_POSTHEAT_SECONDS;
 import static at.dcosta.brew.Configuration.MASHING_THERMOMETER_ADRESSES;
 import static at.dcosta.brew.Configuration.STIRRER_RPM_PIN;
 
@@ -29,6 +30,7 @@ public class MashingSystem extends HeatingSystem {
 	private final Relay maltStoreOpener;
 	private final int maltStoreTimeoutSeconds;
 	private final int maltStoreOpenerTimeoutSeconds;
+	private final int postHeatingSeconds;
 	private final double postHeatingTempIncrease;
 	private final Sensor rpmSensor;
 	private final Stirrer stirrer;
@@ -41,6 +43,7 @@ public class MashingSystem extends HeatingSystem {
 		maltStoreTimeoutSeconds = config.getInt(MALT_STORE_TIMEOUT_SECONDS, 60);
 		maltStoreOpenerTimeoutSeconds = config.getInt(MALT_STORE_OPENER_TIMEOUT_SECONDS);
 		postHeatingTempIncrease = config.getDouble(MASHING_HEATER_POSTHEAT_INCREASE);
+		postHeatingSeconds = config.getInt(MASHING_HEATER_POSTHEAT_SECONDS, 180);
 		int rpmPin;
 		try {
 			rpmPin = config.getInt(STIRRER_RPM_PIN);
@@ -137,6 +140,10 @@ public class MashingSystem extends HeatingSystem {
 			heatingMonitor.stop();
 			switchHeatersOff();
 		}
+		// wait until the heater has cooled down
+		// (when using electrical heaters, the temperature will still increase after
+		// switching the heater off)
+		ThreadUtil.sleepSeconds(postHeatingSeconds);
 	}
 
 	@Override
