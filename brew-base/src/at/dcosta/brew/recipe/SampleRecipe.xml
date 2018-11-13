@@ -14,7 +14,7 @@
 		<malt name="Sauermalz" amount="300" />
 	</malts>
 	<mashing water="15" temperature="61">
-		<rest temperature="67" time="10" />
+		<rest temperature="67" time="10" keepTemperature="false"/>
 		<rest temperature="71" time="60" />
 		<rest temperature="74" time="0" />
 	</mashing>

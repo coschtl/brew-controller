@@ -53,6 +53,9 @@ public class Configuration {
 	public static final String MAIL_PASSWORD = "mail.password";
 	public static final String MAIL_RECIPIENTS = "mail.recipients";
 
+	public static final String SMS_ACCOUNT = "sms.account";
+	public static final String SMS_RECIPIENTS = "sms.recipients";
+
 	private static Configuration INSTANCE;
 	private static final Pattern PATTERN_VARIABLE = Pattern.compile("\\$\\{([^}]+)}");
 
@@ -159,6 +162,7 @@ public class Configuration {
 								"Variables are used inside the configuration are used, but environment file "
 										+ envFile.getAbsolutePath() + " not found!");
 					}
+					System.out.println("reading environment from " + envFile.getAbsolutePath());
 					env = readFile(envFile);
 					mockPi = Boolean.parseBoolean(env.get(SYSTEM_MOCK_PI));
 				}

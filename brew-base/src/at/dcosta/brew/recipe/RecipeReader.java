@@ -139,8 +139,10 @@ public class RecipeReader {
 		recipe.setPrimaryWater(getIntAttribute("water", mashing));
 		NodeList childs = mashing.getElementsByTagName("rest");
 		for (int i = 0; i < childs.getLength(); i++) {
-			Element rest = (Element) childs.item(i);
-			recipe.addRest((new Rest(i, getIntAttribute("temperature", rest), getIntAttribute("time", rest))));
+			Element restElm = (Element) childs.item(i);
+			Rest rest = new Rest(i, getIntAttribute("temperature", restElm), getIntAttribute("time", restElm));
+			rest.setKeepTemperature(getBooleanAttribute("keepTemperature", restElm, true));
+			recipe.addRest(rest);
 		}
 	}
 
@@ -151,6 +153,19 @@ public class RecipeReader {
 	private static Hop createHop(Element hopElement) {
 		return new Hop(hopElement.getAttribute("name"), getIntAttribute("amount", hopElement),
 				getFloatAttribute("alpha", hopElement), getIntAttribute("boilingTime", hopElement, NOT_PRESENT));
+	}
+
+	private static boolean getBooleanAttribute(String name, Element element, boolean defaultValue) {
+		String stringValue = getStringAttribute(name, element, null);
+		if (stringValue == null || stringValue.isEmpty()) {
+			return defaultValue;
+		}
+		try {
+			return Boolean.parseBoolean(stringValue);
+		} catch (Exception e) {
+			throw new RecipeException("Error in element '" + element.getTagName() + "': attribute '" + name
+					+ "': does not have a integer value: " + e.toString());
+		}
 	}
 
 	private static float getFloatAttribute(String name, Element element) {
@@ -173,8 +188,8 @@ public class RecipeReader {
 	}
 
 	private static int getIntAttribute(String name, Element element, Integer defaultValue) {
-		String stringValue = element.getAttribute(name);
-		String err = null;
+		String stringValue = getStringAttribute(name, element, null);
+		String err;
 		if (stringValue == null || stringValue.isEmpty()) {
 			if (defaultValue != null) {
 				return defaultValue.intValue();
@@ -196,5 +211,13 @@ public class RecipeReader {
 					FermentationType.valueOf(root.getAttribute("fermentationType")), getFloatAttribute("wort", root));
 		}
 		throw new RecipeException("unknown type: " + root.getAttribute("type"));
+	}
+
+	private static String getStringAttribute(String name, Element element, String defaultValue) {
+		String stringValue = element.getAttribute(name);
+		if (stringValue == null) {
+			return defaultValue;
+		}
+		return stringValue;
 	}
 }

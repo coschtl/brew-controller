@@ -32,6 +32,7 @@
 											<xs:attribute type="xs:int" name="temperature"
 												use="optional" />
 											<xs:attribute type="xs:int" name="time" use="optional" />
+											<xs:attribute type="xs:boolean" name="keepTemperature" use="optional" default="true" />
 										</xs:extension>
 									</xs:simpleContent>
 								</xs:complexType>

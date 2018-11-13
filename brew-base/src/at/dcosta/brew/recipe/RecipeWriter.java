@@ -54,6 +54,11 @@ public class RecipeWriter {
 		}
 	}
 
+	private RecipeWriter attribute(String name, boolean value) {
+		attribute(name, Boolean.toString(value));
+		return this;
+	}
+
 	private RecipeWriter attribute(String name, float value) {
 		attribute(name, Float.toString(value));
 		return this;
@@ -139,8 +144,12 @@ public class RecipeWriter {
 			startElement("mashing").attribute("water", recipe.getPrimaryWater()).attribute("temperature",
 					recipe.getMashingTemperature());
 			for (Rest rest : ir.getRests()) {
-				startElement("rest").attribute("temperature", rest.getTemperature())
-						.attribute("time", rest.getMinutes()).endEmptyElement();
+				startElement("rest").attribute("temperature", rest.getTemperature()).attribute("time",
+						rest.getMinutes());
+				if (!rest.isKeepTemperature()) {
+					attribute("keepTemperature", rest.isKeepTemperature());
+				}
+				endEmptyElement();
 			}
 			endElement("mashing");
 		}
