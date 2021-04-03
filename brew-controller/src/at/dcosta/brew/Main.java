@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -214,7 +215,7 @@ public class Main {
 			while (true) {
 				List<IOData> entries = ioLog.getLatestEntries(runningBrew, components);
 				if (!entries.isEmpty()) {
-					entries.sort(comparator);
+					Collections.sort(entries, comparator);
 					StringBuilder b = new StringBuilder(df.format(new Date())).append(":");
 					int tempSensorCount = 0;
 					for (IOData entry : entries) {

@@ -1,9 +1,5 @@
 
  - umbau der aktualisierung von menü, chart, log auf websockets
-
- - eingabe für jodnormal ermöglichen
- 
- - ev. chart automatisch aktualisieren?
  
 
  
