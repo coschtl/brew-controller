@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="load-to-pi" name="load jar (including dependencies) to pi">
+	<!--ANT 1.7 is required-->
+	<!-- http://www.jcraft.com/jsch/index.html is required on the Ant Lib-Path -->
+	<target name="load-to-pi">
+		<scp file="target/brew-controller.jar" todir="pi@192.168.1.50:" keyfile="D:/development/apps/cygwin64/home/Stephan/.ssh/id_rsa" trust="true">
+<!--			<fileset dir="target/" includes="brew-controller.jar" />-->
+			<!--
+			<fileset dir="." includes="configuration.properties" />
+			<fileset dir="C:/development/localLibs" includes="*.zip" />
+			<fileset dir="C:/development/localLibs" includes="BrewController" />
+			-->
+		</scp>
+	</target>
+</project>

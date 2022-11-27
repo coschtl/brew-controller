@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8"/>
+<head>
+<title>Brew Server</title>
+<link rel="stylesheet" type="text/css" href="../theme/main.css" />
+<link rel="stylesheet" type="text/css" href="../theme/menu.css" />
+<link rel="stylesheet" type="text/css" href="../theme/recipes.css" />
+<script type="text/javascript" src="../scripts/main.js" ></script>
+<script type="text/javascript">
+
+var contextPath = document.location.href;
+var posStart = contextPath.indexOf("/",  contextPath.indexOf("/") + 2);
+var posEnd = contextPath.indexOf("/", posStart + 1);
+contextPath = contextPath.substring(posStart, posEnd);
+if (contextPath.substring(0,4) == "/app") {
+	contextPath = "";
+}
+
+function loadRecipe(recipeId) {
+	var r = new XMLHttpRequest();
+	r.open("GET", contextPath + "/v1/api/recipes/" + recipeId, true);
+	r.onreadystatechange = function() {
+		if (r.readyState != 4 || r.status != 200) {
+			byId("aktRecipe").innerHTML = "A recipe with id=" + recipeId + " can not get loaded from the Database!";
+			show("aktRecipe");
+			return;
+		}
+		var recipe = JSON.parse(r.responseText);
+		byId("aktRecipe").innerHTML = recipe.name;
+		show("aktRecipe");
+	};
+	r.send();
+}
+
+function loadRecipes() {
+	var r = new XMLHttpRequest();
+	r.open("GET", contextPath + "/v1/api/recipes/", true);
+	r.onreadystatechange = function() {
+		if (r.readyState != 4 || r.status != 200) {
+			return;
+		}
+		var recipes = JSON.parse(r.responseText);
+		var select = byId("recipes");
+		while (select.options.length > 0) {                
+			 select.remove(0);
+		}
+		for (var i=0; i< recipes.length; i++) {
+			var opt = document.createElement('option');
+		    opt.value = recipes[i].id;
+		    opt.innerHTML = recipes[i].name;
+		    select.appendChild(opt);
+		}
+		show("aktRecipe");
+	};
+	r.send();
+}
+
+function addRecipe() {
+	if (alertEmpty("beerRecipe", "Rezept")) {
+		return false;
+	}
+	clearMessages();
+	var formData = new FormData();
+	var file = new FileReader().readAsDataURL(byId("beerRecipe").files[0]);
+	formData.append('recipe', byId("beerRecipe").files[0]);
+	
+	fetch(contextPath + "/v1/api/recipes", {
+	  method: 'POST',
+	  body: formData
+	}).then((response) => {
+		if (response.status == 201) {
+			messageFromHeader(response);
+			response.json().then(function(id) {
+				loadRecipes();
+				showRecipe(id);
+				
+			});
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function getSelectedRecipeId() {
+	var recipes = byId("recipes");
+	return recipes.options[recipes.selectedIndex].value;
+}
+
+function showSelectedRecipe() {
+	clearMessages();
+	showRecipe(getSelectedRecipeId());
+}
+
+var selectedRecipeId;
+	
+function showRecipe(recipe) {	
+	fetch(contextPath + "/v1/api/recipes/" + recipe + "?fetchType=FULL", {
+	  method: 'GET',
+	}).then((response) => {
+		if (response.status == 200) {
+			response.json().then(function(recipe) {
+				show("showRecipeTable");
+				byId("showRecipeId").innerHTML = recipe.id;
+				byId("showRecipeName").innerHTML = recipe.name;
+				byId("showRecipeSource").innerHTML = recipe.source;
+				byId("showRecipeAddedOn").innerHTML = maskXml(recipe.addedOn);
+				byId("showBrewCount").innerHTML = recipe.brewCount;
+				if (recipe.brewCount > 0) {
+					byId("showBrewCount").innerHTML += "<span id='showBrews' class='sub_menu' style='width:80px;'><a href='javascript:showBrewDates()'>Termine anzeigen</a></span>";
+				}
+				byId("showRecipeDetail").innerHTML = maskXml(recipe.recipe);
+				byId("startOrContinue").innerHTML = recipe.brewRunning ? "fortsetzen" : "starten";
+				recipe.brewRunning ? show("abortBrew") : hide("abortBrew");
+				selectedRecipeId = recipe.id;
+			});
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function startOrContinueBrew() {
+	fetch(contextPath + "/v1/api/recipes/" + selectedRecipeId + "/startBrew", {
+	  method: 'PUT',
+	}).then((response) => {
+		console.log(response);
+		if (response.status == 201) {
+			document.location.href= response.headers.get('location');
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function showBrewDates() {
+	fetch(contextPath + "/v1/api/recipes/" + getSelectedRecipeId() + "/showBrews", {
+	  method: 'get',
+	}).then((response) => {
+		if (response.status == 200) {
+			response.json().then(function(brews) {
+				show("showBrewDatesRow", "table-row");
+				var html = "<br/>";
+				for (var i=0; i<brews.length; i++) {
+					html += brews[i].date + "&nbsp;&nbsp;&nbsp;<a href='status.html?brew=" + brews[i].id + "'>Brauvorgang anzeigen</a><br/>";
+				}
+				byId("showBrewDates").innerHTML = html;
+			});
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function init() {
+	var queryArgs = getQueryArguments();
+	
+	if (queryArgs['recipeId'] != null) {
+		loadRecipe(queryArgs['recipeId']);
+	}
+	loadRecipes();
+}
+
+</script>
+</head>
+<body onload="init();">
+	<h1><a href="index.html">Brau-Steuerung</a> - Kochbuch</h1>
+	<div id="aktRecipe" style="display:none">
+		<p id="aktRecipeName"></p>
+	</div>
+	<div id="error" class="message errorMessage" ondblclick="hide('error')"></div>
+	<div id="message" class="message okMessage" ondblclick="hide('message')"></div>
+	<table>
+	<tr valign="top">
+		<td>
+			<fieldset>
+	    	<legend>Rezept auswählen</legend>
+			<select size="1" id="recipes"></select>&nbsp;&nbsp;&nbsp;<img src="../theme/magnifier-tool.png" onclick="showSelectedRecipe();" width="20px" height="20px"/>
+			</fieldset>
+		</td>
+		<td><div style="padding:30px"> --- oder ---</div></td>
+		<td>	
+		<form name="recipeForm" onSubmit="return false;" method="post" enctype="multipart/form-data">
+		<fieldset>
+	    	<legend>Neues Rezept</legend>
+	    	<input type="file" dropzone="true" name="recipe" id="beerRecipe" /><br/><br/>
+	    	<img src="../theme/add.png" onclick="addRecipe()" height="100px"/>
+		</fieldset>
+		</form>
+		</td>
+	</tr>
+	</table>
+	<br/>
+	<hr/>
+	<br/>
+	<table class="recipeTable" id="showRecipeTable" style="display: none">
+	<tr><td class="recipeTable right">ID:</td><td class="recipeTable" id="showRecipeId"></td></tr>
+	<tr><td class="recipeTable right">Bier-Name:</td><td  class="recipeTable" id="showRecipeName"></td></tr>
+	<tr><td class="recipeTable right">Rezept-Quelle:</td><td  class="recipeTable" id="showRecipeSource"></td></tr>
+	<tr><td class="recipeTable right">Hinzugefügt am:</td><td  class="recipeTable" id="showRecipeAddedOn"></td></tr>
+	<tr><td class="recipeTable right">Brau-Zähler:</td><td class="recipeTable"  id="showBrewCount"></td></tr>
+	<tr id="showBrewDatesRow" style="display:none;"><td class="recipeTable right">&nbsp;</td><td class="recipeTable" id="showBrewDates" ></td></tr>
+	<tr><td class="recipeTable right">Rezept:</td><td><pre  class="recipeTable" id="showRecipeDetail"></pre></td></tr>
+	<tr><td>&nbsp;</td>
+	<td class="recipeTable right">
+		<div id="doBrew" class="main_menu" style="width:250px;"><a href="javascript:startOrContinueBrew()">Brauvorgang <span id="startOrContinue"></span></a></div>
+		<div id="abortBrew" class="main_menu" style="width:250px;"><a href="javascript:abortBrew()">Brauvorgang beenden</a></div>
+	</td></tr>
+	</table>
+	
+</body>
+</html>

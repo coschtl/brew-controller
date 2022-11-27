@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8"/>
+<head>
+<title>Brew Server</title>
+<link rel="stylesheet" type="text/css" href="../theme/main.css" />
+<link rel="stylesheet" type="text/css" href="../theme/menu.css" />
+<link rel="stylesheet" type="text/css" href="../theme/recipes.css" />
+<script type="text/javascript" src="../scripts/main.js" ></script>
+<script type="text/javascript">
+
+var contextPath = document.location.href;
+var posStart = contextPath.indexOf("/",  contextPath.indexOf("/") + 2);
+var posEnd = contextPath.indexOf("/", posStart + 1);
+contextPath = contextPath.substring(posStart, posEnd);
+if (contextPath.substring(0,4) == "/app") {
+	contextPath = "";
+}
+
+function getRunningBrew() {
+	fetch(contextPath + "/v1/api/states/system/runningBrew", {
+	  method: 'get',
+	}).then((response) => {
+		if (response.status == 200) {
+			response.json().then(function(brew) {
+				if (brew.id >= 0) {
+					show("runningBrew");
+					byId("toBrewLink").href = "status.html?brew=" + brew.id;
+					byId("toBrewLink").href = "status.html?brew=" + brew.id;
+				}
+			});
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function abortBrew() {
+	if (!confirm("Brauvorgang wirklich abbrechen?")) {
+		return;
+	}
+	fetch(contextPath + "/v1/api/recipes/abortRunningBrew", {
+	  method: 'DELETE',
+	}).then((response) => {
+		if (response.status == 200) {
+			location.reload();
+			return;
+		}
+		errorFromHeader(response);
+	}).catch((data) => {
+		error(data)
+	});
+}
+
+function init() {
+	getRunningBrew();
+	
+}
+
+</script>
+<style type="text/css">
+.selection_menu {
+	width:500px;
+	height: 80px;
+	border-radius: 20px;
+	border: 4px solid #d6d6d6;
+	margin:0.5em;
+	padding:0.5em;
+	text-shadow: 2px;
+	font-size: 200%;
+	display: flex;
+	justify-content:center;
+	align-content:center;
+	flex-direction:column;
+}
+</style>
+</head>
+<body onload="init();">
+	<h1>Brau-Steuerung - HOME</h1>
+	<br/>
+	<div align="center">
+		<div id="error" class="message errorMessage" ondblclick="hide('error')"></div>
+		<div id="message" class="message okMessage" ondblclick="hide('message')"></div>
+		
+		<div id="runningBrew" style="display:none">
+			<div class="selection_menu"><a href="#" id="toBrewLink">zum aktuellen Brau-Vorgang</a></div>
+			<div class="selection_menu"><a href="javascript:abortBrew();" id="abortBrewLink">aktuellen Brau-Vorgang abbrechen</a></div>
+		</div>
+		<div id="cookbook">
+			<div class="selection_menu" ><a href="recipes.html">zum Kochbuch</a></div>
+		</div>
+	</div>
+</body>
+</html>
