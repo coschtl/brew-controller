@@ -193,7 +193,7 @@ public class Main {
 		NotificationService notificationService = new NotificationService(0);
 		if (cmdLine.hasOption("boil")) {
 			int boilingTime = Integer.valueOf(cmdLine.getOptionValue("boil"));
-			BoilingSystem boilingSystem = new BoilingSystem(1, brewDB, notificationService);
+			BoilingSystem boilingSystem = new BoilingSystem(1, brewDB, notificationService, new Journal());
 			boilingSystem.cook(boilingTime);
 			return;
 		}
@@ -295,7 +295,7 @@ public class Main {
 				return;
 			}
 
-			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService);
+			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService, new Journal());
 			mashingSystem.heat(temperature);
 			mashingSystem.switchOff();
 			notificationService.sendNotification(NotificationType.INFO, "heatingFinished", temperature);
@@ -308,7 +308,7 @@ public class Main {
 				return;
 			}
 			int restTime = Integer.valueOf(cmdLine.getOptionValue("rest"));
-			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService);
+			MashingSystem mashingSystem = new MashingSystem(-1, brewDB, notificationService, new Journal());
 			mashingSystem.doRest(new Rest(0, temperature, restTime));
 			mashingSystem.switchOff();
 			notificationService.sendNotification(NotificationType.INFO, "restFinished", restTime, temperature);

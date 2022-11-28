@@ -31,6 +31,9 @@ public class MockUtil {
 	}
 
 	public void setIncrementValuePerSecond(double incrementPerSecond) {
+		if (!isMockPi()) {
+			return;
+		}
 		for (MockSensor sensor : sensors) {
 			sensor.setIncrementValuePerSecond(incrementPerSecond);
 		}

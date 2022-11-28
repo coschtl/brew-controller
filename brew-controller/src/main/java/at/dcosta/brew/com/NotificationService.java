@@ -10,7 +10,7 @@ public class NotificationService {
 
 	public NotificationService(int brewId) {
 		this(new Notifier[] { new ConsoleNotificationService(), new JournalNotificationService(brewId),
-				new MailNotificationService() });
+				new TelegramNotificationService() });
 	}
 
 	protected NotificationService(Notifier... notifiers) {

@@ -20,6 +20,7 @@ import at.dcosta.brew.io.gpio.GpioSubsystem;
 import at.dcosta.brew.io.w1.W1Bus;
 import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.recipe.RecipeWriter;
+import at.dcosta.brew.util.MockUtil;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
 
@@ -42,7 +43,7 @@ public abstract class HeatingSystem {
 	private String errorStatus;
 	private int brewId;
 
-	public HeatingSystem(int brewId, BrewDB brewDb, NotificationService notificationService) {
+	public HeatingSystem(int brewId, BrewDB brewDb, NotificationService notificationService, Journal journal) {
 		this.brewId = brewId;
 		this.brewDb = brewDb;
 		this.notificationService = notificationService;
@@ -51,7 +52,7 @@ public abstract class HeatingSystem {
 		this.temperatureSensors = new ArrayList<>();
 		this.heaters = new ArrayList<>();
 		this.heatingMonitor = new HeatingMonitor(this);
-		this.journal = new Journal();
+		this.journal =journal;
 		this.pauseHandler = new PauseHandler(brewId, journal, this);
 		averageTemperature = new AvgCalculatingSensor(config.getDouble(THERMOMETER_MAXDIFF));
 		double temperatureCorrectionValue = config.getDouble(THERMOMETER_CORRECTION_VALUE);
@@ -105,6 +106,10 @@ public abstract class HeatingSystem {
 	public void switchOff() {
 		switchOffTemperatureSensors();
 		pauseHandler.stopPause();
+	}
+
+	public void logPostHeating() {
+
 	}
 
 	private void handleSensorStatus() {
@@ -171,6 +176,7 @@ public abstract class HeatingSystem {
 	protected void heatToTemperature(double targetTemperature, long maxHeatingTimeMinutes) throws BrewException {
 		System.out.println("heatToTemperature");
 		long heatingEnd = System.currentTimeMillis() + maxHeatingTimeMinutes * ThreadUtil.ONE_MINUTE;
+		MockUtil.instance().setIncrementValuePerSecond(1);
 		while (true) {
 			if (System.currentTimeMillis() > heatingEnd) {
 				break;
@@ -178,6 +184,7 @@ public abstract class HeatingSystem {
 			double aktTemperature = getTemperature();
 			if (aktTemperature >= targetTemperature) {
 				logTemperature();
+				MockUtil.instance().setIncrementValuePerSecond(0);
 				return;
 			}
 			adjustHeaters(targetTemperature);

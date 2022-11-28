@@ -11,6 +11,7 @@ import java.util.Date;
 
 import at.dcosta.brew.com.NotificationService;
 import at.dcosta.brew.db.BrewDB;
+import at.dcosta.brew.db.Journal;
 import at.dcosta.brew.recipe.Recipe;
 import at.dcosta.brew.util.ThreadUtil;
 
@@ -19,8 +20,8 @@ public class BoilingSystem extends HeatingSystem {
 	private final double cookingTemperature;
 	private final double cookingTemperatureMin;
 
-	public BoilingSystem(int brewId, BrewDB brewDb, NotificationService notificationService) {
-		super(brewId, brewDb, notificationService);
+	public BoilingSystem(int brewId, BrewDB brewDb, NotificationService notificationService, Journal journal) {
+		super(brewId, brewDb, notificationService, journal);
 		Configuration config = Configuration.getInstance();
 		cookingTemperature = config.getDouble(COOKING_COOKING_TEMPERATURE);
 		cookingTemperatureMin = config.getDouble(COOKING_COOKING_TEMPERATURE_MIN);

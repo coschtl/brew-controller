@@ -74,7 +74,7 @@ public class BrewController implements StoppableRunnable {
 			BrewStepNameFactory stepnames = new BrewStepNameFactory();
 			StepName stepName;
 			BrewStep currentBrewStep;
-			MashingSystem mashingSystem = new MashingSystem(brew.getId(), brewDb, notificationService);
+			MashingSystem mashingSystem = new MashingSystem(brew.getId(), brewDb, notificationService, journal);
 			boolean isNewStep;
 
 			// heat to the mashing temperature
@@ -100,7 +100,6 @@ public class BrewController implements StoppableRunnable {
 				currentBrewStep = brewDb.addStep(brew.getId(), stepName, "Add malts");
 			}
 			if (!currentBrewStep.isFinished()) {
-				journal.addEntry(brew.getId(), Name.HEAT_WATER, "addMalts");
 				mashingSystem.addMalts();
 				brewDb.complete(currentBrewStep);
 			}

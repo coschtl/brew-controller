@@ -23,7 +23,7 @@ public class MockSensor extends AbstractSensor {
 	@Override
 	public double doGetValue() {
 		// add <incrementPerSecond> per Second
-		value = value + (System.currentTimeMillis() - lastMeasureTime) / 1000 * incrementPerSecond;
+		value = value + (System.currentTimeMillis() - lastMeasureTime) / 1000 * incrementPerSecond*Math.random();
 		lastMeasureTime = System.currentTimeMillis();
 		return value;
 	}
