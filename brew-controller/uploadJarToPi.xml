@@ -2,7 +2,7 @@
 <project default="load-to-pi" name="load jar (including dependencies) to pi">
 	<!--ANT 1.7 is required-->
 	<!-- http://www.jcraft.com/jsch/index.html is required on the Ant Lib-Path -->
-	<target name="load-to-pi">
+	<target name="load-to-pi" depends="create_jar">
 		<scp file="target/brew-controller.jar" todir="pi@192.168.1.50:" keyfile="D:/development/apps/cygwin64/home/Stephan/.ssh/id_rsa" trust="true">
 <!--			<fileset dir="target/" includes="brew-controller.jar" />-->
 			<!--
@@ -11,5 +11,20 @@
 			<fileset dir="C:/development/localLibs" includes="BrewController" />
 			-->
 		</scp>
+	</target>
+	<target name="create_jar">
+
+		<jar destfile="target/brew-controller.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+				<attribute name="Rsrc-Main-Class" value="at.dcosta.brew.Main" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path" value="./ activation.jar brew-base.jar brew-db.jar commons-cli.jar commons-codec.jar commons-logging.jar hamcrest-core.jar httpclient.jar  httpcore.jar javax.mail.jar junit.jar pi4j-core.jar pi4j-device.jar pi4j-gpio-extension.jar sqlite-jdbc.jar" />
+			</manifest>
+			<zipfileset src="jar-in-jar-loader.zip" />
+			<fileset dir="target/classes" />
+			<zipfileset dir="target/lib" includes="*" />
+		</jar>
+
 	</target>
 </project>
