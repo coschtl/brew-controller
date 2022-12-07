@@ -4,10 +4,10 @@
 	<!-- http://www.jcraft.com/jsch/index.html is required on the Ant Lib-Path -->
 	<property name="warFile" value="target/brew-server.war" />
 	<target name="copy_to_pi">
-		<scp file="${warFile}" todir="pi@192.168.1.50:" keyfile="D:/development/apps/cygwin64/home/Stephan/.ssh/id_rsa" trust="true">
+		<scp file="${warFile}" todir="pi@192.168.1.50:jetty/webapps" keyfile="\\wsl.localhost\Ubuntu-22.04\home\stephan\.ssh\id_rsa" trust="true">
 		</scp>
 	</target>
 	<target name="copyWarToLocalJetty">
-		<copy file="${warFile}" toDir="D:/development/brau-pi/jetty8/webapps"/>
+		<copy file="${warFile}" toDir="D:/development/brau-pi/jetty8/webappsbrew-server.war"/>
 	</target>
 </project>
