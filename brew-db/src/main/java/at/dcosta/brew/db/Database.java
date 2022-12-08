@@ -188,13 +188,14 @@ public abstract class Database {
 		try {
 			return DriverManager.getConnection(url);
 		} catch (SQLException e) {
-			throw new DatabaseException("Can not conect ot database: " + e.getMessage(), e);
+			throw new DatabaseException("Can not connect to database using url '" + url + "': " + e.getMessage(), e);
 		}
 	}
 
 	protected Database() {
 		if (jdbcUrl == null) {
 			jdbcUrl = getJdbcUrl();
+			System.out.println("Database-Connection-String: " + jdbcUrl);
 		}
 		if (!ACTUAL_TABLES.contains(getClass())) {
 			ConfigurationDB cdb;
