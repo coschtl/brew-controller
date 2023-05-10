@@ -6,7 +6,6 @@ A brewing controller based on a Raspberry PI developed in Java
 ## Setup Raspberry Pi
 * install dietpi (set static ip)
 * dietpi-config
-  * i2c enabled (advanced)
   * location/timezone/keyboard
   * change password
 * rename user dietpi:
@@ -47,8 +46,16 @@ A brewing controller based on a Raspberry PI developed in Java
 * mvn clean install
 * exec target "load-to-pi" from brew-controller/uploadToPi.xml (first adjust keyfile!)
 * exec target "load-to-pi" from brew-server/uploadWarToPi.xml (first adjust keyfile!)
+
 ## Start Application
 * ssh pi@<pi_ip_address>
 * sudo java -jar brew-controller.jar -brew
 * Go to http://<pi_ip_address>:8080/brew-server/app/
+
+## Debugging Application
+* sudo java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 -jar brew-controller.jar -brew
+
+## ToDO
+* switch to pi4j v2 (v1 is a little bit buggy)
+* update DietPi
 

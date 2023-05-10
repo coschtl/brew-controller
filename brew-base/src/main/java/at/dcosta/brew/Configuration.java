@@ -25,6 +25,10 @@ public class Configuration {
 	public static final String DATABASE_LOCATION = "databaseLocation";
 	public static final String THERMOMETER_MAXDIFF = "thermometer.maxDiff";
 	public static final String THERMOMETER_CORRECTION_VALUE = "thermometer.correctionValue";
+	public static final String THERMOMETER_MIN_VALID_VALUE = "thermometer.minValidValue";
+	public static final String THERMOMETER_MAX_VALID_VALUE = "thermometer.maxValidValue";
+	public static final String RPM_MIN_VALID_VALUE = "rpm.minValidValue";
+	public static final String RPM_MAX_VALID_VALUE = "rpm.maxValidValue";
 	public static final String MULTIPLE_HEATER_TEMPDIFF = "multipleHeater.tempdiff";
 
 	public static final String COOKING_HEATER_PINS = "cooking.heater.pi4jPinNumbers";
@@ -94,6 +98,15 @@ public class Configuration {
 			return Double.parseDouble(stringValue);
 		} catch (NumberFormatException e) {
 			throw ConfigurationException.createIllegalValueException(key, stringValue);
+		}
+	}
+
+	public double getDouble(String key, double defaultValue) {
+		String stringValue = getString(key);
+		try {
+			return Double.parseDouble(stringValue);
+		} catch (NumberFormatException e) {
+			return defaultValue;
 		}
 	}
 

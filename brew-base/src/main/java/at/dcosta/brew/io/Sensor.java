@@ -13,6 +13,8 @@ public interface Sensor {
 	void logValue();
 
 	void setCorrectionValue(double correctionValue);
+	void setMinValidValue(double minValidValue);
+	void setMaxValidValue(double maxValidValue);
 
 	void switchOff();
 

@@ -45,6 +45,8 @@ public class MashingSystem extends HeatingSystem {
         }
         if (rpmPin > 0) {
             rpmSensor = gpioSubsystem.getRpmSensor("Stirrer RPM Sensor", rpmPin);
+            rpmSensor.setMinValidValue(config.getDouble(RPM_MIN_VALID_VALUE, 0.0));
+            rpmSensor.setMaxValidValue(config.getDouble(RPM_MAX_VALID_VALUE, 0.0));
         } else {
             rpmSensor = new MockSensor(ComponentType.ROTATION_SPEED_SENSOR, "RPM-Sensor", "u/min").setValue(30);
         }

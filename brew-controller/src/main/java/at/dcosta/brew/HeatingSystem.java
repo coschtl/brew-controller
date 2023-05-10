@@ -1,9 +1,5 @@
 package at.dcosta.brew;
 
-import static at.dcosta.brew.Configuration.MULTIPLE_HEATER_TEMPDIFF;
-import static at.dcosta.brew.Configuration.THERMOMETER_CORRECTION_VALUE;
-import static at.dcosta.brew.Configuration.THERMOMETER_MAXDIFF;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +19,8 @@ import at.dcosta.brew.recipe.RecipeWriter;
 import at.dcosta.brew.util.MockUtil;
 import at.dcosta.brew.util.ThreadManager;
 import at.dcosta.brew.util.ThreadUtil;
+
+import static at.dcosta.brew.Configuration.*;
 
 public abstract class HeatingSystem {
 
@@ -64,6 +62,8 @@ public abstract class HeatingSystem {
 						"Sensor with address '" + address + "' not found! Check configuration/installation!");
 			}
 			sensor.setCorrectionValue(temperatureCorrectionValue);
+			sensor.setMinValidValue(config.getDouble(THERMOMETER_MIN_VALID_VALUE, 0.0));
+			sensor.setMaxValidValue(config.getDouble(THERMOMETER_MAX_VALID_VALUE, 0.0));
 			temperatureSensors.add(sensor);
 			averageTemperature.addSensor(sensor);
 		}

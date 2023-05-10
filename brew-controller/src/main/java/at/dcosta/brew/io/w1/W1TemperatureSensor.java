@@ -11,6 +11,8 @@ public class W1TemperatureSensor implements Sensor {
 	private final TemperatureSensor sensor;
 	private ManagedThread<W1TemperatureUpdater> temperatureUpdater;
 	private double sensorValue;
+	private double minValidValue;
+	private double maxValidValue;
 	private double correctionValue;
 
 	public W1TemperatureSensor(TemperatureSensor sensor) {
@@ -51,6 +53,24 @@ public class W1TemperatureSensor implements Sensor {
 	@Override
 	public void setCorrectionValue(double correctionValue) {
 		this.correctionValue = correctionValue;
+	}
+
+	@Override
+	public void setMinValidValue(double minValidValue) {
+		this.minValidValue = minValidValue;
+	}
+
+	@Override
+	public void setMaxValidValue(double maxValidValue) {
+		this.maxValidValue = maxValidValue;
+	}
+
+	public double getMinValidValue() {
+		return minValidValue;
+	}
+
+	public double getMaxValidValue() {
+		return maxValidValue;
 	}
 
 	@Override

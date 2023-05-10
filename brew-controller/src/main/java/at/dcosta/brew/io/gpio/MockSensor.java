@@ -5,7 +5,7 @@ import at.dcosta.brew.io.ComponentType;
 
 public class MockSensor extends AbstractSensor {
 
-	private ComponentType componentType;
+	private final ComponentType componentType;
 	private final String id;
 	private final String scale;
 	private double value = 20.1d;
@@ -23,7 +23,7 @@ public class MockSensor extends AbstractSensor {
 	@Override
 	public double doGetValue() {
 		// add <incrementPerSecond> per Second
-		value = value + (System.currentTimeMillis() - lastMeasureTime) / 1000 * incrementPerSecond*Math.random();
+		value = value + (double) (System.currentTimeMillis() - lastMeasureTime) / 1000 * incrementPerSecond*Math.random();
 		lastMeasureTime = System.currentTimeMillis();
 		return value;
 	}
@@ -41,6 +41,14 @@ public class MockSensor extends AbstractSensor {
 	@Override
 	public String getScale() {
 		return scale;
+	}
+
+	@Override
+	public void setMinValidValue(double ignored) {
+	}
+
+	@Override
+	public void setMaxValidValue(double ignored) {
 	}
 
 	public void setIncrementValuePerSecond(double incrementPerSecond) {
